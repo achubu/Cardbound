@@ -4,7 +4,7 @@ The integrated adventure (`index.html`) now loads `assets/expansion.js` after it
 
 ## Exploration
 
-- A fresh seed determines playable room area and irregular connected clearings. Geometry varies within the 800×500 camera; exits stay on the cardinal edges.
+- City rooms use the original fixed street layout, artwork, props, rain and lighting from before the variable-size experiment. Elaris keeps its region artwork with a fixed room footprint. Procedural room sizes and both experimental border treatments have been removed.
 - The city retains its 24-area connection graph and relic gates. Elaris contains 12 forest, plains, rainforest, and riverland areas.
 - Non-safe rooms contain two or three independent slow patrols. Each has a unique encounter/cooldown identity. Bosses are permanently defeated; normal patrols return after three room transitions.
 - Four city caches and three Elaris caches contain two small potions each, once per run.
