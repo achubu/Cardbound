@@ -1,15 +1,15 @@
 'use strict';
-// Rooms retain their map coordinates and artwork; selected cells share one camera area.
+// Save coordinates stay local; joined areas share one continuous illustrated background.
 const JOINED_AREAS={
  city:[
-  {name:'Burnout Avenue · West Service Road',cells:['-1,1','0,1']},
-  {name:'Promenade Market',cells:['1,0','2,0']},
-  {name:'Foundry Quarter',cells:['2,2','3,2','2,3','3,3']},
-  {name:'Crown Mainframe District',cells:['4,1','5,1','4,2','5,2']}
+  {name:'Burnout Avenue · West Service Road',art:'burnout',cells:['-1,1','0,1']},
+  {name:'Promenade Market',art:'promenade',cells:['1,0','2,0']},
+  {name:'Foundry Quarter',art:'foundry',cells:['2,2','3,2','2,3','3,3']},
+  {name:'Crown Mainframe District',art:'mainframe',cells:['4,1','5,1','4,2','5,2']}
  ],
  elaris:[
-  {name:'Sunpetal Wilds',cells:['1,0','2,0']},
-  {name:'Emerald Expanse',cells:['1,1','2,1','1,2','2,2']}
+  {name:'Sunpetal Wilds',art:'sunpetal',cells:['1,0','2,0']},
+  {name:'Emerald Expanse',art:'emerald',cells:['1,1','2,1','1,2','2,2']}
  ]
 };
 function joinedArea(key=state.room){
@@ -27,14 +27,67 @@ function updateAreaCamera(){
  const world=$('world');world.style.width=area.width+'px';world.style.height=area.height+'px';world.style.left=(innerWidth-800*scale)/2+'px';world.style.top=(innerHeight-500*scale)/2+'px';world.style.transformOrigin='0 0';world.style.transform='scale('+scale+') translate('+(-camera.x)+'px,'+(-camera.y)+'px)';
  const player=$('player');if(player){player.style.left=(offset.x+state.pos.x)+'px';player.style.top=(offset.y+state.pos.y)+'px'}
 }
+// Render only interactive cell overlays in joined areas. The scenery is one image
+// attached to the whole world, so camera movement can never reveal atlas seams.
+const originalAreaCellRender=NeonCity.render;
+NeonCity.render=function(container,key,r){
+ const area=joinedArea(key);
+ if(!area.art)return originalAreaCellRender(container,key,r);
+ container.innerHTML='';container.dataset.environment=activeRegion==='city'?'neon':'elaris';
+ for(const dir of ['n','s','e','w']){
+  if(joinedExit(dir,key))continue;
+  const raw=r.exits[dir],info=typeof raw==='string'?{to:raw}:raw;
+  const node=document.createElement('div');node.className='city-exit '+dir;
+  if(!info){node.classList.add('closed');node.textContent='PATH CLOSED'}
+  else{const locked=info.requires&&!hasRelic(info.requires);node.classList.toggle('sealed',!!locked);node.textContent=(locked?'LOCKED · ':'')+rooms[info.to].name}
+  container.append(node);
+ }
+};
+// Painted road corridors match the original corner footprints. Remove old tiny
+// procedural props, which are not present in the new full-area paintings.
+const originalAreaBlocked=NeonCity.blocked;
+NeonCity.blocked=function(key,x,y){
+ if(!joinedArea(key).art)return originalAreaBlocked(key,x,y);
+ return [[0,0,292,157],[500,0,300,157],[0,322,292,178],[500,322,300,178]]
+  .some(([l,t,w,h])=>x>l-12&&x<l+w+12&&y+25>t-5&&y+25<t+h+5);
+};
+// Calibrate the continuous painting to the existing street footprints. Every
+// source pixel is used once, in order; adjacent bands share exactly the same
+// boundary. This fits painted roads to collision without introducing art seams.
+const AREA_ART_GUIDES={
+ burnout:{x:[0,.205,.29,.71,.795,1],y:[0,.405,.605,1]},
+ promenade:{x:[0,.195,.282,.716,.809,1],y:[0,.38,.61,1]},
+ foundry:{x:[0,.20,.275,.73,.80,1],y:[0,.17,.27,.69,.80,1]},
+ mainframe:{x:[0,.215,.285,.715,.785,1],y:[0,.19,.30,.70,.80,1]},
+ sunpetal:{x:[0,.225,.275,.725,.775,1],y:[0,.42,.56,1]},
+ emerald:{x:[0,.23,.29,.71,.77,1],y:[0,.16,.25,.75,.83,1]}
+};
+const areaPaintings={};
+function areaArtBands(area){return {x:[0,292,500,1092,1300,1600],y:area.height===500?[0,157,322,500]:[0,157,322,657,822,1000]}}
+function paintJoinedArea(canvas,area,texture){
+ const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
+ const from=AREA_ART_GUIDES[area.art],to=areaArtBands(area);
+ const sx=from.x.map(v=>Math.round(v*texture.naturalWidth)),sy=from.y.map(v=>Math.round(v*texture.naturalHeight));
+ for(let x=0;x<sx.length-1;x++)for(let y=0;y<sy.length-1;y++)
+  ctx.drawImage(texture,sx[x],sy[y],sx[x+1]-sx[x],sy[y+1]-sy[y],to.x[x],to.y[y],to.x[x+1]-to.x[x],to.y[y+1]-to.y[y]);
+}
+function appendAreaPainting(world,area){
+ const canvas=document.createElement('canvas');canvas.className='joined-scenery';canvas.width=area.width;canvas.height=area.height;
+ canvas.setAttribute('aria-hidden','true');world.append(canvas);
+ let texture=areaPaintings[area.art];
+ if(!texture){texture=new Image();areaPaintings[area.art]=texture;texture.src='assets/environment/areas/'+area.art+'.webp'}
+ const paint=()=>paintJoinedArea(canvas,area,texture);
+ if(texture.complete&&texture.naturalWidth)paint();else texture.onload=paint;
+}
 const singleRenderWorld=renderWorld;
 function appendPatrols(container,key){
  for(const spawn of roomSpawns(key)){if(!spawnAvailable(spawn))continue;const p=patrolFor(spawn),node=document.createElement('div');node.className='enemy-node monster-'+spawn.type+(spawn.boss?' boss':'')+(spawn.elite?' elite':'');node.dataset.spawn=spawn.uid;node.dataset.name=(spawn.elite?'★ ELITE · ':'')+(spawn.element?ELEMENT_ICONS[spawn.element]+' ':'')+enemies[spawn.type].name;node.style.left=p.x+'px';node.style.top=p.y+'px';node.innerHTML=monsterArt(spawn.type);container.append(node)}
 }
 renderWorld=function(){
  if(!state)return;singleRenderWorld();const world=$('world'),area=joinedArea(),current=document.createElement('div');
- // The original renderer's children remain in their own 800×500 art cell.
+ // Preserve local interaction coordinates over the full-area background.
  while(world.firstChild)current.append(world.firstChild);
+ if(area.art)appendAreaPainting(world,area);
  for(const key of area.cells){
   const cell=key===state.room?current:document.createElement('div'),offset=cellOffset(key,area);cell.classList.add('area-cell');cell.style.left=offset.x+'px';cell.style.top=offset.y+'px';cell.dataset.room=key;
   if(key!==state.room){NeonCity.render(cell,key,rooms[key]);appendPatrols(cell,key);const q=rooms[key].relic;if(q&&!hasRelic(q[0])&&q[0]!=='material'){const relic=document.createElement('div');relic.className='relic';relic.textContent=q[2];relic.dataset.name=q[1];relic.style.left=q[3]+'px';relic.style.top=q[4]+'px';cell.append(relic)}const cache=chestFor(key);if(cache&&!state.chests.includes(cache.id)){const chest=document.createElement('div');chest.className='secret-chest';chest.textContent='▣';chest.style.left=cache.x+'px';chest.style.top=cache.y+'px';cell.append(chest)}}
@@ -79,4 +132,4 @@ animateEnemy=function(dt){
 const baseAreaMap=showMap;
 showMap=function(){baseAreaMap();for(const node of document.querySelectorAll('.region-map .panel')){const key=Object.keys(rooms).find(k=>state.visited.includes(k)&&node.textContent.startsWith(rooms[k].name));if(!key)continue;const area=joinedArea(key);if(area.cells.length>1){const label=document.createElement('small');label.textContent=area.name+' · joined area';node.append(label);node.style.borderColor='#71babd'}}};
 $('mapBtn').onclick=showMap;
-const areaStyles=document.createElement('style');areaStyles.textContent='#game{overflow:hidden}#world{border:0}.area-cell{position:absolute;width:800px;height:500px;overflow:hidden}.joined-area-title{font:10px system-ui;color:#a5d7e0;margin-top:5px}';document.head.append(areaStyles);
+const areaStyles=document.createElement('style');areaStyles.textContent='#game{overflow:hidden}#world{border:0}.joined-scenery{position:absolute;left:0;top:0;max-width:none;pointer-events:none;user-select:none}.area-cell{position:absolute;width:800px;height:500px;overflow:visible}.joined-area-title{font:10px system-ui;color:#a5d7e0;margin-top:5px}';document.head.append(areaStyles);
