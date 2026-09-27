@@ -5,8 +5,9 @@ The integrated adventure (`index.html`) now loads `assets/expansion.js` after it
 ## Exploration
 
 - City rooms use the original fixed street layout, artwork, props, rain and lighting from before the variable-size experiment. Elaris keeps its region artwork with a fixed room footprint. Procedural room sizes and both experimental border treatments have been removed.
+- Selected neighboring blocks form seamless 1600×500 streets and 1600×1000 districts. The camera follows the player at the original sprite scale. Burnout/West Service Road and Promenade/Market are two-block streets; the Foundry and Crown/Mainframe districts each join four blocks. Elaris has a two-block Sunpetal area and four-block Emerald area. Internal crossings preserve exact position and do not advance enemy respawn timers; exterior relic gates remain intact.
 - The city retains its 24-area connection graph and relic gates. Elaris contains 12 forest, plains, rainforest, and riverland areas.
-- Non-safe rooms contain two or three independent slow patrols. Each has a unique encounter/cooldown identity. Bosses are permanently defeated; normal patrols return after three room transitions.
+- Small unsafe rooms contain one patrol. Two-block streets contain three patrols and four-block districts contain four, with separated home sectors and a 55-pixel patrol radius. Each has a unique encounter/cooldown identity. Bosses are permanently defeated; normal patrols return after three exterior room transitions.
 - Four city caches and three Elaris caches contain two small potions each, once per run.
 - Defeating the Thorn Warden guarantees **Glacial Covenant**, a Soulbound Ice card, and opens a clickable two-way portal at Warden Mainframe.
 - Entering Elaris for the first time grants all four counter cards. Elaris attunement adds four deck slots while in that region.
@@ -39,6 +40,8 @@ Socket counts unlock at levels 1, 6, 12, 20, and 30. Crystals can be moved or re
 This build starts a fresh expansion save (`cardbound-expansion-v3`). Automatic local saves include combat state. Menu → Export/Import transfers JSON between encounters, including map seed, region progress, cards, talents, device, and card-upgrade materials. Imports are checked before replacing the active run. New Journey is available from the menu if card losses end a run.
 
 ## Verification
+
+Run `node tests/combined-rooms.test.cjs` for combined-area movement, internal route accessibility, patrol density, camera boundaries, cooldown preservation and locked-exit checks. This also runs the expansion integration suite. The combined build still needs a hosted-browser playtest; the cloud browser disallows local file previews.
 
 Run `node tests/expansion.test.cjs`. It executes the actual browser scripts in a Node VM with a DOM adapter. Tests cover progression, device bonuses, freeze, counters, Echo, Overdrive, poison, rewards, combat save reload, the boss-to-portal route, import rejection, one-time chests, and connected room routes across seeds. These are logic/integration tests, not rendered-browser tests. Chromium installation failed in this workspace; visual/mobile playtesting is still required.
 

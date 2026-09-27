@@ -10,6 +10,7 @@ const context=vm.createContext({console,assert,Image:process.env.CARDBOUND_RENDE
 const run=s=>vm.runInContext(s,context);
 run(fs.readFileSync(path.join(root,'assets/environment/neon-city.js'),'utf8'));
 for(const m of fs.readFileSync(path.join(root,'index.html'),'utf8').matchAll(/<script>([\s\S]*?)<\/script>/g))run(m[1]);
+run(fs.readFileSync(path.join(root,'assets/elaris-wildlife.js'),'utf8'));
 run(fs.readFileSync(path.join(root,'assets/expansion.js'),'utf8'));
 run(`
 newGame();
