@@ -23,7 +23,7 @@ assert(state.battle.enemy.hp>cityHp,'Elaris enemies have more health');
 assert(state.battle.enemy.attack>cityAttack,'Elaris enemies hit harder');
 
 for(const element of ELEMENTS){
- state.battle.enemy.element=element;state.battle.enemy.hp=100;
+ state.battle.turn=3;state.battle.enemy.element=element;state.battle.enemy.hp=100;
  state.battle.hand=[make('counter')];state.battle.energy=3;state.battle.block=0;
  const playerHp=state.hp;playCard(0);
  assert.equal(state.battle.counter,COUNTERS[element]);

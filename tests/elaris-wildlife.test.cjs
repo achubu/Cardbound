@@ -3,7 +3,7 @@ const path=require('node:path');
 const {run}=require('./expansion.test.cjs');
 run(`
 const observed=new Set();
-for(const seed of [1,1234,98765]){state.seed=seed;configureRegion('elaris');for(const key of Object.keys(rooms))for(const spawn of roomSpawns(key)){assert(ELARIS_WILDLIFE[spawn.type],'City enemy leaked into Elaris');assert.equal(spawn.element,ELARIS_WILDLIFE[spawn.type].element);observed.add(spawn.type)}}
+for(const seed of [1,1234,98765]){state.seed=seed;configureRegion('elaris');for(const key of Object.keys(rooms))for(const spawn of roomSpawns(key)){if(spawn.boss){assert.equal(spawn.type,'bloomTyrant');continue}assert(ELARIS_WILDLIFE[spawn.type],'City enemy leaked into Elaris');assert.equal(spawn.element,ELARIS_WILDLIFE[spawn.type].element);observed.add(spawn.type)}}
 assert.equal(observed.size,4);
 for(const id of Object.keys(ELARIS_WILDLIFE)){assert(monsterArt(id).includes('wildlife-sprite'));assert(monsterArt(id).includes('aria-label="'+enemies[id].name+'"'))}
 configureRegion('city');assert(!monsterArt('shade').includes('wildlife-sprite'));

@@ -2,13 +2,13 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {run}=require('./expansion.test.cjs');
 run(fs.readFileSync(path.join(__dirname,'../assets/combined-rooms.js'),'utf8'));
-for(const id of ['burnout','promenade','foundry','mainframe','sunpetal','emerald']){
+for(const id of ['burnout','promenade','foundry','mainframe','sunpetal','emerald','stormglass']){
  const bytes=fs.readFileSync(path.join(__dirname,'../assets/environment/areas',id+'.webp'));
  if(bytes.toString('ascii',0,4)!=='RIFF'||bytes.toString('ascii',8,12)!=='WEBP')throw Error('Invalid WebP: '+id);
 }
 run(`
 newGame();
-for(const region of ['city','elaris']){
+for(const region of ['city','elaris','vespera']){
  configureRegion(region);
  for(const group of JOINED_AREAS[region]){
   const area=joinedArea(group.cells[0]),draws=[];

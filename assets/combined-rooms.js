@@ -1,6 +1,7 @@
 'use strict';
 // Save coordinates stay local; joined areas share one continuous illustrated background.
 const JOINED_AREAS={
+ vespera:[{name:'Stormglass Reach',art:'stormglass',cells:['0,0','1,0','0,1','1,1']}],
  city:[
   {name:'Burnout Avenue · West Service Road',art:'burnout',cells:['-1,1','0,1']},
   {name:'Promenade Market',art:'promenade',cells:['1,0','2,0']},
@@ -23,8 +24,8 @@ function joinedExit(dir,key=state.room){const raw=rooms[key].exits[dir];return t
 function areaPatrolCount(key){const area=joinedArea(key);return area.cells.length===2&&key===area.cells[0]?2:1}
 function cameraPosition(area,pos,viewportWidth=800,viewportHeight=500){return{x:Math.max(0,Math.min(area.width-viewportWidth,pos.x-viewportWidth/2)),y:Math.max(0,Math.min(area.height-viewportHeight,pos.y-viewportHeight/2))}}
 function updateAreaCamera(){
- if(!state)return;const area=joinedArea(),offset=cellOffset(state.room,area),scale=Math.min(innerWidth/800,innerHeight/500),camera=cameraPosition(area,{x:offset.x+state.pos.x,y:offset.y+state.pos.y});
- const world=$('world');world.style.width=area.width+'px';world.style.height=area.height+'px';world.style.left=(innerWidth-800*scale)/2+'px';world.style.top=(innerHeight-500*scale)/2+'px';world.style.transformOrigin='0 0';world.style.transform='scale('+scale+') translate('+(-camera.x)+'px,'+(-camera.y)+'px)';
+ if(!state)return;const area=joinedArea(),offset=cellOffset(state.room,area),mobile=innerWidth<=720,viewWidth=mobile?480:800,scale=Math.min(innerWidth/viewWidth,innerHeight/500),viewHeight=mobile?Math.min(area.height,Math.max(250,(innerHeight-160)/scale)):500,camera=cameraPosition(area,{x:offset.x+state.pos.x,y:offset.y+state.pos.y},viewWidth,viewHeight);
+ const world=$('world');world.style.width=area.width+'px';world.style.height=area.height+'px';world.style.left=(innerWidth-viewWidth*scale)/2+'px';world.style.top=(mobile?124:(innerHeight-500*scale)/2)+'px';world.style.transformOrigin='0 0';world.style.transform='scale('+scale+') translate('+(-camera.x)+'px,'+(-camera.y)+'px)';
  const player=$('player');if(player){player.style.left=(offset.x+state.pos.x)+'px';player.style.top=(offset.y+state.pos.y)+'px'}
 }
 // Render only interactive cell overlays in joined areas. The scenery is one image
@@ -55,6 +56,7 @@ NeonCity.blocked=function(key,x,y){
 // source pixel is used once, in order; adjacent bands share exactly the same
 // boundary. This fits painted roads to collision without introducing art seams.
 const AREA_ART_GUIDES={
+ stormglass:{x:[0,.21,.29,.71,.79,1],y:[0,.19,.30,.70,.80,1]},
  burnout:{x:[0,.205,.29,.71,.795,1],y:[0,.405,.605,1]},
  promenade:{x:[0,.195,.282,.716,.809,1],y:[0,.38,.61,1]},
  foundry:{x:[0,.20,.275,.73,.80,1],y:[0,.17,.27,.69,.80,1]},
