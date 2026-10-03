@@ -2,15 +2,24 @@
 // Save coordinates stay local; joined areas share one continuous illustrated background.
 const JOINED_AREAS={
  vespera:[{name:'Stormglass Reach',art:'stormglass',cells:['0,0','1,0','0,1','1,1']}],
+ // Round 29: city rebuilt again to match the user's own hand-designed
+ // maze layout (a long main corridor with two looping branches to mini-
+ // bosses, not a simple spine). Crown Mainframe District is the only
+ // existing art district that found a clean 2x2 block in the new shape;
+ // Promenade Market has no matching slot this time and is parked for a
+ // future region rather than forced in somewhere that wouldn't fit its
+ // art calibration.
  city:[
-  {name:'Burnout Avenue · West Service Road',art:'burnout',cells:['-1,1','0,1']},
-  {name:'Promenade Market',art:'promenade',cells:['1,0','2,0']},
-  {name:'Foundry Quarter',art:'foundry',cells:['2,2','3,2','2,3','3,3']},
-  {name:'Crown Mainframe District',art:'mainframe',cells:['4,1','5,1','4,2','5,2']}
+  {name:'Crown Mainframe District',art:'mainframe',cells:['1,7','2,7','1,8','2,8']}
  ],
+ // Round 30: relocated into the new maze — both districts' art is
+ // percentage-based (not tied to specific coordinates), so only the cell
+ // adjacency needed preserving. Sunpetal Wilds (2-cell E/W pair) sits
+ // just past the start; Emerald Expanse (2x2 block) sits mid-path, near
+ // the secondary loop pocket.
  elaris:[
   {name:'Sunpetal Wilds',art:'sunpetal',cells:['1,0','2,0']},
-  {name:'Emerald Expanse',art:'emerald',cells:['1,1','2,1','1,2','2,2']}
+  {name:'Emerald Expanse',art:'emerald',cells:['5,4','6,4','5,5','6,5']}
  ]
 };
 function joinedArea(key=state.room){
@@ -21,7 +30,21 @@ function joinedArea(key=state.room){
 }
 function cellOffset(key,area=joinedArea()){const [x,y]=key.split(',').map(Number);return{x:(x-area.left)*800,y:(y-area.top)*500}}
 function joinedExit(dir,key=state.room){const raw=rooms[key].exits[dir];return typeof raw==='string'&&joinedArea(key).cells.includes(raw)?raw:null}
-function areaPatrolCount(key){const area=joinedArea(key);return area.cells.length===2&&key===area.cells[0]?2:1}
+// Joined-area density (2- and 4-cell districts) is left exactly as before —
+// it's already tuned so each district's total patrol count stays sane, and
+// a 4-cell district is already at that ceiling with zero room to add more.
+// The actual flatness problem is in the 12 single, unjoined city rooms,
+// which previously always got exactly 1 patrol no matter how far they were
+// from the start. Those now scale 1 -> 2 -> 3 with distance from the
+// region's start room (3 is the real practical ceiling for a single room:
+// the 4 fixed patrol candidate positions in roomSpawns() are spaced such
+// that only 3 of them can ever be mutually >230px apart at once).
+function areaPatrolCount(key){
+ const area=joinedArea(key);
+ if(area.cells.length!==1)return area.cells.length===2&&key===area.cells[0]?2:1;
+ const frac=(typeof regionDistanceFrac==='function')?regionDistanceFrac(key):0;
+ return frac>=.7?3:frac>=.35?2:1;
+}
 function cameraPosition(area,pos,viewportWidth=800,viewportHeight=500){return{x:Math.max(0,Math.min(area.width-viewportWidth,pos.x-viewportWidth/2)),y:Math.max(0,Math.min(area.height-viewportHeight,pos.y-viewportHeight/2))}}
 function updateAreaCamera(){
  if(!state)return;const area=joinedArea(),offset=cellOffset(state.room,area),mobile=innerWidth<=720,viewWidth=mobile?480:800,scale=Math.min(innerWidth/viewWidth,innerHeight/500),viewHeight=mobile?Math.min(area.height,Math.max(250,(innerHeight-160)/scale)):500,camera=cameraPosition(area,{x:offset.x+state.pos.x,y:offset.y+state.pos.y},viewWidth,viewHeight);
@@ -83,7 +106,7 @@ function appendAreaPainting(world,area){
 }
 const singleRenderWorld=renderWorld;
 function appendPatrols(container,key){
- for(const spawn of roomSpawns(key)){if(!spawnAvailable(spawn))continue;const p=patrolFor(spawn),node=document.createElement('div');node.className='enemy-node monster-'+spawn.type+(spawn.boss?' boss':'')+(spawn.elite?' elite':'');node.dataset.spawn=spawn.uid;node.dataset.name=(spawn.elite?'★ ELITE · ':'')+(spawn.element?ELEMENT_ICONS[spawn.element]+' ':'')+enemies[spawn.type].name;node.style.left=p.x+'px';node.style.top=p.y+'px';node.innerHTML=monsterArt(spawn.type);container.append(node)}
+ for(const spawn of roomSpawns(key)){if(!spawnAvailable(spawn))continue;const p=patrolFor(spawn),node=document.createElement('div');node.className='enemy-node monster-'+spawn.type+(spawn.boss?' boss':'')+(spawn.elite?' elite':'');node.dataset.spawn=spawn.uid;node.dataset.name=(spawn.elite?'★ ELITE · ':'')+(spawn.element?ELEMENT_ICONS[spawn.element]+' ':'')+enemies[spawn.type].name+' · Lv.'+enemyLevel(key);node.style.left=p.x+'px';node.style.top=p.y+'px';node.innerHTML=monsterArt(spawn.type);container.append(node)}
 }
 renderWorld=function(){
  if(!state)return;singleRenderWorld();const world=$('world'),area=joinedArea(),current=document.createElement('div');
@@ -92,7 +115,7 @@ renderWorld=function(){
  if(area.art)appendAreaPainting(world,area);
  for(const key of area.cells){
   const cell=key===state.room?current:document.createElement('div'),offset=cellOffset(key,area);cell.classList.add('area-cell');cell.style.left=offset.x+'px';cell.style.top=offset.y+'px';cell.dataset.room=key;
-  if(key!==state.room){NeonCity.render(cell,key,rooms[key]);appendPatrols(cell,key);const q=rooms[key].relic;if(q&&!hasRelic(q[0])&&q[0]!=='material'){const relic=document.createElement('div');relic.className='relic';relic.textContent=q[2];relic.dataset.name=q[1];relic.style.left=q[3]+'px';relic.style.top=q[4]+'px';cell.append(relic)}const cache=chestFor(key);if(cache&&!state.chests.includes(cache.id)){const chest=document.createElement('div');chest.className='secret-chest';chest.textContent='▣';chest.style.left=cache.x+'px';chest.style.top=cache.y+'px';cell.append(chest)}}
+  if(key!==state.room){NeonCity.render(cell,key,rooms[key]);appendPatrols(cell,key);const q=rooms[key].relic;if(q&&!hasRelic(q[0])&&q[0]!=='material'){const relic=document.createElement('div');relic.className='relic';relic.textContent=q[2];relic.dataset.name=q[1];relic.style.left=q[3]+'px';relic.style.top=q[4]+'px';cell.append(relic)}const cache=chestFor(key);if(cache&&!state.chests.includes(cache.id)){const chest=document.createElement('div');chest.className='map-chest';chest.style.left=cache.x+'px';chest.style.top=cache.y+'px';cell.append(chest)}}
   for(const dir of ['n','s','e','w'])if(joinedExit(dir,key))cell.querySelector('.city-exit.'+dir)?.remove();
   world.append(cell);
  }
@@ -131,7 +154,8 @@ animateEnemy=function(dt){
   if(key===state.room&&Math.hypot(state.pos.x-p.x,state.pos.y-p.y)<(spawn.boss?58:43)){startBattle(spawn.uid);if(state.battle)return}
  }
 };
-const baseAreaMap=showMap;
-showMap=function(){baseAreaMap();for(const node of document.querySelectorAll('.region-map .panel')){const key=Object.keys(rooms).find(k=>state.visited.includes(k)&&node.textContent.startsWith(rooms[k].name));if(!key)continue;const area=joinedArea(key);if(area.cells.length>1){const label=document.createElement('small');label.textContent=area.name+' · joined area';node.append(label);node.style.borderColor='#71babd'}}};
+// showMap() itself (assets/expansion.js) now natively draws each joined
+// area as one grid-spanning cell, so this wrapper's old job — bolting on
+// an extra "· joined area" label after the fact — is redundant.
 $('mapBtn').onclick=showMap;
 const areaStyles=document.createElement('style');areaStyles.textContent='#game{overflow:hidden}#world{border:0}.joined-scenery{position:absolute;left:0;top:0;max-width:none;pointer-events:none;user-select:none}.area-cell{position:absolute;width:800px;height:500px;overflow:visible}.joined-area-title{font:10px system-ui;color:#a5d7e0;margin-top:5px}';document.head.append(areaStyles);
