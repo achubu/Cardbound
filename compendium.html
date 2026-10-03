@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClaudeBound — Compendium & Database</title>
+    <style>
+        :root {
+            --bg-color: #0f111a;
+            --card-bg: #1e2230;
+            --accent-color: #ff4757;
+            --accent-blue: #2ed573;
+            --accent-purple: #a55eea;
+            --text-main: #e0e6ed;
+            --text-dim: #a4b0be;
+            --border-color: #2f3542;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #141722;
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h1 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: var(--accent-color);
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            background: #181b26;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        nav a {
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        nav a:hover {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            border-left: 4px solid var(--accent-color);
+            padding-left: 0.75rem;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            background-color: #0b0c12;
+            padding: 1rem;
+            box-sizing: border-box;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-content {
+            padding: 1.25rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.25rem;
+            color: #ffffff;
+        }
+
+        .card-type {
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-desc {
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+            flex-grow: 1;
+        }
+
+        .stats-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 0.75rem;
+        }
+
+        .stats-list li {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+
+        .stats-list span {
+            color: var(--text-dim);
+        }
+
+        .badge {
+            background-color: #2f3542;
+            color: #fff;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .fallback-graphic {
+            height: 200px;
+            background: #0b0c12;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-purple);
+            font-weight: bold;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: #141722;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+    </style>
+
+    <!-- Load Local Game Scripts -->
+    <!-- Round 37: corrected to the real file layout. There's no standalone
+         game.js -- the game's main logic lives inline inside index.html
+         itself, which this page can't reach into (that's the whole reason
+         cards.js was split out: to share just the data, not the logic).
+         The other two scripts live under assets/, not at root. -->
+    <script src="assets/cards.js" onerror="console.warn('assets/cards.js not found')"></script>
+    <script src="assets/expansion.js" onerror="console.warn('assets/expansion.js not found')"></script>
+    <script src="assets/encounter-depth.js" onerror="console.warn('assets/encounter-depth.js not found')"></script>
+</head>
+<body>
+
+    <header>
+        <h1>ClaudeBound Compendium</h1>
+        <div class="subtitle">Live Local Game Archives & Card Index</div>
+    </header>
+
+    <nav>
+        <a href="#cards">Cards & Deck</a>
+        <a href="#monsters">Bestiary</a>
+        <a href="#bosses">Boss Mechanics</a>
+    </nav>
+
+    <div class="container">
+
+        <!-- DYNAMIC CARDS SECTION -->
+        <section id="cards">
+            <h2>Player Cards & Abilities</h2>
+            <div class="grid" id="card-grid"></div>
+        </section>
+
+        <!-- MONSTERS SECTION -->
+        <section id="monsters">
+            <h2>Bestiary & Enemies</h2>
+            <div class="grid" id="monster-grid"></div>
+        </section>
+
+        <!-- BOSS SECTION -->
+        <section id="bosses">
+            <h2>Boss Encounters</h2>
+            <div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+                <h3 style="color: var(--accent-blue); margin-top: 0;">Touch Crystals Boss Encounter</h3>
+                <p>Multi-phase boss fight centered around controlling crystal conduits. Activate energy nodes in sequence to bypass the boss's shield generator.</p>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>ClaudeBound Compendium &mdash; Running locally from repository root.</p>
+    </footer>
+
+    <script>
+        function handleImageError(img, altName) {
+            const parent = img.parentElement;
+            const fallback = document.createElement('div');
+            fallback.className = 'fallback-graphic';
+            fallback.innerHTML = `[ ${altName} ]`;
+            parent.replaceChild(fallback, img);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const cardGrid = document.getElementById('card-grid');
+            const monsterGrid = document.getElementById('monster-grid');
+
+            // Scan window object for any globally defined card arrays/objects.
+            // The real game's data is `defs` (assets/cards.js) -- checked
+            // first since that's what's actually there; the others are kept
+            // as a fallback in case this page ever points at something else.
+            let rawCards = window.defs || window.cards || window.cardsData || window.CARDS || window.ALL_CARDS || window.cardDatabase;
+            
+            // If cards are stored as an object instead of an array, convert to
+            // array -- using entries, not values, so each card keeps its real
+            // id (the object key). Without the id there's no way to build the
+            // real art path or feed it back through rules()/stat() below.
+            let cardList = [];
+            if (Array.isArray(rawCards)) {
+                cardList = rawCards;
+            } else if (rawCards && typeof rawCards === 'object') {
+                cardList = Object.entries(rawCards).map(([id, c]) => ({ id, ...c }));
+            }
+
+            if (cardList.length > 0) {
+                cardGrid.innerHTML = cardList.map(c => {
+                    const title = c.name || c.id || 'Unknown Card';
+                    // `kind` is the real field name on defs entries ('Attack',
+                    // 'Defense', etc.) -- type/category never existed on this
+                    // data, they were a guess.
+                    const type = c.kind || c.type || c.category || 'Ability';
+                    const cost = c.cost ?? c.energy ?? 'N/A';
+                    // rules()/stat() (assets/cards.js) are the exact functions
+                    // the game itself uses to turn a card's level-0 tier into
+                    // readable text ("Deal 6 damage.") -- there's no separate
+                    // description string on defs entries to fall back to, so
+                    // without this every card would just say "No description
+                    // available."
+                    const desc = (typeof window.rules === 'function' && c.id)
+                        ? window.rules({ id: c.id, level: 0 })
+                        : (c.desc || c.description || c.text || 'No description available.');
+                    // Real card art (assets/cards/level0/<id>.png), via the
+                    // same cardArtPath() the game uses -- c.icon is a single
+                    // Unicode glyph, not an image path, so using it directly
+                    // as a src always 404s.
+                    const imgSrc = (typeof window.cardArtPath === 'function' && c.id)
+                        ? window.cardArtPath(c.id, 0)
+                        : (c.img || c.image || `assets/cards/level0/${(c.id || title).toLowerCase().replace(/\s+/g, '-')}.png`);
+
+                    return `
+                        <div class="card">
+                            <img src="${imgSrc}" 
+                                 alt="${title}" 
+                                 class="card-img" 
+                                 onerror="handleImageError(this, '${title}')">
+                            <div class="card-content">
+                                <div class="card-type">${type}</div>
+                                <h3 class="card-title">${title}</h3>
+                                <p class="card-desc">${desc}</p>
+                                <ul class="stats-list">
+                                    <li><span>Cost:</span> <strong class="badge">${cost} Energy</strong></li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                cardGrid.innerHTML = `<p style="color: var(--text-dim);">No card data array found in game scripts. Check DevTools Console (F12) to see global variables.</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
