@@ -311,7 +311,7 @@ assert(ids.length>0,'defs actually has cards to check');
 const missing=[];
 for(const id of ids){
  for(let level=0;level<4;level++){
-  const file=path.join(cardsDir,`level${level}`,`${id}.png`);
+  const file=path.join(__dirname,'..',run(`cardArtPath(${JSON.stringify(id)},${level})`));
   if(!fs.existsSync(file))missing.push(`level${level}/${id}.png`);
  }
 }
