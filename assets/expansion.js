@@ -333,7 +333,7 @@ if(b.id==='crownSentinel'&&grantNeonCovenant())b.special.push('Neon Covenant: gu
 if(isMiniBoss){setMaterials(materials()+1);b.special.push('Mini-boss defeated: guaranteed Upgrade Crystal! ('+materials()+' total)')}
 if(b.enemy.elite&&Math.random()<.08){const type=Object.keys(CRYSTALS)[Math.floor(Math.random()*3)],crystal=rollUpgradeCrystal(type);state.device.crystals.push(crystal);b.crystalDrop=crystal.uid;b.special.push(crystalLabel(crystal)+' crystal found! Slot it into the Aetherlink.')}b.levels=levels;b.logs.push(b.lootType==='soulbound'?'Loot chest: Soulbound card!':b.lootType==='potion'?'Loot chest: small healing potion.':b.lootType==='crystal'?'Loot chest: an Upgrade Crystal! ('+materials()+' total)':b.lootType==='empty'?'Loot chest: empty — '+b.thief+' bolted off with everything inside.':'Loot chest: one random card added to your collection.')};
 const baseLoseBattle=loseBattle;
-loseBattle=function(){const b=state.battle;baseLoseBattle();state.hp=state.maxHp;state.room=activeRegion!=='city'?'0,0':'0,5';state.pos={x:400,y:300};b.lastRegion=activeRegion;if(!active().length&&state.pool.length)state.deck=[state.pool[0].uid]};
+loseBattle=function(){const b=state.battle;baseLoseBattle();state.hp=state.maxHp;state.room=activeRegion!=='city'?'0,0':'0,5';state.pos={x:400,y:300};b.lastRegion=activeRegion;if(!active().length&&state.pool.length)state.deck=[state.pool[0].uid];b.defeatSummary={hp:state.hp,maxHp:state.maxHp,location:room()?.name||'safe zone',deckCount:state.deck.length}};
 const baseRenderBattle=renderBattle;
 renderBattle=function(){const b=state.battle;if(!b)return;if(b.phase==='reward'){const m=$('battleModal');
 if(!b.chestOpened){
