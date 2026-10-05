@@ -19,7 +19,14 @@
 .talent-node:focus-visible{outline:3px solid #fff;outline-offset:3px}
 .talent-rank-badge{z-index:2;right:3px;bottom:42px;font-size:10px;min-width:24px;background:#06121eef}
 .talent-pips{bottom:-9px}.talent-tooltip{display:none!important}
-.talent-connectors line{stroke-width:2}.connector-lit{stroke:var(--branch)}
+.talent-layout{display:grid;grid-auto-rows:116px;row-gap:48px;position:relative;z-index:1}
+.talent-slot{display:flex;justify-content:center;min-width:0}
+.talent-connectors path{fill:none;stroke-linecap:round}
+.talent-connectors .connector-track{stroke:#050e17;stroke-width:6;stroke-dasharray:none}
+.talent-connectors .connector-wire{stroke:currentColor;stroke-width:2;stroke-dasharray:none}
+.talent-connectors circle{fill:currentColor;stroke:#0b1723;stroke-width:1}
+.talent-connectors .connector-lit{color:var(--branch);filter:drop-shadow(0 0 3px var(--branch))}
+.talent-connectors .connector-dim{color:#527080;stroke-dasharray:none}
 .talent-detail{position:sticky;bottom:-24px;z-index:25;display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;padding:14px;margin:18px 0 0;background:#091824f5;border:1px solid #6b94a4;border-radius:10px;box-shadow:0 -8px 28px #0008;min-height:122px}
 .talent-detail>img{width:64px;height:64px;border-radius:7px}.talent-detail h3{margin:3px 0;color:#ffe3a4;font-size:17px}.talent-detail p{margin:4px 0;font:12px/1.45 system-ui}.talent-detail small{font:11px/1.4 system-ui;color:#a9c7d4}.talent-detail .eyebrow{font-size:9px}.talent-detail button{min-height:44px}
 .talent-tabs{display:none}.talent-footer{padding:14px 0}.talent-points{white-space:nowrap}

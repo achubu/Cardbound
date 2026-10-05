@@ -394,24 +394,23 @@ function switchTalentBranch(key){
  inspectTalent(key,TALENT_BRANCHES[key].nodes[0].id);renderTalentConnectors();
 }
 function talentRowsHTML(key,branch){
- // Group nodes by tier into rows (tier 0 at top, deeper tiers further
- // down) instead of one flat list — this is what makes the branch read
- // as an actual tree with rows, not a scrolling stack of wide cards.
- const maxTier=Math.max(...branch.nodes.map(n=>n.tier)),rows=[];
- for(let t=0;t<=maxTier;t++){
-  const atTier=branch.nodes.filter(n=>n.tier===t);
-  if(atTier.length)rows.push('<div class="talent-row">'+atTier.map(node=>talentNodeHTML(key,node)).join('')+'</div>');
+ // Reserve a column for each leaf, keeping every prerequisite subtree
+ // together. Visual depth also separates dependencies in the same tier.
+ const positions=new Map();let leaves=0;
+ function place(node,depth){
+  const row=Math.max(node.tier,depth),children=branch.nodes.filter(n=>n.req?.[0]===node.id);
+  const slots=children.map(child=>place(child,row+1));
+  const slot=slots.length?(slots[0]+slots[slots.length-1])/2:leaves++;
+  positions.set(node.id,{row,slot});return slot;
  }
- return rows.join('');
+ branch.nodes.filter(n=>!n.req).forEach(node=>place(node,0));
+ return '<div class="talent-layout" style="grid-template-columns:repeat('+Math.max(2,leaves*2)+',1fr)">'+branch.nodes.map(node=>{
+  const {row,slot}=positions.get(node.id);
+  return '<div class="talent-slot" style="grid-row:'+(row+1)+';grid-column:'+(slot*2+1)+' / span 2">'+talentNodeHTML(key,node)+'</div>';
+ }).join('')+'</div>';
 }
 function renderTalentConnectors(){
- // Draws a line from every talent to the prerequisite it depends on,
- // using each node's REAL rendered position (same approach as the
- // exploration map's connector lines) rather than precomputed grid math
- // — this adapts automatically to however many nodes land in a row and
- // works even for a same-tier dependency. querySelectorAll safely
- // returns nothing outside a real browser, so this is a no-op in the
- // test harness rather than throwing.
+ // Connect ordered subtrees through the empty space between rows.
  document.querySelectorAll('.talent-branch').forEach(branchEl=>{
   const key=[...branchEl.classList].find(c=>TALENT_BRANCHES[c]),branch=TALENT_BRANCHES[key];
   const lane=branchEl.querySelector('.talent-lane');
@@ -419,15 +418,20 @@ function renderTalentConnectors(){
   const old=lane.querySelector('.talent-connectors');if(old)old.remove();
   const laneBox=lane.getBoundingClientRect();
   if(!laneBox.width||!laneBox.height)return;
-  let svg='<svg class="talent-connectors" xmlns="http://www.w3.org/2000/svg">';
+  let svg='<svg class="talent-connectors" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
   branch.nodes.forEach(node=>{
    if(!node.req)return;
    const childEl=lane.querySelector('[data-talent="'+node.id+'"]'),parentEl=lane.querySelector('[data-talent="'+node.req[0]+'"]');
    if(!childEl||!parentEl)return;
    const c=childEl.getBoundingClientRect(),p=parentEl.getBoundingClientRect();
-   const x1=p.left-laneBox.left+p.width/2,y1=p.top-laneBox.top+p.height,x2=c.left-laneBox.left+c.width/2,y2=c.top-laneBox.top;
+   const siblings=branch.nodes.filter(n=>n.req?.[0]===node.req[0]);
+   const port=(siblings.indexOf(node)-(siblings.length-1)/2)*16;
+   const x1=p.left-laneBox.left+p.width/2+port,y1=p.bottom-laneBox.top+12;
+   const x2=c.left-laneBox.left+c.width/2,y2=c.top-laneBox.top-5,mid=(y1+y2)/2;
    const lit=talentRank(node.req[0])>=node.req[1];
-   svg+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" class="'+(lit?'connector-lit':'connector-dim')+'"/>';
+   const path='M '+x1+' '+y1+' C '+x1+' '+mid+', '+x2+' '+mid+', '+x2+' '+y2;
+   svg+='<g class="'+(lit?'connector-lit':'connector-dim')+'"><path class="connector-track" d="'+path+'"/><path class="connector-wire" d="'+path+'"/><circle cx="'+x1+'" cy="'+y1+'" r="2.5"/><circle cx="'+x2+'" cy="'+y2+'" r="2.5"/></g>';
+
   });
   svg+='</svg>';
   lane.insertAdjacentHTML('afterbegin',svg);
