@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClaudeBound — Compendium & Database</title>
+    <title>Cardbound — Compendium & Database</title>
     <style>
         :root {
             --bg-color: #0f111a;
@@ -197,6 +197,44 @@
             color: var(--text-dim);
             font-size: 0.9rem;
         }
+
+        .lead, .dim { color: var(--text-dim); }
+        .lead { margin-top: -0.75rem; margin-bottom: 1.5rem; }
+        .game-card.soul { border-color: #7d5aa8; }
+        .soul-tag { color: var(--accent-purple); }
+        .level-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 6px; background: #0b0c12; border-bottom: 1px solid var(--border-color); }
+        .lvl { all: unset; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 3px; border: 1px solid transparent; border-radius: 5px; font-size: 0.7rem; color: var(--text-dim); }
+        .lvl img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 3px; opacity: .65; }
+        .lvl.on, .lvl:hover { border-color: var(--accent-color); color: #fff; }
+        .lvl.on img, .lvl:hover img { opacity: 1; }
+        .lvl:focus-visible { outline: 2px solid var(--accent-color); }
+        .lvl-label { font-size: 0.75rem; color: var(--text-dim); font-weight: normal; }
+        .region { margin-bottom: 2.5rem; }
+        .region-title { font-size: 1.35rem; margin: 0 0 0.25rem; color: #fff; }
+        .empty { padding: 1rem; border: 1px dashed var(--border-color); border-radius: 8px; color: var(--text-dim); }
+        .dossier-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+        .sprite-box { display: grid; place-items: center; }
+        .sprite-box svg { width: 160px; height: 160px; }
+        .sheet { height: 100%; aspect-ratio: 3 / 4; background-size: 400% 100%; background-position: 0 0; background-repeat: no-repeat; image-rendering: pixelated; }
+        .pattern-title { margin: 1rem 0 0.5rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); }
+        .pattern { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+        .step { display: grid; grid-template-columns: auto 1fr auto; gap: 2px 10px; padding: 8px 10px; border-radius: 6px; background: #161925; border-left: 4px solid #57606f; font-size: 0.88rem; }
+        .step b { color: var(--text-dim); font-weight: 600; font-size: 0.78rem; align-self: center; }
+        .step-name { color: #fff; font-weight: 600; }
+        .step-dmg { font-weight: 700; white-space: nowrap; }
+        .step-tip { grid-column: 1 / -1; color: var(--text-dim); font-size: 0.8rem; }
+        .k-attack { border-left-color: #ff6b6b; } .k-heavy { border-left-color: #ff4757; } .k-guard { border-left-color: #1e90ff; }
+        .k-charge { border-left-color: #ffa502; } .k-elemental { border-left-color: #a55eea; }
+        .cycle-note { font-size: 0.8rem; color: var(--text-dim); margin: 0.4rem 0 0; }
+        .mini-pattern { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0; font-size: 0.78rem; }
+        .mini-pattern i { color: var(--text-dim); font-style: normal; }
+        .chip { padding: 2px 7px; border-radius: 10px; background: #161925; border-left: 3px solid #57606f; text-transform: capitalize; }
+        .notes { margin: 0.75rem 0 0; padding-left: 1.1rem; font-size: 0.85rem; color: var(--text-dim); }
+        .notes b { color: #fff; }
+        .mech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+        .mech { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .mech p { margin: 0.35rem 0 0; color: var(--text-dim); font-size: 0.9rem; }
+        @media (max-width: 600px) { h1 { font-size: 1.6rem; } nav { gap: 0; flex-wrap: wrap; } nav a { padding: 0.4rem 0.6rem; } .dossier-grid { grid-template-columns: 1fr; } }
     </style>
 
     <!-- Load Local Game Scripts -->
@@ -204,128 +242,343 @@
          game.js -- the game's main logic lives inline inside index.html
          itself, which this page can't reach into (that's the whole reason
          cards.js was split out: to share just the data, not the logic).
-         The other two scripts live under assets/, not at root. -->
+         cards.js is only a fallback now: the full card and enemy data is
+         read from the running game (see loadGameData below), because
+         expansion.js / encounter-depth.js depend on the game's own globals
+         and crashed here, silently dropping 10 of the 23 cards. -->
     <script src="assets/cards.js?v=neon-covenant" onerror="console.warn('assets/cards.js not found')"></script>
-    <script src="assets/expansion.js" onerror="console.warn('assets/expansion.js not found')"></script>
-    <script src="assets/encounter-depth.js" onerror="console.warn('assets/encounter-depth.js not found')"></script>
 </head>
 <body>
 
     <header>
-        <h1>ClaudeBound Compendium</h1>
-        <div class="subtitle">Live Local Game Archives & Card Index</div>
+        <h1>Cardbound Compendium</h1>
+        <div class="subtitle">Card upgrades, bestiary &amp; boss dossiers</div>
     </header>
 
     <nav>
-        <a href="#cards">Cards & Deck</a>
+        <a href="#cards">Cards</a>
+        <a href="#side">Side deck</a>
+        <a href="#bosses">Bosses</a>
         <a href="#monsters">Bestiary</a>
-        <a href="#bosses">Boss Mechanics</a>
+        <a href="#mechanics">Attack guide</a>
     </nav>
 
     <div class="container">
 
-        <!-- DYNAMIC CARDS SECTION -->
         <section id="cards">
-            <h2>Player Cards & Abilities</h2>
+            <h2>Player Cards &amp; Upgrades</h2>
+            <p class="lead">Every card has four forms: Level 0 plus three upgrades. Tap a level to see its artwork and what it does.</p>
             <div class="grid" id="card-grid"></div>
         </section>
 
-        <!-- MONSTERS SECTION -->
-        <section id="monsters">
-            <h2>Bestiary & Enemies</h2>
-            <div class="grid" id="monster-grid"></div>
+        <section id="side">
+            <h2>Side Deck &amp; Aether</h2>
+            <p class="lead" id="side-lead">Pitch cards at the end of your turn for Aether, then spend it to play utility counters straight from your side deck (4 Aether minimum).</p>
+            <div class="grid" id="side-grid"></div>
         </section>
 
-        <!-- BOSS SECTION -->
         <section id="bosses">
-            <h2>Boss Encounters</h2>
-            <div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
-                <h3 style="color: var(--accent-blue); margin-top: 0;">Touch Crystals Boss Encounter</h3>
-                <p>Multi-phase boss fight centered around controlling crystal conduits. Activate energy nodes in sequence to bypass the boss's shield generator.</p>
-            </div>
+            <h2>Bosses &amp; Mini-bosses</h2>
+            <p class="lead">Boss attacks follow a fixed sequence that repeats. Learn it and you'll know exactly when to block, when to hold a counter, and when to attack.</p>
+            <div id="boss-list"></div>
+        </section>
+
+        <section id="monsters">
+            <h2>Bestiary</h2>
+            <div id="monster-list"></div>
+        </section>
+
+        <section id="mechanics">
+            <h2>Attack guide</h2>
+            <div class="mech-grid" id="mechanics-list"></div>
         </section>
 
     </div>
 
     <footer>
-        <p>ClaudeBound Compendium &mdash; Running locally from repository root.</p>
+        <p>Cardbound Compendium &mdash; card and enemy data is read live from the game.</p>
     </footer>
 
     <script>
-        function handleImageError(img, altName) {
-            const parent = img.parentElement;
-            const fallback = document.createElement('div');
-            fallback.className = 'fallback-graphic';
-            fallback.innerHTML = `[ ${altName} ]`;
-            parent.replaceChild(fallback, img);
+        // ---------------------------------------------------------------
+        // Data source. The game's full card and enemy data only exists once
+        // index.html has run all of its scripts (expansion cards, Elaris
+        // wildlife, the Bloom Tyrant, boss attack patterns), so the page is
+        // loaded invisibly and its live values are read directly. It never
+        // starts a journey, so it never writes a save.
+        // ---------------------------------------------------------------
+        function loadGameData() {
+            return new Promise(resolve => {
+                const frame = document.createElement('iframe');
+                frame.src = 'index.html';
+                frame.setAttribute('aria-hidden', 'true');
+                frame.tabIndex = -1;
+                frame.style.cssText = 'position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;left:-9999px';
+                const done = data => { clearTimeout(timer); resolve(data); };
+                const timer = setTimeout(() => done(null), 10000);
+                frame.onload = () => {
+                    try {
+                        const get = name => frame.contentWindow.eval(name);
+                        done({
+                            defs: get('defs'), rules: get('rules'), stat: get('stat'), cardArtPath: get('cardArtPath'),
+                            enemies: get('enemies'), monsterArt: get('monsterArt'),
+                            enemyStats: get('typeof enemyStats === "function" ? enemyStats : null'),
+                            balanceFor: get('typeof balanceFor === "function" ? balanceFor : null'),
+                            bossPatterns: get('typeof BOSS_PATTERNS !== "undefined" ? BOSS_PATTERNS : {}'),
+                            counters: get('typeof COUNTERS !== "undefined" ? COUNTERS : {}'),
+                            miniBossCards: get('typeof MINI_BOSS_CARDS !== "undefined" ? MINI_BOSS_CARDS : {}'),
+                            soulChance: get('typeof MINI_BOSS_SOULBOUND_CHANCE !== "undefined" ? MINI_BOSS_SOULBOUND_CHANCE : 0.25'),
+                            afflictions: get('typeof AFFLICTIONS !== "undefined" ? AFFLICTIONS : null'),
+                            enemyAfflictions: get('typeof ENEMY_AFFLICTIONS !== "undefined" ? ENEMY_AFFLICTIONS : {}'),
+                            afflictionText: get('typeof afflictionText === "function" ? afflictionText : null'),
+                            sideCards: get('typeof SIDE_CARDS !== "undefined" ? SIDE_CARDS : null'),
+                            sideArtPath: get('typeof sideArtPath === "function" ? sideArtPath : null'),
+                            aether: get('typeof AETHER_MAX !== "undefined" ? { max: AETHER_MAX, draw: SIDE_DRAW_COST, hold: SIDE_HAND_MAX, deck: SIDE_DECK_MAX, copies: SIDE_COPIES } : null')
+                        });
+                    } catch (e) { console.warn('Compendium: could not read game data', e); done(null); }
+                };
+                document.body.append(frame);
+            });
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const cardGrid = document.getElementById('card-grid');
-            const monsterGrid = document.getElementById('monster-grid');
+        // Which enemies live where, and at what level. Mirrors the spawn
+        // tables and room levels in assets/expansion.js; health and attack
+        // come live from the game's own enemyStats(), so they always match
+        // what you face in battle.
+        const REGIONS = [
+            { id: 'city', name: 'Neon Aftermath', blurb: 'The ruined city where every journey starts.', levels: [1, 8], bossLevels: { moonKnight: 4, crownSentinel: 6, thornWarden: 9 },
+              regular: ['emberling', 'thornling', 'vineguard', 'burrower', 'shade', 'cryptWisp', 'forgeBeast', 'crownEye'],
+              miniBosses: ['moonKnight', 'crownSentinel'], boss: 'thornWarden' },
+            { id: 'elaris', name: 'Elaris', blurb: 'An overgrown wild world reached through the boss portal.', levels: [10, 17], bossLevels: { tidewardenElaris: 10, galeSovereign: 16, bloomTyrant: 18 },
+              regular: ['cinderFox', 'drownedHeron', 'blightAntler', 'stormMoth'],
+              miniBosses: ['tidewardenElaris', 'galeSovereign'], boss: 'bloomTyrant' },
+            { id: 'vespera', name: 'Vespera', blurb: 'A storm-wracked crystal coast beyond the Bloom Tyrant: 42 rooms, levels 19–27.', levels: [19, 26], bossLevels: { arcSentinel: 21, resonantPhantom: 25, stormTyrant: 27 },
+              regular: ['vespFox', 'vespThorn', 'vespMoth', 'vespHeron', 'vespShade', 'vespStag', 'vespWisp', 'vespMauler'], miniBosses: ['arcSentinel', 'resonantPhantom'], boss: 'stormTyrant' }
+        ];
+        const ELEMENT_EFFECT = {
+            fire: 'Burn: 2 damage at the end of each of your next 2 turns.',
+            earth: 'Poison: 1 damage every turn, stacking up to 3.',
+            water: 'Drain: you start your next turn with 1 less energy.',
+            air: 'Exposed: the next hit you take deals +2 damage.'
+        };
+        const ELEMENT_ICON = { fire: '🔥', earth: '🌿', water: '💧', air: '🌪', lightning: 'ϟ' };
+        const cap = s => s ? s[0].toUpperCase() + s.slice(1) : '';
+        const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;');
 
-            // Scan window object for any globally defined card arrays/objects.
-            // The real game's data is `defs` (assets/cards.js) -- checked
-            // first since that's what's actually there; the others are kept
-            // as a fallback in case this page ever points at something else.
-            let rawCards = window.defs || window.cards || window.cardsData || window.CARDS || window.ALL_CARDS || window.cardDatabase;
-            
-            // If cards are stored as an object instead of an array, convert to
-            // array -- using entries, not values, so each card keeps its real
-            // id (the object key). Without the id there's no way to build the
-            // real art path or feed it back through rules()/stat() below.
-            let cardList = [];
-            if (Array.isArray(rawCards)) {
-                cardList = rawCards;
-            } else if (rawCards && typeof rawCards === 'object') {
-                cardList = Object.entries(rawCards).map(([id, c]) => ({ id, ...c }));
-            }
+        function handleImageError(img, altName) {
+            const fallback = document.createElement('div');
+            fallback.className = 'fallback-graphic';
+            fallback.textContent = `[ ${altName} ]`;
+            img.replaceWith(fallback);
+        }
 
-            if (cardList.length > 0) {
-                cardGrid.innerHTML = cardList.map(c => {
-                    const title = c.name || c.id || 'Unknown Card';
-                    // `kind` is the real field name on defs entries ('Attack',
-                    // 'Defense', etc.) -- type/category never existed on this
-                    // data, they were a guess.
-                    const type = c.kind || c.type || c.category || 'Ability';
-                    const cost = c.cost ?? c.energy ?? 'N/A';
-                    // rules()/stat() (assets/cards.js) are the exact functions
-                    // the game itself uses to turn a card's level-0 tier into
-                    // readable text ("Deal 6 damage.") -- there's no separate
-                    // description string on defs entries to fall back to, so
-                    // without this every card would just say "No description
-                    // available."
-                    const desc = (typeof window.rules === 'function' && c.id)
-                        ? window.rules({ id: c.id, level: 0 })
-                        : (c.desc || c.description || c.text || 'No description available.');
-                    // Real card art (assets/cards/level0/<id>.png), via the
-                    // same cardArtPath() the game uses -- c.icon is a single
-                    // Unicode glyph, not an image path, so using it directly
-                    // as a src always 404s.
-                    const imgSrc = (typeof window.cardArtPath === 'function' && c.id)
-                        ? window.cardArtPath(c.id, 0)
-                        : (c.img || c.image || `assets/cards/level0/${(c.id || title).toLowerCase().replace(/\s+/g, '-')}.png`);
-
-                    return `
-                        <div class="card">
-                            <img src="${imgSrc}" 
-                                 alt="${title}" 
-                                 class="card-img" 
-                                 onerror="handleImageError(this, '${title}')">
-                            <div class="card-content">
-                                <div class="card-type">${type}</div>
-                                <h3 class="card-title">${title}</h3>
-                                <p class="card-desc">${desc}</p>
-                                <ul class="stats-list">
-                                    <li><span>Cost:</span> <strong class="badge">${cost} Energy</strong></li>
-                                </ul>
-                            </div>
+        // ---------------------------------------------------------------
+        // Cards: every card at Level 0-3, with its art and rules per level.
+        // ---------------------------------------------------------------
+        function renderCards(game) {
+            const grid = document.getElementById('card-grid');
+            const defs = game ? game.defs : window.defs;
+            const rules = game ? game.rules : window.rules;
+            const artPath = game ? game.cardArtPath : window.cardArtPath;
+            const stat = game ? game.stat : window.stat;
+            if (!defs) { grid.innerHTML = '<p class="dim">No card data found.</p>'; return; }
+            const order = { Attack: 0, Defense: 1, Skill: 2, Healing: 3 };
+            const list = Object.entries(defs).map(([id, c]) => ({ id, ...c })).filter(c => !c.hidden)
+                .sort((a, b) => (!!a.soulbound - !!b.soulbound) || ((order[a.kind] ?? 9) - (order[b.kind] ?? 9)) || a.name.localeCompare(b.name));
+            grid.innerHTML = list.map(c => {
+                const levels = [0, 1, 2, 3].map(level => {
+                    let text = '', cost = c.cost, name = c.name;
+                    try { text = rules({ id: c.id, level }); } catch (e) { text = c.desc || ''; }
+                    try { const s = stat({ id: c.id, level }); cost = c.xCost ? 'X' : s.cost; name = s.name; } catch (e) {}
+                    return { level, text, cost, name, art: artPath(c.id, level) };
+                });
+                const thumbs = levels.map(l => `
+                    <button class="lvl${l.level === 0 ? ' on' : ''}" data-level="${l.level}" aria-pressed="${l.level === 0}" title="Level ${l.level}">
+                        <img src="${l.art}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+                        <span>Lv ${l.level}</span>
+                    </button>`).join('');
+                return `
+                    <article class="card game-card${c.soulbound ? ' soul' : ''}" data-levels='${esc(JSON.stringify(levels))}'>
+                        <img src="${levels[0].art}" alt="${esc(c.name)}, level 0" class="card-img main-art" onerror="handleImageError(this, '${esc(c.name)}')">
+                        <div class="level-strip">${thumbs}</div>
+                        <div class="card-content">
+                            <div class="card-type">${esc(c.kind || 'Ability')}${c.element ? ' · ' + (ELEMENT_ICON[c.element] || '') + ' ' + cap(c.element) : ''}${c.soulbound ? ' · <span class="soul-tag">◆ Soulbound</span>' : ''}${c.unique && game && game.enemies[c.unique] ? ' · <span class="soul-tag">◇ Mini-boss drop: ' + esc(game.enemies[c.unique].name) + '</span>' : ''}</div>
+                            <h3 class="card-title"><span class="lvl-name">${esc(levels[0].name)}</span> <small class="lvl-label">Level 0</small></h3>
+                            <p class="card-desc lvl-text">${levels[0].text}</p>
+                            <ul class="stats-list">
+                                <li><span>Cost:</span> <strong class="badge lvl-cost">${levels[0].cost} Energy</strong></li>
+                            </ul>
                         </div>
-                    `;
-                }).join('');
-            } else {
-                cardGrid.innerHTML = `<p style="color: var(--text-dim);">No card data array found in game scripts. Check DevTools Console (F12) to see global variables.</p>`;
+                    </article>`;
+            }).join('');
+            grid.addEventListener('click', e => {
+                const btn = e.target.closest('.lvl'); if (!btn) return;
+                const card = btn.closest('.game-card'), levels = JSON.parse(card.dataset.levels), l = levels[+btn.dataset.level];
+                card.querySelectorAll('.lvl').forEach(b => { const on = b === btn; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+                const main = card.querySelector('.main-art');
+                if (main) { main.src = l.art; main.alt = l.name + ', level ' + l.level; }
+                card.querySelector('.lvl-name').textContent = l.name;
+                card.querySelector('.lvl-label').textContent = 'Level ' + l.level;
+                card.querySelector('.lvl-text').innerHTML = l.text;
+                card.querySelector('.lvl-cost').textContent = l.cost + ' Energy';
+            });
+        }
+
+        // ---------------------------------------------------------------
+        // Enemies
+        // ---------------------------------------------------------------
+        function artFor(game, id, name) {
+            let html = '';
+            try { html = game.monsterArt(id); } catch (e) {}
+            const img = /<img[^>]*src="([^"]+)"/.exec(html);
+            if (img) return `<img src="${img[1]}" alt="${esc(name)}" class="card-img" onerror="handleImageError(this, '${esc(name)}')">`;
+            const sheet = /url\(([^)]+)\)/.exec(html);
+            if (sheet) return `<div class="card-img sprite-box"><div class="sheet" role="img" aria-label="${esc(name)}" style="background-image:url(${sheet[1]})"></div></div>`;
+            const svg = /<svg[\s\S]*<\/svg>/.exec(html);
+            if (svg) return `<div class="card-img sprite-box">${svg[0]}</div>`;
+            return `<div class="fallback-graphic">[ ${esc(name)} ]</div>`;
+        }
+
+        function patternFor(game, id, e) {
+            if (game.bossPatterns[id]) return game.bossPatterns[id];
+            return e.element ? ['attack', 'charge', 'elemental', 'guard'] : ['attack', 'guard', 'heavy'];
+        }
+
+        // Turn-by-turn description, using the same numbers as enemyPlan()
+        // in assets/encounter-depth.js (before Weaken and enemy level).
+        function describeStep(kind, attack, element, shifter, turn, game, region, isBoss) {
+            const B = k => game.balanceFor ? game.balanceFor(k, region) : ({ heavyBase: 1.5, heavyDistance: 1, bossHeavyMax: Infinity, elementalMult: 1.8, bossElementalMult: 1.8 })[k];
+            const heavyLo = Math.min(B('heavyBase'), isBoss ? B('bossHeavyMax') : Infinity), heavyHi = Math.min(B('heavyBase') + B('heavyDistance'), isBoss ? B('bossHeavyMax') : Infinity);
+            const elementalMult = B(isBoss ? 'bossElementalMult' : 'elementalMult');
+            const el = shifter ? shifter.shift[Math.floor((turn - 1) / (shifter.shiftEvery || 3)) % shifter.shift.length] : element;
+            const guardBlock = shifter ? 8 : 5;
+            switch (kind) {
+                case 'attack': return { label: 'Strike', dmg: `${attack}`, tip: 'A normal hit.' };
+                case 'heavy': { const lo = Math.round(attack * heavyLo), hi = Math.round(attack * heavyHi); return { label: 'Heavy attack', dmg: lo === hi ? `${lo}` : `${lo}–${hi}`, tip: lo === hi ? 'A big hit. Stack Block this turn.' : 'Hits harder the further you are from the region start. Stack Block.' }; }
+                case 'guard': return { label: shifter ? 'Rootguard' : 'Guard', dmg: '—', tip: `No damage this turn, so you can skip blocking. It gains ${guardBlock} Block next turn, which soaks your next attacks first.` };
+                case 'charge': return { label: `Charging ${ELEMENT_ICON[el] || ''} ${cap(el)}`, dmg: '—', tip: `No damage now. Next comes a charged ${el} strike. Play Prismatic Counter to cancel it.` };
+                case 'elemental': return { label: `Charged ${ELEMENT_ICON[el] || ''} ${cap(el)} strike`, dmg: `${Math.round(attack * elementalMult)}`, tip: (ELEMENT_EFFECT[el] || '') + ' Cancelled by an armed Prismatic Counter, which reflects 6 damage.' };
             }
+            return { label: kind, dmg: '?', tip: '' };
+        }
+
+        function enemyCard(game, id, region, opts = {}) {
+            const e = game.enemies[id]; if (!e) return '';
+            const statsAt = level => game.enemyStats ? game.enemyStats(id, { region: region.id, level, boss: !!e.boss }) : { hp: e.hp, attack: e.attack };
+            const bossLevel = region.bossLevels[id];
+            const lo = statsAt(bossLevel || region.levels[0]), hi = statsAt(bossLevel || region.levels[1]);
+            const hp = lo.hp === hi.hp ? `${lo.hp}` : `${lo.hp}–${hi.hp}`, attackText = lo.attack === hi.attack ? `${lo.attack}` : `${lo.attack}–${hi.attack}`, attack = lo.attack;
+            const tier = e.boss ? (e.miniBoss ? 'Mini-boss' : 'Region boss') : 'Enemy';
+            const el = e.element ? ` · ${ELEMENT_ICON[e.element] || ''} ${cap(e.element)}` : '';
+            const pattern = patternFor(game, id, e), shifter = e.shift ? e : null;
+            const steps = pattern.map((k, i) => {
+                const s = describeStep(k, attack, e.element, shifter, i + 1, game, region.id, !!e.boss);
+                return `<li class="step k-${k}"><b>Turn ${i + 1}</b><span class="step-name">${s.label}</span><span class="step-dmg">${s.dmg === '—' ? 'no damage' : s.dmg + ' dmg'}</span><span class="step-tip">${s.tip}</span></li>`;
+            }).join('');
+            const notes = [];
+            if (e.boss) notes.push('<b>Enraged</b> below 50% HP: every attack deals +2 damage.');
+            if (shifter) { const every = shifter.shiftEvery || 3; notes.push(`<b>Shifting element:</b> ${shifter.shift.map((el, i) => `${el} for turns ${i * every + 1}–${(i + 1) * every}`).join(', ')}, then repeats. Your Prismatic Counter adapts automatically.`); }
+            const dropId = game.miniBossCards && game.miniBossCards[id];
+            if (dropId && game.defs[dropId]) notes.push(`<b>Unique drop:</b> ${esc(game.defs[dropId].name)} — Soulbound ${Math.round(game.soulChance * 100)}% of the time, otherwise Impermanent. Drops once, the first time you win.`);
+            if (e.armor) notes.push(`<b>Armor ${e.armor}:</b> blocks ${e.armor} damage from every hit except Pierce cards.`);
+            const affl = (game.enemyAfflictions && game.enemyAfflictions[id]) || [];
+            if (affl.length && game.afflictions) {
+                const ri = { city: 0, elaris: 1, vespera: 2 }[region.id] || 0;
+                const strikeOnly = affl.length === 1 && game.afflictions[affl[0]].type === 'strike';
+                const when = e.boss ? (e.miniBoss ? 'every 3rd turn (2, 5, 8…), alternating' : 'every 3rd turn in order, and <b>every 2nd turn once enraged</b>') : (strikeOnly ? 'on its plain attacks every 3rd turn (4, 7, 10…)' : 'every 3rd turn (2, 5, 8…)') + '; elites every 2nd turn';
+                notes.push(`<b>Afflictions</b> — ${when}:<br>` + affl.map(a => { const A = game.afflictions[a]; const answer = A.answer.map(x => x === 'cleanse' ? 'spending 2 Aether to cleanse it' : (game.sideCards && game.sideCards[x] ? game.sideCards[x].name : x)).join(', '); return `${A.icon} <b>${esc(A.name)}</b>: ${esc(game.afflictionText ? game.afflictionText(a, ri) : A.name)} <i>Answer: ${esc(answer)}.</i>`; }).join('<br>'));
+            }
+            const fixedCycle = opts.full ? `<ol class="pattern">${steps}</ol><p class="cycle-note">Repeats every ${pattern.length} turns.</p>` :
+                `<p class="mini-pattern">${pattern.map(k => `<span class="chip k-${k}">${k === 'elemental' ? 'charged strike' : k}</span>`).join('<i>→</i>')}</p>`;
+            return `
+                <article class="card enemy-card${opts.full ? ' dossier' : ''}">
+                    ${artFor(game, id, e.name)}
+                    <div class="card-content">
+                        <div class="card-type">${tier}${el}</div>
+                        <h3 class="card-title">${e.boss ? '★ ' : ''}${esc(e.name)}</h3>
+                        <ul class="stats-list">
+                            <li><span>Health:</span> <strong class="badge">${hp} HP</strong></li>
+                            <li><span>Level:</span> <strong class="badge">${bossLevel ? 'Lv ' + bossLevel : `Lv ${region.levels[0]}–${region.levels[1]}`}</strong></li>
+                            <li><span>Attack:</span> <strong class="badge">${attackText}</strong></li>
+                            <li><span>Armor:</span> <strong class="badge">${e.armor || 0}</strong></li>
+                        </ul>
+                        <h4 class="pattern-title">${opts.full ? 'Attack sequence' : 'Attack cycle'}</h4>
+                        ${fixedCycle}
+                        ${notes.length ? `<ul class="notes">${notes.map(n => `<li>${n}</li>`).join('')}</ul>` : ''}
+                    </div>
+                </article>`;
+        }
+
+        function renderEnemies(game) {
+            const bossList = document.getElementById('boss-list'), monsterList = document.getElementById('monster-list');
+            if (!game || !game.enemies) {
+                const msg = '<p class="dim">Enemy data loads from the game itself. Open this page from the hosted site or a local web server rather than straight from a file.</p>';
+                bossList.innerHTML = monsterList.innerHTML = msg; return;
+            }
+            const bossNote = 'Stats at each boss\'s own level. Matching that level is a fair fight: a typical build beats a mini-boss about 4 times in 10 and a final boss about 3 times in 10; a strong build that answers its afflictions wins most of the time.';
+            bossList.innerHTML = REGIONS.map(r => {
+                const ids = [...r.miniBosses, r.boss].filter(Boolean);
+                return `<div class="region"><h3 class="region-title">${esc(r.name)}</h3><p class="dim">${r.blurb} ${ids.length ? bossNote : ''}</p>
+                    ${ids.length ? `<div class="dossier-grid">${ids.map(id => enemyCard(game, id, r, { full: true })).join('')}</div>` : '<p class="empty">No mini-bosses or boss in this region yet.</p>'}</div>`;
+            }).join('');
+            monsterList.innerHTML = REGIONS.map(r => `<div class="region"><h3 class="region-title">${esc(r.name)}</h3>
+                <p class="dim">Enemies here are level ${r.levels[0]}–${r.levels[1]}, getting tougher the further you go; stats show that range. Elites have extra health and +2 attack.</p>
+                <div class="grid">${r.regular.map(id => enemyCard(game, id, r)).join('')}</div></div>`).join('');
+        }
+
+        // Side deck cards: read live from SIDE_CARDS in assets/aether-deck.js.
+        function renderSide(game) {
+            const grid = document.getElementById('side-grid');
+            if (!game || !game.sideCards) { grid.innerHTML = '<p class="dim">Side deck data loads from the game itself.</p>'; return; }
+            const a = game.aether || { max: 8, draw: 4, hold: 2, deck: 6, copies: 2 };
+            document.getElementById('side-lead').innerHTML = `Pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1 (up to ${a.max} stored). Your whole side deck is open in every fight: each side card can be played once per encounter for Aether only — ${a.draw} plus its listed cost, never less than ${a.draw}. Unspent energy turns into Aether 1 for 1. Your side deck starts with room for 2 cards and grows to ${a.deck} (+1 for beating the Crown Sentinel, the Gale Sovereign, the Bloom Tyrant and the Resonant Phantom). Build it (${a.copies} copies each) in the Deck Workshop. Numbers that grow with your level are shown at level 1.`;
+            const where = ['Starter or any world', 'Elaris and Vespera', 'Vespera', 'Final bosses only'];
+            grid.innerHTML = Object.entries(game.sideCards).map(([id, c]) => {
+                let text = ''; try { text = c.text(); } catch (e) {}
+                const art = game.sideArtPath ? game.sideArtPath(id) : '';
+                return `<article class="card game-card side">
+                    <img src="${art}" alt="${esc(c.name)}" class="card-img main-art" onerror="handleImageError(this, '${esc(c.name)}')">
+                    <div class="card-content">
+                        <div class="card-type">Side deck · ${esc(c.kind)}</div>
+                        <h3 class="card-title">${c.icon} ${esc(c.name)}</h3>
+                        <p class="card-desc">${esc(text)}</p>
+                        <ul class="stats-list"><li><span>Cost:</span> <strong class="badge">${(a.draw || 4) + (c.cost || 0)} Aether</strong></li><li><span>Found:</span> <strong class="badge">${where[c.tier] || ''}</strong></li></ul>
+                    </div>
+                </article>`;
+            }).join('');
+        }
+
+        function renderMechanics() {
+            const items = [
+                ['Strike', 'Deals the enemy\'s attack value.'],
+                ['Heavy attack', 'About 1.5× attack near a region\'s start, a little more at its far edge. Bosses\' heavy hits are capped lower so one hit never decides the fight.'],
+                ['Guard', 'Gives the enemy 5 Block (Bloom Tyrant: 8) starting next turn. Block soaks your damage first.'],
+                ['Charge', 'No damage. It telegraphs a charged elemental strike on the following turn.'],
+                ['Charged strike', 'About 1.8× attack (1.5× for bosses) plus a status effect if any damage gets through. An armed Prismatic Counter cancels it and reflects 6 damage.'],
+                ...Object.entries(ELEMENT_EFFECT).map(([el, t]) => [`${ELEMENT_ICON[el]} ${cap(el)} strike`, t]),
+                ['Enraged', 'Bosses and mini-bosses below 50% health deal +2 damage on every attack.'],
+                ['Afflictions', 'Every enemy adds telegraphed riders to some of its actions: debuffs on you, buffs on itself, or nastier strikes. The battle screen shows this turn\'s and next turn\'s. A strike affliction scheduled on a turn without an attack moves to the next attack.'],
+                ['Pitch & Aether', 'Mark cards in hand to pitch. When you end the turn they burn away for the rest of the encounter and give Aether equal to cost + 1. You must keep at least 4 cards cycling. Aether carries over between turns, up to 8.'],
+                ['Points of interest', 'About a third of ordinary rooms hold one: Aether Shrines (choose a blessing for your next fight), Campfires (rest, or train a card +15 mastery uses), Supply Caches (Shards), Sealed Caches (risk HP for more Shards) and five lore finds per world (read all five for 15 Shards and a side card).'],
+                ['Shards & the merchant', 'Enemies drop Shards: 1-2 from regulars, 3 from elites, 6 from mini-bosses, 10 from final bosses. The Wandering Merchant (one in every world, shown on the map) sells for Shards: a side card, healing potions (◇ 4, never sell out), unlimited card upgrades for Impermanent cards (◇ 12 to level 1, ◇ 20 to level 2, ◇ 30 to level 3), plus an upgraded card, card bundle or blessing. It never sells Soulbound cards or Upgrade Crystals, and moves to a new room whenever you enter a world or fall in battle.'],
+                ['Card rewards', 'A loot chest that holds a card offers three from the current world\'s pool. Take one, or leave them all.'],
+                ['Quiet rooms & events', 'Elaris and Vespera each have three quiet rooms with no enemies. Each holds an event with a choice: rest, gather potions, trade Shards, take a risk for a card upgrade, or earn a blessing.'],
+                ['Nexus Waypoints', 'Every world has a Nexus Waypoint at its start and another in its middle (Tunnelworks Corridor, Mistbound Thicket, Glasswind Reach). Walking into one discovers it. Then teleport to any discovered waypoint, in any world you have reached, from the map or by stepping on a waypoint.'],
+                ['Experience', 'Enemies at or above your level give full XP (25, elites 40, bosses 50). Each level you are above an enemy takes 20% off, down to 10% at five or more levels.'],
+                ['Unspent energy', 'Each point of energy left when you end your turn becomes 1 Aether.'],
+                ['Side deck', 'Room for 2 side cards at first, growing to 6 as you beat the Crown Sentinel, Gale Sovereign, Bloom Tyrant and Resonant Phantom. Your whole side deck is always open in battle. Play any side card once per encounter, paid in Aether only: 4 minimum (Null Anchor, Mirror Sigil and Phase Veil 5, Stasis Field 6). No energy needed.'],
+                ['Weaken', 'Talent ability, once per encounter: the enemy\'s next attack deals 3 less damage (+3 per Deep Interference rank), then it wears off.']
+            ];
+            document.getElementById('mechanics-list').innerHTML = items.map(([t, d]) => `<div class="mech"><b>${t}</b><p>${d}</p></div>`).join('');
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('card-grid').innerHTML = document.getElementById('boss-list').innerHTML = '<p class="dim">Loading game data…</p>';
+            const game = await loadGameData();
+            renderCards(game);
+            renderEnemies(game);
+            renderSide(game);
+            renderMechanics();
         });
     </script>
 </body>

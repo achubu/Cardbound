@@ -52,14 +52,21 @@ The integrated world uses an original colorful fantasy-steampunk style:
 - Build a 4–6 card active deck from the owned card pool, then invest in Deck Matrix to reach ten cards.
 - Decks allow three copies of a card by default; Pattern Replication raises the limit to five.
 - Every physical card starts at Level 0 and tracks its own uses.
-- Fifty uses plus one open-world upgrade material unlock each of three card levels.
+- Soulbound cards need 50, then 100, then 200 uses plus one Upgrade Crystal per level; Impermanent cards auto-upgrade every 100 uses.
 - Purple Soulbound cards cannot be destroyed or lost.
 - Every defeat destroys one random active Impermanent card; Soulbound boss cards are always protected.
 - Normal victories award 25 player XP; bosses award 50; defeats award 10.
-- Player progression now spans Levels 1–30, with one talent point earned at every level from 2 onward.
+- Player progression spans Levels 1–60, with one talent point earned at every level from 2 onward (59 points at the cap).
 - The three-branch Neural Talent Matrix offers ranked, incremental card-battle upgrades: Surge improves offense and Power Boost, Disruption improves Weaken, draw, energy, deck capacity, and copy limits, and Resolve improves Retain, Block, health, and potion strength.
 - Deeper talent rows require points invested in that branch, with capstone upgrades available after ten branch points.
 - Talent choices can be freely recompiled outside active encounters, making it practical to test different builds.
+- Round 40 expanded each tree to 9 rows and 4-6 build paths (16-17 talents per tree, 50 in total); see CHANGES.md for every path.
+- **Pitch & Aether (Round 44):** mark cards in hand to pitch; when you end the turn they burn away for that encounter and give Aether (cost + 1, up to 8 stored). At least 4 cards must stay in the encounter.
+- **Card rewards (Round 49):** a loot chest that holds a card offers three from the current world's pool — take one or leave them. Each world adds five new cards: Arc Jab, Bulwark Bash, Overclock, Static Shield, Breach Spike (city); Thornlash, Wildfire, Rootbind, Tidecall, Verdant Pact (Elaris); Chain Lightning, Storm Battery, Mirrorguard, Tempest Surge (X cost), Prism Lance (Vespera).
+- **Exploration (Round 50):** about a third of ordinary rooms hold a seeded point of interest — Aether Shrine (blessing for your next fight), Campfire (rest or train a card), Supply Cache, Sealed Cache (risky), and five lore finds per world (all five: 15 Shards + a side card). Enemies drop Shards, spent at the Wandering Merchant (one in every world) on side cards, upgraded Impermanent cards, card upgrade packs, potions, card bundles and blessings — never Soulbound cards or Upgrade Crystals. The merchant moves rooms each time you enter a world or fall.
+- **Unspent energy:** ending a turn with energy left over gives 1 Aether.
+- **Side deck:** a second, player-built deck of up to 6 utility counters (2 copies each). Spend 4 Aether to look at its top 2 cards and keep one; hold up to 2. Every journey starts with Purifying Light, Aegis Ward and Dispel Lance; more drop from 5% of regular and elite enemies and from every boss, and the merchant always sells one.
+- **Enemy afflictions:** every enemy telegraphs riders a turn ahead — Bleed, Frail, Shackle, Fog, Static, Empower, Barrier, Rend, Crush, Siphon and Barrage. Regular enemies have one, mini-bosses two and final bosses three, each landing every 3rd turn (elites and enraged final bosses every 2nd); Empower and Bleed stack once, so stalling is punished. See the compendium for which side card answers what.
 - Bosses have a 10% chance to drop an exclusive Soulbound card.
 - Normal encounters have a 10% material chance; bosses guarantee one material.
 
@@ -75,7 +82,7 @@ Automated logic checks cover:
 - Ember Sigil, Briarstep Boots, and Moon Lens route gates
 - Normal-enemy three-room respawning
 - Integrated physical-card mastery
-- Player XP, the Level 30 cap, talent points, branch gates, deck capacity, copy limits, and derived combat bonuses
+- Player XP, the Level 60 cap, talent points, branch gates, deck capacity, copy limits, and derived combat bonuses
 - Boss material guarantees and the 10% Soulbound boundary
 - Impermanent defeat loss and Soulbound protection
 - Healing-potion drops and fresh-save initialization

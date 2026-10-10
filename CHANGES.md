@@ -1814,6 +1814,92 @@ understood state doesn't need new coverage of its own. Verified directly:
 card renders at 174px again, and all 8 test files pass clean across 3
 full runs.
 
+## Round 39 — world rebalance, Vespera rebuilt, unique mini-boss cards
+
+**Balance in one place.** Every enemy-strength setting now lives in the
+`BALANCE` block at the top of `assets/expansion.js` (per-world level growth,
+world multipliers, elite and boss modifiers, heavy and charged-strike
+multipliers, per-boss health). `enemyStats()` is the single source of truth
+for an enemy's health and attack, used by battles and by `compendium.html`.
+
+- Removed double scaling (Elaris/Vespera multipliers stacked on rising levels).
+- Boss heavy hits capped at 1.3x and boss charged strikes at 1.5x, so a single
+  hit no longer decides a boss fight.
+- Tuned with `tests/balance-sim.cjs` (real engine, talent-using bot, 4 builds
+  x 2 play styles, player level = enemy level). At that fair-fight level a
+  typical build beats every final boss ~39% of the time (Thorn Warden, Bloom
+  Tyrant, Tempest Colossus) and every mini-boss ~50%; overall about 5-10
+  points harder than the previous pass.
+
+**Vespera rebuilt to the city's scale.** 42 rooms (was 4), 8 zones at levels
+19-26, generated from a hand-designed maze graph (45 links, 4 loops, all rooms
+reachable). Stormglass Reach (start) is unchanged, so existing Vespera saves
+load; the parked Promenade and Foundry art became the Prism Bazaar and
+Stormforge Foundry districts. Eight storm-touched enemy types (recolored
+borrowed sprites), two mini-bosses on side branches with crystal chests (Arc
+Sentinel, Lv 21; Resonant Phantom, Lv 25) and a final boss at the far end (the
+Tempest Colossus, Lv 27, shifting water/air every 4 turns). Storm visuals:
+tinted ground, rain, lightning flashes (disabled under reduced motion).
+Element-shifting is now generic (`enemies[id].shift`), no longer Bloom-only.
+
+**Unique mini-boss cards.** Each of the six mini-bosses drops its own card the
+first time it is beaten: Soulbound 25% of the time, otherwise the same card
+Impermanent. Lunar Edict, Neon Covenant (moved from always-Soulbound to this
+rule), Tidebound Aegis, Sovereign Gale, Arc Bulwark, Phantom Resonance. New
+card art from `tools/generate_unique_card_art.py` (pixel-art stand-ins; drop
+in hand-made art under the same filenames to replace them).
+
+**Also fixed.** Nine eastern city rooms used undefined districts and froze the
+screen; tap/click near a room edge now walks through that exit (phones crop
+the side exits off screen); compendium shows all cards with all four levels
+and live boss dossiers; "Exhaust." no longer duplicated on lightning cards.
+
+## Round 40 — expanded talent trees
+
+Each tree is roughly twice as deep (5 -> 9 rows) and twice as wide (2-3 -> 4-6
+paths): Surge 6 -> 17 talents, Disruption 7 -> 17, Resolve 6 -> 16. Rows
+unlock at 0/1/3/5/7/10/13/16/20 points spent in that tree; with 29 points in
+total no build can take everything. Existing talent ids, ranks and
+prerequisites are unchanged (only their row moved), so saved builds stay valid.
+Full-clear costs stay within 4 points of each other (36/34/32).
+
+- Surge: Boost & Overdrive · Critical strikes (Lethal Focus, Adrenaline Loop,
+  Executioner) · Elemental (Attunement, Kindling, Exploit Weakness,
+  Stormcaller) · Momentum combos (Momentum, Flurry) · Armor breaking
+  (Sunder, Shatterpoint).
+- Disruption: Weaken & Silence (Suppression Field, Static Silence, Dominion)
+  · Draw engine (Foresight, Recycler) · Energy (Surge Battery) · Deck ·
+  Counter mastery (Counter Weave, Resonant Rebound, Reflux, Null Field).
+- Resolve: Armor/Echo/Mirror · Block & retaliation (Bulwark Doctrine,
+  Retaliation Coil, Fortress Protocol, Unbreakable) · Life steal (Siphon
+  Edge, Second Wind, Undying Core) · Retained-card tempo (Preparation, Total
+  Recall, Steady Mind).
+
+Effects live in `assets/talent-matrix.js` and hook the engine through
+`cardEffect()` hooks plus wrappers on playCard/endTurn/enemyPlan/startBattle/
+loseBattle/stat. `tests/talent-matrix.test.cjs` checks every new talent with
+exact numbers. One tree shows at a time on every screen (tabs show points
+spent; path chips under each tree); wide trees scroll sideways on phones.
+
+Balance: 16 builds (4 original + 4 per tree, one per new path) simulated
+across all three worlds; new talents tuned over six passes (e.g. Preparation
+originally cut a card's cost every turn and pushed builds to 100%). "Typical"
+in tests/balance-sim.cjs is now the 16-build average, and every boss's health
+was retuned against it: final bosses ~39%, mini-bosses ~50%. Build averages
+across all areas: Surge paths 59-68%, Disruption 62-75%, Resolve 78-93%.
+
+Also fixed: deep trees could centre a node on a quarter column, which CSS
+grids drop (rounded to the half-column grid); the talent detail panel was
+empty when a tab's selected talent belonged to another tree.
+
+## Round 41 — level cap 60
+
+`MAX_PLAYER_LEVEL` is now 60 (was 30). One talent point per level from level 2,
+so 59 points at the cap (was 29). XP stops at the cap; save imports accept
+levels 1-60. Aetherlink sockets now unlock every 12 levels (1, 12, 24, 36, 48;
+was 1, 6, 12, 20, 30), defined once in `AETHERLINK_SOCKET_LEVELS`. Enemy levels
+still top out at 27 in Vespera, so levels 28-60 are headroom for future content.
+
 ## Testing
 
 ```
@@ -1911,3 +1997,252 @@ or main, both regions) spawns exactly the boss and nothing else, that no
 chest sits on either region's mandatory spine, and confirmed with a real
 Chromium render that connector lines are genuinely straight between
 cardinally-aligned rooms.
+
+## Round 42 — Card Mastery doubling
+
+- Soulbound cards now need 50 uses for Level 1, 100 for Level 2 and 200 for Level 3 (plus 1 Upgrade Crystal each). Impermanent cards still auto-upgrade every 100 uses.
+- Battle hand, deck workshop (Ready filter, upgrade button, tooltips) and save import all use the per-level requirement.
+- New test: tests/mastery-doubling.test.cjs.
+
+## Round 43 — Regular enemies 10% tougher
+
+- Every regular and elite enemy in all three worlds has 10% more health (`BALANCE.normalHp`). Mini-bosses and final bosses are unchanged.
+- Simulated (balance-sim, 30 fights × 16 builds × 2 styles): typical regular-fight win rates fall about 6–8 points; boss and mini-boss win rates identical. Adding +10% attack too was tested and rejected — it compounds to ~21% and drops some city zones below 20%.
+
+## Round 44 — Pitch, Aether, the side deck and enemy afflictions
+
+New file `assets/aether-deck.js` (+ `assets/aether-deck.css`), loaded after talent-matrix.js. It wraps enemyPlan, endTurn, playCard, cardEffect, startBattle, winBattle, renderBattle, showDeck, newGame, restoreGame and validateImport.
+
+**Pitch & Aether.** Every hand card has a *Pitch* toggle. When you end the turn, marked cards burn away for the rest of the encounter (exhausted) and give Aether = energy cost + 1 (0-cost 1, 1-cost 2, 2-cost 3). Aether carries between turns (max 8); every encounter starts with 2, so one pitched card buys the first draw and later draws take a couple. At least 4 cards must stay cycling, and the retained card can't be pitched.
+
+**Side deck.** A second, player-built deck (up to 6 cards, 2 copies each) managed in the Deck Workshop. Spend 4 Aether to look at its top 2 cards and keep one (the other goes to the bottom). Up to 2 side cards wait in their own row until played; they cost their own energy. New journeys and old saves get Purifying Light, Aegis Ward and Dispel Lance. Drops: 12% from regular enemies, 35% from elites, guaranteed from every boss (final bosses may drop Stasis Field). Pool by world: city tier (Purifying Light, Dispel Lance, Aegis Ward, Null Anchor, Verdant Restore), Elaris adds Grounding Rod and Mirror Sigil, Vespera adds Phase Veil and Aether Overflow.
+
+| Side card | Cost | Effect |
+|---|---|---|
+| Purifying Light | 0 | Cleanse all debuffs and purge Static; undo this turn's Shackle / Fog |
+| Dispel Lance | 0 | Strip Empower and Barrier, 4/7/10 piercing damage by world |
+| Aegis Ward | 0 | 4 + level/2 Block; Rend can't cut it this turn |
+| Null Anchor | 1 | Prevent the next affliction, whatever it is |
+| Verdant Restore | 0 | Heal 5 + level/3, cleanse Bleed |
+| Grounding Rod | 0 | Arm a counter for the enemy's current element |
+| Mirror Sigil | 1 | Next damaging action: you take half, enemy takes all of it |
+| Phase Veil | 1 | Negate all damage of the next damaging action |
+| Aether Overflow | 0 | +1 energy, draw 1, +1 Aether |
+| Stasis Field | 2 | Enemy skips its next action (final-boss drop) |
+
+**Afflictions.** Riders on enemy actions, telegraphed on the intent panel for this turn and next, each with the side cards that answer it. Hexes: Lacerate (Bleed 2/3/4, stacks to double, never below 1 HP), Enfeeble (Frail: −25% card damage for 2 turns), Shackle (−1 energy), Mind Fog (draw 1 fewer), Static Flood (unplayable Static cards; pitch for 1 Aether), Empower (+2/3/4 attack, stacks once), Aether Barrier (5/10/16, refreshes). Strikes: Rend (cuts half your Block), Crushing Blow (+30%), Siphon (enemy heals the damage), Barrage (3 hits at 45%, Block and Armor per hit). Regular enemies carry one, mini-bosses two, final bosses three; they land every 3rd turn (elites and enraged final bosses every 2nd). A regular enemy's strike affliction lands on its plain attacks (turns 4, 7 …) instead of stacking onto a heavy hit; a boss strike affliction scheduled on a guard/charge turn carries to its next attack.
+
+**Balance.** Simulated with the bot taught to pitch, draw and play side cards (`tests/talent-sim.cjs`; `NO_SIDE=1` turns that off). Typical-build win rates vs Round 43 (30 fights × 16 builds × 2 styles, fair-fight levels): city regulars Lv3 93→66%, Lv7 89→69%, Lv8 41→22% (Crown Observer uses Mind Fog — Shackle there measured 10%); Elaris regulars down 5–17 points; Vespera regulars down 2–20, except Lv26 79→31% (Thunder Mauler's Rend). Mini-bosses: Lunar 47%, Crown Sentinel 42%, Tidebound 49%, Gale 46%, Arc 38%, Resonant 37%. Final bosses: Thorn Warden 31%, Bloom Tyrant 29%, Tempest Colossus 33%. Boss health was retuned with every affliction active so a typical build wins about 40% against mini-bosses and 28% against final bosses (was ~50% / ~39%): perEnemy hp moonKnight .6, crownSentinel .69, thornWarden .64, tidewardenElaris .8, bloomTyrant .46, arcSentinel .64, resonantPhantom .96, stormTyrant .45 (galeSovereign unchanged). balance-sim targets now zone 30–100, mini 34–50, boss 22–36.
+
+Also: compendium gains a Side Deck section, per-enemy affliction notes (with answers) and new attack-guide entries; side-card and Static art via `tools/generate_side_card_art.py`; new `tests/aether-deck.test.cjs` covers pitching, Aether, draws, all 11 afflictions and schedules, all 10 side cards, drops, deck rules and save migration; `tests/trace-fight.cjs` prints one fight's log for debugging.
+
+## Round 45 — Two-bubble enemy intent
+
+- The enemy intent panel is now two bubbles: a rose one for **when you end this turn** and a blue one for **the turn after**. Each shows the action, its damage (or "no attack", "3 × N" for Barrage, "frozen", "negated by Phase Veil"), a counter-window marker, and its own affliction with the answers. Side by side on desktop, stacked on phones.
+
+## Round 46 — Static must be cleansed
+
+- Static junk cards can no longer be pitched for Aether. Each one in your hand has a **Cleanse · 2 ✦** button that spends 2 Aether to remove it for the rest of the encounter; Purifying Light still purges every Static at once, and Null Anchor still prevents Static Flood. Card text, telegraph answers and the compendium say so.
+- The simulation bot cleanses Static when it has the Aether. Test coverage: Static can't be pitched, cleansing needs 2 Aether, removes the card from every pile and spends the Aether.
+
+## Round 47 — Readable battle HUD
+
+- New `assets/battle-hud.js` + `assets/battle-hud.css` (visual only; restyles what renderBattle draws). Encounter text scales with the window (`clamp(14px, 1.35vw, 19px)`), so it grows on big screens and stays legible on phones, where the two combatants now stack.
+- Health: tall rounded bars with a gloss highlight, large bold numbers, a heart icon for you and a fanged skull for the enemy. Your bar turns green → amber (≤50%) → pulsing red (≤25%).
+- Energy: a gold pill with a lightning bolt and one glowing orb per point (empty sockets for spent energy, blue orbs for bonus energy above your maximum) and a big "2/3" count.
+- Armor: a steel shield with a gold rim and the number on it. Block: a glowing cyan crystal (orange for enemy Block).
+- Intent bubbles, Aether row, combat log and hand title also scale up.
+
+## Round 48 — Intent labels
+
+- The two intent bubbles are now labelled "Enemy move next turn:" (rose) and "Enemy move the turn after:" (blue), in normal case and a little larger.
+
+## Round 49 — Card variety, card choice, energy → Aether, faster city
+
+New file `assets/card-variety.js` (loaded after aether-deck.js); art from `tools/generate_variety_card_art.py`; tests in `tests/card-variety.test.cjs`.
+
+- **Choose your card reward.** A loot chest that holds a card now offers three different cards from the current world's pool; take one or leave them all ("Leave them"). Pools: city 11 cards, Elaris 13, Vespera 13 (Vespera finally has its own).
+- **15 new cards, 5 per world, 4 levels each:**
+  - City: Arc Jab (0: 3 dmg, +1 Aether), Bulwark Bash (1: damage = your Block), Overclock (0: +1 energy, exhaust; pitches for 3 Aether), Static Shield (1: 6 Block, cleanse 1 debuff), Breach Spike (1: 5 dmg, enemy −2 Armor for the fight).
+  - Elaris: Thornlash (1: 4 dmg, Poison 3, doubled if already poisoned), Wildfire (2: 8 dmg, Burn 3 or double an existing Burn, max 10), Rootbind (1: 5 Block, next enemy attack −4), Tidecall (1: draw 2, +1 card next turn), Verdant Pact (0: heal 4, +1 Aether, exhaust).
+  - Vespera: Chain Lightning (2: 5 dmg × 3, Armor per hit), Storm Battery (1: +2 Aether, draw 1), Mirrorguard (2: 10 Block, reflect half of what Block stops), Tempest Surge (X: 7 dmg per energy spent), Prism Lance (2: 12 piercing, ignores Barrier).
+- **Unspent energy → Aether.** Ending a turn with energy left gives 1 Aether. City side-deck use went from ~0–0.3 to ~0.7–1.5 plays per fight in simulation.
+- **Faster early city.** City regular enemies' extra health eased from ×1.1 to ×0.95. Simulated level-3 city fights: ~23 → ~17 turns; level-7: ~12.5 → ~10.
+- **Balance.** The simulator's decks now include the new cards a player would pick (BASIC_DECKS=1 restores the old decks), and the bot understands X-cost and multi-hit cards. Boss health retuned so a typical build still wins ~40% vs mini-bosses and ~28% vs final bosses: moonKnight .73, crownSentinel .72, thornWarden .95, tidewardenElaris 1.4, galeSovereign .79, bloomTyrant .77, arcSentinel .72, resonantPhantom .82, stormTyrant .46. Final typical win rates: Lunar 38%, Crown Sentinel 38%, Thorn Warden 27%, Tidebound 45%, Gale 44%, Bloom Tyrant 25%, Arc 41%, Resonant 40%, Tempest Colossus 32%. Regular fights mostly 65–100%; the last Vespera zone (Lv 26) is the hardest at 27%.
+
+## Round 50 — Exploration: points of interest and the Wandering Merchant
+
+New file `assets/exploration.js` (loaded after combined-rooms.js); tests in `tests/exploration.test.cjs`.
+
+- **Points of interest.** About a third (36%) of ordinary rooms in each world (never the start, a boss room or a chest room) get one, placed from the journey seed on a reachable spot at least 150px from patrol homes. Each world has five lore finds plus at least one of each other kind:
+  - ⛩ **Aether Shrine** — choose 1 of 3 blessings for your next fight: Ward of Glass (6 + level/2 opening Block), Surge Rite (+1 energy, +1 card on turn 1), Aether Well (+3 Aether), Keen Edge (+3 damage on every attack), Vigil (heal 30% after the win).
+  - 🔥 **Campfire** — rest for 35% max HP, or train an active card for +15 mastery uses.
+  - ⌨/◈/ϟ **Lore** (Data Terminal / Whispering Stone / Storm Glyph) — five short story fragments per world, +2 Shards each; reading all five gives +15 Shards and a side card.
+  - ⬙ **Supply Cache** — 3–6 Shards, 25% chance of a potion.
+  - ⚠ **Sealed Cache** — optional risk: 50% +9 Shards, 50% lose 15% max HP (never below 1).
+  Each is single-use; walking onto it opens it (step away to reopen). Used ones dim. The map tags rooms with their point of interest and shows found/used counts and lore progress.
+- **Shards** (new currency, shown in the HUD): 1–2 per regular win, 3 per elite, 6 per mini-boss, 10 per final boss.
+- **Wandering Merchant** 🛒 — sets up in a random ordinary room, with a new room and stock each time you enter a world or are defeated. Three wares from: side-deck card (10), healing potion (5), card bundle (choose 1 of 3, 8), Upgrade Crystal (25), bottled blessing (4); always includes a side card. Each sells once.
+- Saves: `shards`, `blessing`, `poi` are validated on import; older saves start with empty exploration data.
+
+## Round 51 — Smoother start in Elaris
+
+Problem (simulated, all 16 builds, player level = enemy level, arriving with the city deck): Elaris Lv 10 regulars won 42%, Lv 11 35%, Lv 12 36%; Drowned Heron 4–9% at Lv 11–12, Storm Moth 22–27%.
+
+- **Entry ramp** (`BALANCE.entryRamp.elaris`): regular and elite enemies (never bosses) at Lv 10/11/12/13 have ×0.90/0.88/0.90/0.95 health and −1/−1/−1/0 attack, so difficulty climbs from the portal instead of jumping.
+- **Drowned Heron** health ×0.85 and **Storm Moth** ×0.9 (the two worst early fights).
+- **Elaris attunement:** arriving from the city for the first time offers a choice of 1 of 3 Elaris cards (Cinder Lance, Venom Bloom, Gale Cut, Thornlash, Wildfire, Rootbind, Tidecall, Verdant Pact); it joins the active deck if there's room.
+- Result with the city deck: Lv 10 **78%**, Lv 11 **66%**, Lv 12 **65%** (Heron 81/59/53%, Moth 61/54/61%). With an Elaris deck after a few rewards: 95/89/88%, then Lv 13 ~70%+. Bosses unchanged.
+
+## Round 52 — Store rules
+
+- The Wandering Merchant no longer sells Upgrade Crystals, and never sells Soulbound cards: card bundles and upgraded cards are always Impermanent.
+- New wares: **Upgraded card** (12 Shards — choose 1 of 3 Impermanent cards from this world at level 1, level 2 in Vespera) and **Card upgrade pack** (15 Shards — raise one of your Impermanent cards by a level; mastery starts fresh; can't be bought if you have none to upgrade).
+- Every stock is a side card + a card upgrade (upgraded card or pack) + one of potion / card bundle / blessing.
+- Every world always has a store: if no ordinary room is free, the merchant sets up in the safe start room. The map now names the area the merchant is in.
+
+## Round 53 — Drop rates
+
+- Loot chests: a card choice is now the most common outcome at **55%** (was 35.5%). Potions 25% (was 35.5%), empty 15% (was 24%); Soulbound jackpot 1% and Upgrade Crystal 4% unchanged.
+- Side-deck card drops: **5%** from regular and elite enemies (was 12% / 35%). Bosses still always drop one, lore sets pay one, and the merchant always stocks one.
+
+## Round 54 — Card choice at 40%
+
+- Loot chests: card choice **40%**, potion 35%, empty 20%, Upgrade Crystal 4%, Soulbound 1%. (Side-card drops stay at 5% from regular and elite enemies.)
+
+## Round 55 — Show the unspent-energy Aether
+
+- The unspent-energy rule (Round 49: end a turn with energy left → +1 Aether) was working but invisible until after the turn. The Aether row now counts it in the pending pips and says "+N at end of turn (incl. +1 from unspent energy)"; with nothing pending it reads "Pitch cards or end the turn with energy left to gain Aether".
+
+## Round 56 — Stacked copies in the Deck Workshop
+
+- Copies of the same card at the same level and ownership (Soulbound or Impermanent) now show as one tile with a gold ×N badge and "k of N copies in deck". Buttons work on one copy at a time: Add a copy / Remove a copy / Upgrade a copy / Destroy a copy (destroys the least-used copy not in your deck first). The tile shows the most-used copy's mastery (or a copy that's ready to upgrade).
+- The active-deck list stacks the same way ("Sundering Arc · Lv 0 ×2").
+- Soulbound and Impermanent copies stay separate stacks because one can be lost and the other can't; different levels stay separate too.
+
+## Round 57 — Weaken button
+
+- The Weaken ability is now a large glowing magenta button with a cracked-blade icon, "WEAKEN" and "Enemy attack −N · once per fight", pulsing while available and lifting on hover. After use it turns into a dimmed "WEAKENED · Enemy attack −N" plate, and the enemy gets a "▼ −N attack" chip. Visual only (battle-hud.js / battle-hud.css).
+
+## Round 58 — View the side deck any time
+
+- The Aether row has a **▾ View side deck** toggle that expands the cards still left in your side deck for this encounter, sorted by name so the draw order stays hidden. They are shown dimmed and can't be played or taken from there. A note says how many are left and whether you have the 4 Aether needed to draw ("You need 4 Aether to draw — you have 2."). Drawing still only happens through the Side deck button, which stays disabled until you have enough Aether.
+
+## Round 59 — The map only shows what you've seen
+
+- Room tags (Boss, Relic, Chest, Crystal, points of interest, the merchant) appear only for areas you have visited; an unexplored area is never tagged.
+- The map footer no longer reveals totals: "N areas explored · X hidden chests found · Y relics claimed", and "Points of interest found: N" (with lore read and Shards). The merchant's location is listed only once you've seen its area. (This replaces Round 52's always-named merchant.)
+
+## Round 60 — Upgrade Crystal pickup image
+
+- New `assets/pickups.js`. Every Upgrade Crystal you receive now shows the up-arrow crystal from `assets/items/upgrade-crystals.png` (popping in, then floating) with "You now have N":
+  - in the victory screen for loot-chest crystals and the guaranteed mini-boss crystal (beside any card or side-card reward);
+  - in an "Item found" window for hidden crystal chests and the Memory Annex crystal in the world.
+
+## Round 61 — Map without overlaps, doorways to the unknown; campfire clarity
+
+- The exploration map is laid out on fixed-size grid cells (150 × 104 px) instead of squeezing the whole explored area into one fixed box, so room panels never overlap. A large map scrolls, and it opens centred on the room you're in.
+- Paths leading to areas you haven't explored end in a small glowing **doorway** marker just outside the room — you can see there's a way through without the map revealing what's beyond it.
+- Campfires (already single-use) now say so: "The fire burns out after one use", the toast confirms it burned out, a used campfire reads "The campfire has burned out. Each campfire can be used once — to rest or to train one card", and the buttons ignore repeat clicks.
+
+## Round 62 — Damage-over-time per turn
+
+- Both combatants show a "☠ −N HP / turn" badge whenever damage-over-time is active, with the breakdown underneath: on you, Bleed + Burn + Poison (red); on the enemy, Poison + Burn (green). The total matches what actually ticks at the end of the turn (checked in the browser: −5 on you, −7 on the enemy).
+
+## Round 63 — Signal Amplifier and Deep Interference: +1 per rank
+
+- Signal Amplifier now adds +1 Power Boost per rank (Boost = 1 + rank, up to +6 at rank 5; was +1 at ranks 1/3/5, max +4). Deep Interference adds +1 Weaken per rank (Weaken = 1 + rank, up to −6 enemy attack; was max −4). Talent descriptions updated.
+- Simulated effect (20 fights × 16 builds × 2 styles): bosses and mini-bosses about 3–13 points easier (e.g. Thorn Warden 27→35%, Crown Sentinel 38→51%, Arc Sentinel 41→54%, Tempest Colossus 32→41%); regular fights a little easier too. Boss health not retuned.
+
+## Round 64: compact burgundy Weaken, always-visible debuffs
+
+- The Weaken button (and the WEAKENED plate) is half its old size and burgundy instead of purple.
+- Both combatants have a **Debuffs** strip that is always visible and shows "None" when nothing is active. It lists every active debuff with a tooltip, plus the total HP lost per turn.
+  - You: Bleed, Poison, Burn (turns left), Frail, Shackled, Drained, Exposed, Fogged.
+  - Enemy: Poison, Burn (amount and turns), Weakened, Rootbind, Frozen, Silenced.
+- The scattered duplicates are gone: the top status line, the intent status text and the loose debuff tags.
+
+## Round 65: Aether is only spent when you play a side card
+
+- Drawing from the side deck is free: look at the top 2 side cards, then take one or put both back on top. Viewing the side deck, opening Character, and drawing never cost Aether.
+- Playing a side card is what costs Aether: 4, plus the card's own energy. Side cards show a "4 ✦" badge and are greyed out until you can afford them.
+- Unspent energy converts 1:1. Each energy left when you end your turn gives 1 Aether, up to the 8 cap. The Aether preview shows the exact amount.
+- Updated the Deck Workshop text, the compendium, the tests, and the simulation bot. Bosses stay in target: Thorn Warden 31%, Bloom Tyrant 30%, Tempest Colossus 34% (SEED=11, 30 runs).
+
+## Round 66: Weaken is a one-shot, tripled
+
+- Weaken (once per encounter) now lowers only the enemy's **next attack**, then wears off. It used to last the rest of the fight.
+- Its value is tripled: 3 base, +3 per Deep Interference rank, up to 18. Charge turns, guard turns, Silenced turns and frozen turns don't use it up.
+- Updated the button, the "WEAKENED" plate (it shows "WEAKEN USED" once spent), the debuff strip, the talent descriptions and the compendium. Balance was not re-simulated, as requested.
+
+## Round 67: the side deck is always open, 4 Aether minimum
+
+- There's no more draw, choose or put-back step. In every fight, every side card in your side deck is shown and can be played directly, once per encounter.
+- Side cards cost Aether only, never energy: 4 plus the card's listed cost, so the minimum is 4. Purifying Light, Dispel Lance, Aegis Ward, Verdant Restore, Grounding Rod and Aether Overflow cost 4. Null Anchor, Mirror Sigil and Phase Veil cost 5. Stasis Field costs 6.
+- The cost badge on each side card shows its Aether price. Cards you can't afford are greyed out. The panel can be collapsed with "Hide side deck".
+- Updated the Deck Workshop text, the compendium (side cards list their Aether cost), the tests and the simulation bot. Balance was not re-simulated.
+
+## Round 68: Jammer Reserve, extra Weaken charges
+
+- New Disruption talent, **Jammer Reserve**: 2 ranks, needs Deep Interference 3, sits beside Suppression Field. Each rank adds +1 Weaken charge per encounter, for up to 3 charges.
+- Only one Weaken is active at a time. When it wears off after the enemy's next attack, the button comes back if you have charges left.
+- The Weaken button shows "N of M charges left". The WEAKENED plate shows the charges remaining, and once all charges are spent it reads "All 3 charges spent".
+- Weaken now runs through a shared `useWeaken()` function. New talent tests cover the charges, one-at-a-time use, and wearing off. The sim bot can use the extra charges.
+
+## Round 69: the merchant always sells potions and unlimited card upgrades
+
+- Every Wandering Merchant now stocks a side card, **healing potions** and **card upgrades**, plus one more ware (an upgraded card, a card bundle or a blessing).
+- **Potions** cost ◇ 4 and never sell out. That's about two regular fights of Shards. A potion heals 5 HP (plus 1 per Recovery Protocol rank), so it's priced to be a cheap top-up.
+- **Card upgrades** are unlimited. You pay when you pick the card, and the price depends on the level reached: ◇ 12 to level 1, ◇ 20 to level 2, ◇ 30 to level 3. Taking one card from 0 to 3 costs ◇ 62.
+  - Why these prices: in the playthrough, a world paid about 150–180 Shards, roughly 1.5 per regular fight, 3 per elite and 6–10 per boss, and runs ended with 200–600 Shards left over. At these prices a world's income buys about three full card upgrades, or about ten single steps.
+- The upgrade screen lists your Impermanent cards with their price, cheapest first. Cards you can't afford are greyed out, and you can buy several in a row. Opening it is free, and "Back to the merchant" returns to the shop.
+- Updated the exploration tests and the compendium.
+
+## Round 70: XP by level gap, quiet rooms and waystones, compact side deck
+
+- **Less XP for enemies below your level.** Enemies at or above your level give full XP: 25, elites 40, bosses 50. Each level you are above the enemy takes 20% off (80%, 60%, 40%, 25%), with a 10% floor at five or more levels. The victory screen shows "+N XP" and says when it was reduced. In the playthrough, players left the city at level 20–25 against level 1–9 enemies; now clearing a world no longer outruns it.
+- **Quiet rooms with events in Elaris and Vespera.**
+  - Three rooms per world have no enemies: Elaris 2,2 / 5,6 / 10,7 and Vespera 2,4 / 6,4 / 10,5.
+  - Each holds an event with two choices, three different events per world.
+  - Elaris events: Moonlit Spring, Wounded Ranger, Glowing Seedpod and Strangling Vines.
+  - Vespera events: Storm Shelter, Humming Conduit, Glass Scavenger and Echoing Prism.
+  - The choices cover resting, potions, Shards, risky card upgrades, deck training and blessings. Each event can be used once.
+- **Waystone shortcuts.** Each world has a waystone at the landing and its twin mid-world: Elaris at Mistbound Thicket (level 15), Vespera at Glasswind Reach (level 22). The landing stone stays dark until you touch the far one. After that you can travel between them any time, for example to go back to the start and the merchant.
+- Lore and the four kinds of points of interest are still guaranteed in every world. The minimum number of points of interest was raised so Elaris still fits all of them.
+- **Side deck fix.** In battle the side deck is now a compact row of chips showing each card's icon, name and Aether price, with the full text on hover. Chips you can afford glow and play with one click. "Card details" opens the full cards.
+- On phones, the fighters and both enemy-move bubbles now sit side by side, so your hand is visible without scrolling.
+- New tests in tests/pacing.test.cjs, and the compendium is updated.
+
+## Round 71: the side deck grows from 2 to 6
+
+- New journeys start with room for **2** side cards: Purifying Light and Aegis Ward are equipped, and Dispel Lance waits in your collection to swap in.
+- You gain **+1 slot** for each of these bosses, reaching 6 by late Vespera:
+  - Crown Sentinel (city), which takes you to 3
+  - Gale Sovereign (Elaris), 4
+  - Bloom Tyrant (Elaris), 5
+  - Resonant Phantom (Vespera), 6
+- When a slot opens, the victory screen says so, and an unequipped side card is equipped into it automatically.
+- The Deck Workshop shows "Room for N of 6 cards" and names the boss that opens the next slot. Adding a card beyond the current room explains how to expand it.
+- Battles only bring the cards that fit. Older saves with more cards equipped than they have room for are trimmed to fit.
+- Updated the tests (aether-deck) and the compendium.
+
+## Round 72: the side deck gets its own column beside your hand
+
+- In battle, the side deck now sits in its own column to the right of your hand instead of in a row above it.
+- Side cards are stacked one per row, and the column scrolls up and down. The list is capped at 430px on desktop and 300px on phones.
+- The column header shows how many side cards are left and how many you can afford right now. Cards you can't afford are greyed out, and their tooltip says how much Aether they need.
+- The Aether bar stays above your hand.
+- On phones the column is narrower and its cards are compact: name, Aether price and text, with no art.
+- The Round 70 "Card details" toggle is gone. The column always shows the full card text.
+
+## Round 73: Nexus Waypoints, with teleporting from the map
+
+- Every world now has a **Nexus Waypoint** at its start and another in its middle:
+  - Neon Aftermath: Afterlight Refuge and Tunnelworks Corridor
+  - Elaris: Dawnroot Landing and Mistbound Thicket
+  - Vespera: Stormglass Landing and Glasswind Reach
+- **Walking into a waypoint's room discovers it.** The start waypoints are discovered as soon as you arrive in a world.
+- **Teleporting:** the map has a "Nexus Waypoints" panel listing every waypoint you've discovered, grouped by world. Click one to teleport, including to another world you've already reached. Stepping on a waypoint opens the same list. You can't teleport during a fight.
+- Teleporting into another world remembers where you'd been there.
+- These replace the Round 70 waystones. Older saves with an attuned waystone get both of that world's waypoints.
+- Updated tests/pacing.test.cjs, tests/exploration.test.cjs and the compendium.

@@ -28,7 +28,7 @@ for(let i=0;i<8000;i++){
  state.battle={phase:'fight',enemy:{hp:0,boss:false,elite:false},logs:[]};
  activeRegion='elaris';
  winBattle();
- if(state.battle.reward)seen.add(state.battle.reward.id);
+ if(state.battle.reward)seen.add(state.battle.reward.id);if(state.battle.offers)state.battle.offers.forEach(c=>seen.add(c.id));
 }
 assert(seen.has('bastion'),'Elaris reward pool now offers Bastion (block)');
 assert(seen.has('mend'),'Elaris reward pool now offers Mend (healing)');
@@ -88,10 +88,10 @@ assert.equal(forceRoll(.0099).lootType,'soulbound','just under 1% is still Soulb
 assert.equal(forceRoll(.01).lootType,'crystal','exactly 1% rolls over into the Upgrade Crystal band');
 assert.equal(forceRoll(.0499).lootType,'crystal','just under 5% is still an Upgrade Crystal');
 assert.equal(forceRoll(.05).lootType,'empty','exactly 5% rolls over into the empty-chest band');
-assert.equal(forceRoll(.2899).lootType,'empty','just under 29% is still empty');
-assert.equal(forceRoll(.29).lootType,'potion','exactly 29% rolls over into potion');
-assert.equal(forceRoll(.6449).lootType,'potion','just under 64.5% is still potion');
-assert.equal(forceRoll(.645).lootType,'card','exactly 64.5% rolls over into card');
+assert.equal(forceRoll(.2499).lootType,'empty','just under 25% is still empty');
+assert.equal(forceRoll(.25).lootType,'potion','exactly 25% rolls over into potion');
+assert.equal(forceRoll(.5999).lootType,'potion','just under 60% is still potion');
+assert.equal(forceRoll(.60).lootType,'choice','exactly 60% rolls over into a card choice (40% of chests)');
 forceRoll(0);assert(state.pool.some(c=>['phoenix','oath','verdict'].includes(c.id)),'Soulbound jackpot actually grants a Soulbound card');
 const materialsBefore=materials();forceRoll(.03);assert.equal(materials(),materialsBefore+1,'the Upgrade Crystal outcome actually increments the persistent materials() count');
 assert(typeof forceRoll(.15).thief==='string'&&forceRoll(.15).thief.length,'an empty chest names the animal that looted it');
@@ -236,7 +236,8 @@ state.room='1,5';const nearHeavy=enemyPlan(battleStub,3).damage;
 state.room=trueEdgeRoom;const farHeavy=enemyPlan(battleStub,3).damage;
 assert(farHeavy>nearHeavy,'a heavy hit does more damage far from the start than near it, same base attack (near='+nearHeavy+' far='+farHeavy+')');
 assert(nearHeavy<=Math.round(10*1.7),'near the start, the heavy-hit multiplier stays close to its original 1.5x (got '+nearHeavy+')');
-assert.equal(farHeavy,Math.round(10*2.5),'at the actual map edge ('+trueEdgeRoom+'), the heavy-hit multiplier reaches its full 2.5x (got '+farHeavy+')');
+const fullHeavy=balanceFor('heavyBase')+balanceFor('heavyDistance');
+assert.equal(farHeavy,Math.round(10*fullHeavy),'at the actual map edge ('+trueEdgeRoom+'), the heavy-hit multiplier reaches its full BALANCE value '+fullHeavy+'x (got '+farHeavy+')');
 
 // --- Armor visibility: the UI now shows the enemy's armor stat, and the
 // combat log explains the reduction in one line instead of two separate
@@ -581,13 +582,13 @@ if(_origNExit2===undefined)delete rooms['2,1'].exits.n;else rooms['2,1'].exits.n
 // --- roomTag correctly identifies special room types used for map badges
 assert.equal(roomTag('0,5').label,'Safe','the starting safe room is tagged Safe');
 const bossKey=Object.keys(rooms).find(k=>rooms[k].enemy&&enemies[rooms[k].enemy[0]]&&enemies[rooms[k].enemy[0]].boss&&rooms[k].enemy[0]==='thornWarden');
-assert(bossKey&&roomTag(bossKey).label==='Boss','the Thorn Warden room is tagged Boss');
+assert(bossKey&&roomTag(bossKey)===null,'an unexplored boss room is not tagged on the map');state.visited.push(bossKey);assert(roomTag(bossKey).label==='Boss','once seen, the Thorn Warden room is tagged Boss');
 // 'boots' specifically, not 'ember'/'lens' — those two now live in the
 // mini-boss branch rooms (Round 26), where roomTag()'s Boss check takes
 // precedence over Relic regardless of collection state, so a boss room
 // with an uncollected relic still correctly shows "Boss", not "Relic".
 const relicKey=Object.keys(rooms).find(k=>rooms[k].relic&&rooms[k].relic[0]==='boots');
-assert(relicKey&&roomTag(relicKey).label==='Relic','a room with an uncollected relic (and no boss) is tagged Relic');
+state.visited.push(relicKey);assert(relicKey&&roomTag(relicKey).label==='Relic','a room with an uncollected relic (and no boss) is tagged Relic');
 state.relics=['boots'];
 assert.notEqual(roomTag(relicKey)&&roomTag(relicKey).label,'Relic','once the relic is collected it is no longer tagged as an available Relic');
 
@@ -646,7 +647,7 @@ assert.equal(enemyPlan(state.battle,state.battle.turn).kind,'guard','turn 2 of t
 assert.equal(state.battle.enemy.guard,0,'Block is NOT yet active during the turn that telegraphs it (matches every other enemy action resolving at end-of-turn, e.g. charge)');
 endTurn();
 assert.equal(state.battle.enemy.guard,5,'Block becomes active only once the guard turn has actually resolved, i.e. starting the following turn');
-const guardTelegraphLog=state.battle.logs[state.battle.logs.length-1];
+const guardTelegraphLog=state.battle.logs.filter(l=>l.startsWith('Rootguard')).at(-1)||'';
 assert(guardTelegraphLog.includes('starting next turn')||guardTelegraphLog.includes('next turn'),'the telegraph message explicitly says this Block applies starting next turn, not immediately (old message: "Rootguard: 5 enemy Block." read as already-active)');
 
 // --- Starter card protection now heals on load, not just on a fresh game
@@ -890,19 +891,24 @@ run(`
 newGame();state.playerLevel=30;
 const cloneNode=TALENT_BRANCHES.resolve.nodes.find(n=>n.id==='cloneCore');
 assert(cloneNode,'Mirror Array exists in the Resolve branch');
-assert.equal(cloneNode.tier,4,'it sits at tier 4, one past every existing tier');
+assert.equal(cloneNode.tier,7,'Round 40: on the 9-row grid it sits at row 7 (the old tier 4)');
 assert.deepEqual(cloneNode.req,['echo',1],'it requires Echo Protocol itself, not just a point threshold');
-assert.equal(TALENT_TIERS[4],15,'tier 4 has a real point threshold, not left undefined');
+assert.equal(TALENT_TIERS[7],16,'row 7 has a real point threshold, not left undefined');
 
 // Max out the full Resolve chain up to and including Echo, then confirm
 // Mirror Array is locked until Echo is actually learned, not just until
 // 15 points are spent some other way.
 state.talents={retainCore:1,plating:5,vitality:5,recovery:3};
-assert.equal(branchSpent('resolve'),14,'14 points spent so far, one short of the tier-4 threshold');
+assert.equal(branchSpent('resolve'),14,'14 points spent so far, short of the row-7 threshold');
 assert(!talentAvailable('resolve',cloneNode),'Mirror Array is not available yet (under the point threshold AND Echo not learned)');
 state.talents.echo=1;
-assert.equal(branchSpent('resolve'),15,'learning Echo brings total Resolve spend to exactly 15');
-assert(talentAvailable('resolve',cloneNode),'Mirror Array becomes available once Echo is learned and the tier-4 threshold is met');
+assert.equal(branchSpent('resolve'),15,'learning Echo brings total Resolve spend to 15');
+assert(!talentAvailable('resolve',cloneNode),'still one point short of the 16-point row');
+state.talents.bulwark=1;
+assert(talentAvailable('resolve',cloneNode),'Mirror Array becomes available once Echo is learned and the row-7 threshold (16) is met');
+delete state.talents.echo;
+assert(!talentAvailable('resolve',cloneNode),'16 points without Echo itself is not enough');
+state.talents.echo=1;
 state.talents.cloneCore=1;
 
 // --- The actual gameplay effect: cloning adds a real, playable duplicate
