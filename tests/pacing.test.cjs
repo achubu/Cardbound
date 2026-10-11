@@ -8,6 +8,9 @@ newGame(); state.playerLevel = 10; state.xp = 0; state.room = '1,5'; startBattle
 let b = state.battle; b.enemy.level = 3; b.enemy.elite = false; b.enemy.boss = false; b.enemy.hp = 0; winBattle();
 assert.equal(b.xpGain, Math.round(25 * .1)); assert.equal(state.xp, b.xpGain, 'a level-3 enemy gives a level-10 player 10% XP');
 newGame(); state.room = '1,5'; startBattle(roomSpawns(state.room).find(s => !s.boss).uid); b = state.battle; b.enemy.level = 1; b.enemy.hp = 0; winBattle(); assert.equal(b.xpGain, b.enemy.elite ? 40 : 25, 'same level: full XP');
+// Round 75 regression: the reward screen shows the XP and no phantom level-up line.
+for (const loot of ['potion', 'empty']) { newGame(); state.room = '1,5'; startBattle(roomSpawns(state.room).find(s => !s.boss).uid); const bb = state.battle; bb.enemy.hp = 0; winBattle(); bb.lootType = loot; bb.chestOpened = true; renderBattle();
+  const html = document.getElementById('battleModal').innerHTML; assert(/[+][0-9]+ XP/.test(html), loot + ': the reward screen shows the XP gained'); assert(!/maximum HP, [+]0 healing/.test(html), loot + ': no level-up line without a level-up'); }
 // Quiet rooms, events and waystones in Elaris and Vespera.
 for (const region of ['elaris', 'vespera']) {
   newGame(); state.seed = 99; state.region = region; configureRegion(region); state.room = '0,0'; state.visited = ['0,0']; ensureExplore();
@@ -28,9 +31,9 @@ for (const id of Object.keys(EVENTS)) {
 newGame(); state.region = 'elaris'; configureRegion('elaris'); state.room = '0,0'; state.visited = ['0,0']; ensureExplore(); const p = poiAt(QUIET_ROOMS.elaris[0]); openPOI(p); document.getElementById('event1').onclick(); assert(poiUsed(p), 'an event is used once chosen');
 // Round 73: Nexus Waypoints — discover by arriving, teleport from the map, across worlds.
 newGame(); renderWorld(); assert.deepEqual(nexusList().map(n => n.id), ['city:0,5'], 'the city start waypoint is discovered at once');
-nexusTravel('city', '5,6'); assert.equal(state.room, '0,5', 'cannot teleport to an undiscovered waypoint');
-state.room = '5,6'; renderWorld(); assert(nexusList().some(n => n.id === 'city:5,6'), 'arriving discovers the mid-world waypoint');
-nexusTravel('city', '0,5'); assert.equal(state.room, '0,5'); nexusTravel('city', '5,6'); assert.equal(state.room, '5,6', 'teleport both ways');
+nexusTravel('city', '4,5'); assert.equal(state.room, '0,5', 'cannot teleport to an undiscovered waypoint');
+state.room = '4,5'; renderWorld(); assert(nexusList().some(n => n.id === 'city:4,5'), 'arriving discovers the mid-world waypoint');
+nexusTravel('city', '0,5'); assert.equal(state.room, '0,5'); nexusTravel('city', '4,5'); assert.equal(state.room, '4,5', 'teleport both ways');
 showMap(); assert(document.querySelectorAll('.nexus-go').length >= 0);
 state.poi.nexus.push('elaris:7,6'); nexusTravel('elaris', '7,6'); assert.equal(activeRegion, 'elaris'); assert.equal(state.room, '7,6'); assert(state.visited.includes('7,6'), 'teleport into another world');
 nexusTravel('city', '0,5'); assert.equal(activeRegion, 'city'); assert.equal(state.room, '0,5'); assert(state.regionVisits.elaris.includes('7,6'), 'that world remembers where you have been');

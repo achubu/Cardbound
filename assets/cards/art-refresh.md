@@ -61,3 +61,13 @@ check every card level and side-card image reference, run the existing test
 suite, and verify live card rendering. Bump the card-data version in both
 `index.html` and `compendium.html` when artwork paths change. The two uploaded
 map files remain explicitly out of scope.
+
+## Chronospire artwork follow-up
+
+The sync from Claudebound `8ecd90b4` adds seven more card designs:
+Temporal Barrage, Delayed Bulwark, Clockwork Volley, Rewind Mend,
+Accelerate, Chrono Spike, and Future Sight. Review and replace their
+procedural illustrations in a later generation pass, with distinct art for
+levels 0–3 (28 additional illustrations). Keep their supplied PNGs until
+replacements are generated and verified. These are separate from the
+64 pending prompts above; no new images were generated during this sync.

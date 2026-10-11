@@ -2246,3 +2246,371 @@ Problem (simulated, all 16 builds, player level = enemy level, arriving with the
 - Teleporting into another world remembers where you'd been there.
 - These replace the Round 70 waystones. Older saves with an attuned waystone get both of that world's waypoints.
 - Updated tests/pacing.test.cjs, tests/exploration.test.cjs and the compendium.
+
+## Round 74: click a waypoint on the map to teleport
+
+- On the exploration map, every Nexus Waypoint you've discovered in the current world has a cyan glow and a "⟟ Teleport" badge. Click it, or focus it and press Enter or Space, to teleport there.
+- The waypoint you're standing at is labelled "⟟ Waypoint" and can't be clicked. Waypoints you haven't discovered aren't clickable, and nothing on the map teleports during a fight.
+- The "Nexus Waypoints" button list under the map stays, for waypoints in other worlds.
+- Map room panels now carry a `data-cells` attribute so map features can find their rooms.
+
+## Round 75: playtest fixes
+
+- **Fixed: phantom level-up line on victory screens.** Since Round 70, every potion or empty-chest victory showed "Level N! +0 maximum HP, +0 healing, and +0 talent point(s)" and hid the XP gained. A missing pair of brackets made the level-up line always appear. Victory screens now show "+N XP" (and say when it was reduced) and only mention a level-up when one happens.
+- **Fixed: card-choice chests didn't show XP at all.** They now show the same "+N XP" line.
+- **Fixed: Elaris and Vespera maps started at "34% complete".** Worlds with no relics counted that part as already done. The percentage now averages only the parts a world actually has.
+- **Simulation harness:** fights now start with the progress a player would have by then, meaning bosses already beaten (so side deck room grows) and the side cards picked up along the way. Before this, every simulated fight used a 2-card starter side deck.
+  - With that fixed, the Bloom Tyrant comes out at 22%, back in its target range, instead of 9%.
+  - Late Vespera is still a little too hard: level 26 regulars 28%, the Arc Sentinel 30%, the Tempest Colossus 21%.
+- New regression test in tests/pacing.test.cjs for the victory screen.
+
+## Round 76: build balance, elite rewards, city events, bounties, full-exploration reward
+
+- **Talent builds balanced late game.** Defensive and control talents gave flat amounts that couldn't keep up with Vespera's numbers. Reactive Plating, Bulwark Doctrine, Retaliation Coil, Siphon Edge, Counter Weave, Reflux and Weaken now scale with the world: ×1.3 in Elaris and ×1.6 in Vespera. Simulated with SEED=7, 20 fights per build, comparing the worst build before and after (✓ means the average is now in its target range):
+
+  | Fight | Average win rate | Worst builds before | Worst builds now |
+  |---|---|---|---|
+  | Vespera level 26 regulars | 28% → 50% ✓ | 0% | 5–25% |
+  | Arc Sentinel | 30% → 43% ✓ | 0% | 0–15% |
+  | Tempest Colossus | 21% → 33% ✓ | 0% | 0–25% |
+
+  - Resolve builds such as R·Retain went from 10–20% to 80–90%. Elemental is still strongest, but no longer the only build that works.
+  - Elaris checked: Bloom Tyrant 33%, Tidebound Warden 45%. The Gale Sovereign came out at 52%, so its health went up from 0.79 to 0.82.
+  - The talent descriptions mention the scaling.
+- **Elites are worth fighting.** An elite's loot chest always gives a card choice instead of an empty chest or a potion (crystal and Soulbound rolls still win). Elites drop 6 Shards instead of 3.
+- **City quiet rooms and events.** Overgrown Alley, Wisplight Row and Corrupted Passage have no enemies. Each holds a city event, three of these four per journey:
+  - Abandoned Terminal: hack it for Shards, or train your deck.
+  - Street Medic: pay for a heal, or get a free potion.
+  - Busted Vending Machine: kick it for potions, or pay for one.
+  - Lost Courier: return the parcel for a blessing and Shards, or open it for a chance at a side card.
+- **Bounties.** Every fight has one optional bounty, shown as a chip in the top bar that turns green when done or grey and crossed out when missed. Victory screens say whether you earned it. The four bounties:
+  - Swift: win within 4 turns (5 for elites, 7 for bosses).
+  - Untouched: lose no HP.
+  - Self-reliant: play no side card.
+  - Overkill: deal 15+ damage with one card.
+  - Rewards: +3 Shards, +5 for elites, +8 for bosses.
+- **Full exploration reward.** Visiting every room and finding every chest and relic in a world gives +20 Shards and a side card, once per world. The map shows a note with the goal.
+- New tests in tests/round76.test.cjs, and the compendium is updated.
+
+## Round 77: Chronospire, the fourth world, and the ⏳ Suspend mechanic
+
+**Suspend** comes from Magic: The Gathering.
+- A card marked ⏳ Suspend N can be played normally, or set aside for 0 energy with its own **⏳ Suspend · free** button.
+- A suspended card waits in the **⏳ Suspended** tray with a big countdown. The number drops by 1 each time you end your turn.
+- At 0 the card plays itself at the start of your turn, for free, with its charged bonus. For example, Temporal Barrage deals 14 + 8 = 22 damage.
+- You can have up to 3 suspended cards at once.
+
+Making it clear on screen:
+- Every Suspend card has a gold "⏳ SUSPEND N" badge. Its rules text spells out the whole rule, including when it fires and its exact charge.
+- The Suspend button says when the card will play itself and what bonus it gets.
+- The tray shows each card's countdown, when it fires and its charge. After a card fires, a green banner shows what it did, including the damage.
+- **How Suspend works** is a 3-step guide. It opens on arrival in Chronospire and the first time you hold a Suspend card, and the tray's button reopens it any time.
+- The combat log also records each suspend and each auto-play.
+
+The new cards (all Impermanent, with art from tools/generate_chrono_card_art.py):
+- Temporal Barrage, Suspend 2: 14 damage, charged +8.
+- Delayed Bulwark, Suspend 1: 9 Block, charged +6.
+- Clockwork Volley, Suspend 2: 3 hits of 4, charged +2 per hit.
+- Future Sight, Suspend 1: draw 2, charged +1 card.
+- Rewind Mend, Suspend 2: heal 7, charged +6. Exhausts.
+- Chrono Spike, Suspend 1: 7 piercing damage, charged +4.
+- Accelerate, costs 0: all suspended countdowns drop by 1, and anything that reaches 0 fires immediately.
+
+New enemy affliction:
+- ⟲ **Rewind** adds 1 turn to every suspended countdown. If nothing is suspended, you lose 1 Aether instead.
+- It can be stopped with Purifying Light or Null Anchor.
+
+**Chronospire**, a clockwork citadel where time is broken:
+- **Getting there:** a rift opens in the Eye of the Tempest after you beat the Tempest Colossus.
+- **Layout:** 34 rooms, all two-way, at levels 28–36.
+- **Enemies:** 8 new regular enemies (Gearhound, Tick Moth, Brass Sentry, Lag Wraith, Hourglass Heron, Pendulum Stag, Rust Wisp, Cog Mauler). They reuse existing sprites, recoloured in brass.
+- **Bosses:**
+  - The Clockwarden, a mini-boss at level 30.
+  - The Paradox Twin, a mini-boss at level 33.
+  - The Chronarch, the final boss at level 36. It switches element every 4 turns.
+- **Points of interest:**
+  - Nexus Waypoints at Chronospire Gate and Hourglass Hall.
+  - Three quiet rooms with four new events: Clockmaker's Bench, Paradox Pool, Giant Hourglass and Echoing Corridor.
+  - Five Chrono Inscription lore entries, two crystal chests and a merchant.
+- **On arrival** you get Temporal Barrage and Chrono Spike, plus the Suspend guide.
+- **Other numbers:** talents scale ×1.9 here, and side cards drop from all tiers. Card rewards come from the Suspend cards plus late-game staples.
+
+Balance (simulated with SEED=7, 10–12 fights per build; the bot suspends every Suspend card that costs 2 or more):
+- Average win rates: regulars 98% at level 28 and 56% at level 35; mini-bosses 48% and 49%; the Chronarch 30%. All are inside their target ranges.
+- If the bot never uses Suspend, level 35 regulars drop to 9% and the Chronarch to 1%, so this world is built around the mechanic.
+
+Fixed along the way:
+- Elaris, Vespera and Chronospire enemies were invisible in the small battle portrait, because their sprites had no size there.
+- The full-exploration map note read "every room, chest here". It now reads "Find every room and hidden chest in this world".
+
+Tests: tests/chronospire.test.cjs. The sims now cover Chronospire, and NO_SUSPEND=1 turns the bot's Suspend use off.
+
+## Round 78: Diagonal shortcuts in Neon Aftermath and Elaris
+
+- New `assets/diagonals.js`. Wherever the old path bent around a corner
+  (A → B → C), A and C now also get a direct diagonal road. The old route still
+  works. Neon Aftermath gains 25 shortcuts and Elaris gains 14. Boss rooms and
+  the joined districts don't get them.
+- Rooms with a diagonal road use the new 8-way roundabout art
+  (`assets/environment/diagonal/neon-8way.webp` and `jungle-8way.webp`).
+- Walk into a corner along the painted diagonal road to cross, or click or tap
+  the gold corner label (↗ ↖ ↘ ↙ plus the room name). You arrive at the
+  matching corner of the next room. The exploration map draws the diagonal
+  links.
+- Enemy levels and room distances are unchanged; they are still measured on the
+  original grid.
+- The industrial foundry maps are saved in `assets/environment/industrial/` for
+  a later world.
+
+## Round 79: Purpose-made roundabout art for Neon Aftermath diagonals
+
+- Each Neon Aftermath diagonal room now shows a painting with **only its open
+  corner roads**. There are 12 variants in `assets/environment/diagonal/city/`,
+  named by their open corners (e.g. `ne-sw.webp`). They were built by combining
+  the quadrants of two matching paintings: one with all four diagonals, one with
+  none.
+- Collision follows the painting: you walk on the roads, sidewalks and
+  roundabout, never on rooftops. The walkable area is a 4-pixel trace stored in
+  `diagonals.js` (`DIAG_MASK_SRC`).
+- You arrive a few steps in along the diagonal you came from. Hidden chests
+  whose usual spot is now inside a building move to the nearest pavement.
+- Tests: the diagonal connectivity check now flood-fills from the centre to
+  each open corner. The chest walkability check accounts for chest relocation.
+- Elaris still uses the earlier jungle art until its matching paintings arrive.
+- Removed the unused squashed `neon-8way.webp`.
+
+## Round 80: Purpose-made jungle crossroads for Elaris diagonals
+
+- Elaris diagonal rooms now use the new jungle crossroads paintings. There are 9
+  variants in `assets/environment/diagonal/elaris/`, built the same way as the
+  city ones: each shows only the paths that are open.
+- Collision follows the dirt paths, the stepping stones and the clearing around
+  the spring. Moss-covered stone curbs and the planted blocks are solid.
+- In painted rooms, the walkable area is exactly the traced paths, with no extra
+  body-width margin, because jungle paths are only about 45px wide.
+- Reaching the room edge near an open corner now counts as taking that diagonal.
+  The painted jungle paths don't always meet the exact corner pixel.
+- Arrival points sit clear of the corner zones, so you can't bounce straight
+  back. Tap-to-move only steps between grid points when the ground in between
+  is open, so it routes around thin wall tips.
+- Corner labels always show their direction arrow.
+- Tests: an arrival must be walkable and outside any corner zone. Corner
+  reachability uses the corner zones.
+- Removed the unused `jungle-8way.webp`.
+
+## Round 81: Cleaner exploration map
+
+- Removed the oval door markers on unexplored paths. A short dotted line
+  leading off a room now marks a path you haven't taken yet.
+
+## Round 82: The exploration map is a giant city
+
+- New `assets/map-terrain.js`. The map paints each explored room's own ground
+  art onto the grid, edge to edge: street blocks, the diagonal roundabouts, the
+  joined-district paintings and the jungle clearings. Explored Neon Aftermath
+  reads as one continuous city, and Elaris as one jungle.
+- Unexplored rooms stay dark (fog of war). Your current room has a gold glow.
+- Room names are now compact floating tags over their tile, and connection
+  lines are thin dotted guides.
+- Map cells are 16:10 (176×110) so the art keeps its shape. Room tiles are
+  cached after their first draw, and paintings that are still loading redraw
+  the map when they finish.
+- New `tests/map-terrain.test.cjs`.
+
+## Round 83: Map frontier and seamless joins
+
+- **Seamless joins:** where two explored rooms touch, each tile's edge is
+  mirrored a short way into its neighbour and cross-faded. The pictures blend
+  instead of meeting at a hard line, and because the edges are mirrored, every
+  road stays exactly where it is and runs straight through the join.
+- **Frontier:** edges facing unexplored ground are softly dimmed and blurred
+  into the fog, with no outline. A blurred, darkened copy of the explored land
+  sits underneath, and the sharp art fades out over it near the edges. The
+  frontier shape is gently irregular and continuous around corners.
+- **Fog:** unexplored ground is dark with a faint survey grid.
+- Room name tags are 40% opaque, and the connection lines 30% opaque, so more of the art shows through.
+- **Closed roads:** two explored rooms side by side with no path between them
+  get a small striped barricade where their roads would meet. This happens in
+  Vespera and Chronospire.
+
+## Round 84: Smaller world enemies, danger-coloured names
+
+- New `assets/enemy-labels.js`. Enemies in the world are drawn 20% smaller in
+  every world, and their name bubbles are 30% smaller.
+- An enemy whose level is 2 or more above yours has its name shown in red. It
+  goes back to normal once you catch up.
+- New `tests/enemy-labels.test.cjs`.
+
+## Round 85: Sharper map with zoom
+
+- The map terrain is drawn at the screen's real pixel size, device pixel ratio
+  included, so it's crisp on high-DPI screens. It redraws at the new resolution
+  whenever you zoom. Room art is cached at 400×250, half the room's size.
+- The terrain is never stretched. It's always drawn at 16:10 per room, and the
+  map no longer widens to fill the panel when only a few rooms are explored.
+- **Zoom:** the − / + buttons, a percentage readout and "Fit" sit above the
+  map. Ctrl or ⌘ + scroll and trackpad pinch zoom around the cursor, and
+  two-finger pinch works on touch screens. The range is 30% to 300%, and the
+  zoom is remembered between openings.
+- Very large zooms are capped at about 16 megapixels so mobile Safari can still
+  draw them.
+
+## Round 86: New Crown Mainframe and Prism Bazaar art
+
+- Crown Mainframe District (Neon Aftermath, 4 rooms) and Prism Bazaar
+  (Vespera, 2 rooms) now use the new crossroads paintings: violet crystal
+  citadel for the Mainframe, garden bazaar for Prism Bazaar.
+- Each room in a district gets the crossroads. Neighbouring rooms are mirror
+  images, so every road and kerb meets its twin exactly at the shared edge and
+  the district reads as one continuous place.
+- Collision follows the painted roads: the east–west and north–south streets
+  with their pavements, plus the roundabout. Buildings, towers, ponds and trees
+  are solid. Hidden chests in these rooms use the pavement fallback spots.
+- The 8-way versions are saved as `mainframe-8way.webp` and
+  `promenade-8way.webp`, ready for when those districts get diagonals.
+
+## Round 87: Painted Neon Aftermath streets and a new Crown Mainframe
+
+- **Crown Mainframe District** has a new single 2×2 painting: violet citadels,
+  waterfalls and crystal roundabouts. It's calibrated onto the district's
+  streets band by band, like the other districts, and replaces the mirrored
+  crossroads from Round 86.
+- **Plain city rooms are now painted.** The 13 Neon Aftermath rooms with no
+  diagonal roads and no district use quarters of two new neon street paintings
+  (`assets/environment/city-blocks/neon-a.webp` and `neon-b.webp`): 8
+  different crossroads, chosen per room. Each quarter's roads are stretched onto
+  the room's existing street corridor, so exits, spawns and points of interest
+  stay where they were. Only the four corner blocks are solid; the old loose
+  street props are gone with the procedural texture.
+- New `assets/city-paintings.js`. The exploration map picks the paintings up
+  automatically and redraws once they've loaded.
+- New `tests/city-paintings.test.cjs`.
+
+## Round 88: Painted Elaris rooms and the organic-path engine
+
+- **Painted Elaris rooms:** the 7 plain Elaris rooms (no diagonals, not in a
+  district) now use quarters of the new jungle crossroads painting
+  (`city-blocks/elaris-a.webp`). The sandy roads are fitted onto the existing
+  path corridor, so exits, spawns and points of interest are unchanged.
+  `city-paintings.js` now takes a painting list per world.
+- **Organic-path engine** (`assets/organic-paths.js`): a district can be one
+  free-form landscape with winding paths. `tools/build_organic_area.py` traces
+  the dirt paths into a walk mask and registers it in `assets/organic-areas.js`.
+  Inside such a district:
+  - you walk only on the paths;
+  - each exit sits where a path meets that edge, and its label is drawn there;
+  - you arrive at that door when you come in;
+  - patrols and chests move onto the paths;
+  - tapping a door label walks you there.
+  The engine is off until a fitted painting is registered; it's covered by
+  `tests/organic-paths.test.cjs` with a synthetic winding-path district.
+- Saved for later: the first organic Elaris draft and the medieval town map
+  (`assets/environment/later/`).
+
+## Round 89: Emerald Expanse becomes an organic jungle
+
+- Elaris's Emerald Expanse district (4 rooms) is now one free-form jungle
+  painting with winding sandy paths, wooden bridges, waterfalls and temple
+  ruins, the first district on the organic-path engine.
+- You walk only on the paths and bridges. The three exits (west to Drowned
+  Thicket, south to Stormlit Marsh, south to Galeward Shallows) sit where the
+  paths leave the painting, with their labels there, and you arrive on the path
+  when you come in. Patrols are placed on the paths.
+- "Path closed" signs are hidden in organic districts; the painting shows where
+  the paths end.
+- `build_organic_area.py` accepts several path colours and `--clear` boxes, used
+  here to drop a sunbeam the tracer mistook for path.
+- Tests: the real painting's three doors must all connect along the paths, and
+  every patrol must stand on a path.
+
+## Round 90: Five more organic districts
+
+- Five more districts are now organic paintings with winding paths:
+  - **Crown Mainframe District** (Neon Aftermath): rain-soaked neon walkways.
+  - **Sunpetal Wilds** (Elaris): sunflower-meadow trails.
+  - **Stormglass Reach** (Vespera): storm-cliff flagstones.
+  - **Prism Bazaar** (Vespera): cobbled market lanes.
+  - **Stormforge Foundry** (Vespera): catwalks over molten channels.
+  Six districts in total use the engine now. Wide two-room paintings keep their
+  own 3.2:1 shape.
+- **Doors on room boundaries:** a door can now sit on a path that leaves the
+  district right on the line between two of its rooms. The search may reach up
+  to 220 px into a neighbouring district room that has no exit of its own on
+  that side. Leaving through such a door hands you to the room that owns the
+  exit, and arriving puts you in whichever room the landing spot is in.
+- **`build_organic_area.py`:**
+  - `--close N` to seal seams and bridge joints;
+  - edge-padded closing, so paths keep touching the border;
+  - keeps only the largest connected path network.
+  Shaded or lightning-lit catwalk colours and bridge colours were added per
+  painting.
+- Tests: all six real paintings must have every door on a path, landing points
+  on a path, all doors connected, and every patrol on a path.
+
+## Round 91: Neon Aftermath becomes one continuous painted city
+
+- **The map:** the first world is rebuilt on your six district paintings, laid
+  out as a 3×2 map. Each painting covers 3×3 rooms, so the city is 54 rooms
+  (it was 42):
+  - Harbor Ruins (start)
+  - Neon Square
+  - Crystal Citadel
+  - Overgrown Park
+  - Lantern Quarter
+  - Junkyard Lots
+- **Streets:** `tools/build_world_map.py` stitches the paintings and traces
+  every street, plaza and park path into one connected walk mask (8 px
+  cells, in `assets/neon-world.js`).
+  - The tracer had to bridge Neon Square's puddled plaza and the Junkyard
+    arena, and a few hand-placed links join the plaza steps, the temple
+    courtyards and the junkyard spur.
+  - It drops the pools and waterfalls the tracer mistook for paving, and
+    slivers where a street only grazes a room's edge.
+  - `tools/build_world_rooms.py` turns the result into rooms, with exits
+    wherever a street crosses a room edge.
+- **Each room is an 800×500 window onto the map.** You walk only on the
+  painted streets. Leave by any street that crosses the room's edge and you
+  arrive at the matching spot in the next room, so walking feels continuous.
+  The edge you came in by stays shut briefly so you can't bounce straight
+  back.
+- **Exit labels** sit on each side's main street, and that street must
+  continue on the far side. Tapping a label walks you there.
+- **Placement:** patrols, chests, relics, points of interest and the merchant
+  are all placed on the streets. You're snapped onto the nearest street if a
+  fixed arrival point (portal, waypoint, defeat) lands inside a building.
+- **Progression:**
+  - The Thorn Warden is at the Warden's Crown, the Crystal Citadel's
+    hilltop arena. It also holds the portal to Elaris.
+  - The Crown Sentinel guards the Scrap Fortress in the Junkyard (with a
+    crystal chest).
+  - The Lunar Enforcer guards the Moon Temple in the Lantern Quarter (with
+    the Ember Sigil and a crystal chest).
+  - Briarstep Boots are in the park's Statue Garden, the Moon Lens on the
+    Billboard Steps above Neon Square, and the Upgrade Crystal on the
+    Lighthouse Pier.
+- **Gates:**
+  - The Ember Sigil opens the Crystal Citadel.
+  - Briarstep Boots open the Junkyard.
+  - The Moon Lens opens the park's lake-bridge shortcut into the Lantern
+    Quarter.
+  - Enemy zones (1–8) follow walking distance from the Afterlight Refuge.
+  - Nexus Waypoints are at the Refuge and in Neon Square.
+- **Retired for the city:** the old Crown Mainframe district, the diagonal
+  roundabouts and the painted crossroads. That art stays in use in Elaris.
+- **Old saves:** they keep the character, deck, levels, relics and boss kills;
+  Neon Aftermath exploration restarts at the Refuge. Imports migrate the same
+  way.
+- **Map:** the exploration map shows the painted city seamlessly, without
+  barricades or cross-fades.
+- **Engine and fixes:**
+  - The organic-path engine now supports whole-world maps, caches walkable
+    spots per room, and keeps patrols at least 125 px from doors.
+  - Bug fix: crossing between rooms of the same district now works anywhere
+    along the seam, not only near the middle. This affected organic districts.
+- **Tests:**
+  - New: `tests/neon-world.test.cjs` (two-way doors, continuous streets,
+    gates and progression, everything on the streets, the portal) and
+    `tests/neon-world-migrate.test.cjs`.
+  - The harness now loads the page scripts in page order and skips duplicate
+    loads.
+  - City room references in the older tests were moved to the new layout.
