@@ -31,3 +31,33 @@ the superseded PNG emblems; they do not produce the current WebP illustrations.
 
 This refresh does not change map files, movement, card effects, progression,
 or saved-game data.
+
+## Follow-up: finish generation when available
+
+The artwork pass is **not complete**. Keep the 64 pending entries in
+`tools/art-refresh/prompts.json` open until their generated files have been
+visually reviewed, installed, and verified in the game. Do not mark reused
+stage artwork as a newly generated illustration.
+
+Resume in this order to cover more card designs before spending the next
+allowance on upgrades:
+
+1. Generate base art for the 23 untouched designs: Rootbind, Tidecall,
+   Verdant Pact, Tempest Surge, Storm Battery, Mirrorguard, Prism Lance,
+   Arc Bulwark, Lunar Edict, Phantom Resonance, Sovereign Gale, Tidebound,
+   Static, and all ten side-deck cards.
+2. Complete the five missing stages for partially refreshed cards:
+   Static Shield 1, Thornlash 3, and Wildfire 0, 2, 3.
+3. Generate the remaining 36 upgrade illustrations for the twelve newly
+   refreshed upgradeable cards.
+
+Reuse completed illustrations only as temporary fallbacks. Preserve the
+existing art for designs still waiting; never point the game at pending files.
+Use the original pixel-art reference and the saved prompts. Stop the batch
+on the first usage-limit response, retaining all successful outputs.
+
+After each batch, update completion statuses and the shared art resolvers,
+check every card level and side-card image reference, run the existing test
+suite, and verify live card rendering. Bump the card-data version in both
+`index.html` and `compendium.html` when artwork paths change. The two uploaded
+map files remain explicitly out of scope.
