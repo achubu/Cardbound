@@ -153,8 +153,10 @@
       "id": "staticShield",
       "level": 1,
       "path": "assets/cards/level1/staticShield.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A round translucent cyan energy shield intercepts blue electrical bolts, a gloved arm holds its technological emitter in a neon corridor.\nUpgrade level 1: awakened magic, additional illuminated inlays and brighter energy arcs; preserve the subject identity.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A round translucent cyan energy shield intercepts blue electrical bolts, a gloved arm holds its technological emitter in a neon corridor.\nUpgrade level 1: awakened magic, additional illuminated inlays and brighter energy arcs; preserve the subject identity.\nUse the supplied existing Static Shield base illustration as the edit target. Evolve it into level 1 while retaining the same crisp pixel scale, technological corridor, gauntleted arm, emitter and cyan disk identity. Add illuminated emitter inlays and a second narrow energy rim, a stronger electrical impact. No text. Square.",
+      "status": "complete",
+      "completed_batch": "2026-10-11",
+      "reference": "assets/cards/level0/staticShield.webp"
     },
     {
       "id": "staticShield",
@@ -195,15 +197,18 @@
       "id": "thornlash",
       "level": 3,
       "path": "assets/cards/level3/thornlash.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A living thorn-covered emerald vine lashes in a sweeping arc from a gauntleted hand through an ancient overgrown technological ruin.\nUpgrade level 3, ultimate form: magnificent gold and crystal embellishments, spectacular controlled magical corona, strongest heroic action; preserve subject identity and readable silhouette.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A living thorn-covered emerald vine lashes in a sweeping arc from a gauntleted hand through an ancient overgrown technological ruin.\nUpgrade level 3, ultimate form: magnificent gold and crystal embellishments, spectacular controlled magical corona, strongest heroic action; preserve subject identity and readable silhouette.\nEdit the supplied Thornlash level-2 illustration into its ultimate level-3 form. Preserve the pixel-art medium, gauntleted hand, thorn vine and overgrown technological ruin. Evolve the weapon with intertwined golden vine filaments, larger emerald crystal thorns, an extra sweeping vine arc and a controlled magical corona. Keep the action readable and the subject identity clear. Square; no text.",
+      "status": "complete",
+      "completed_batch": "2026-10-11",
+      "reference": "assets/cards/level2/thornlash.webp"
     },
     {
       "id": "wildfire",
       "level": 0,
       "path": "assets/cards/level0/wildfire.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A roaring orange firestorm surges through an abandoned forest shrine, embers and tongues of fire curling around carved stone.\nBase level: restrained magic, sturdy simple equipment, focused single action.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A roaring orange firestorm surges through an abandoned forest shrine, embers and tongues of fire curling around carved stone.\nBase level: restrained magic, sturdy simple equipment, focused single action.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "wildfire",
@@ -217,161 +222,167 @@
       "level": 2,
       "path": "assets/cards/level2/wildfire.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A roaring orange firestorm surges through an abandoned forest shrine, embers and tongues of fire curling around carved stone.\nUpgrade level 2: evolved ornate equipment, layered luminous crystal details, expanding magical effects and powerful dramatic action.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "wildfire",
       "level": 3,
       "path": "assets/cards/level3/wildfire.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A roaring orange firestorm surges through an abandoned forest shrine, embers and tongues of fire curling around carved stone.\nUpgrade level 3, ultimate form: magnificent gold and crystal embellishments, spectacular controlled magical corona, strongest heroic action; preserve subject identity and readable silhouette.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "rootbind",
       "level": 0,
       "path": "assets/cards/level0/rootbind.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: Massive twisting roots erupt from a mossy ruin floor to bind a broken mechanical sentinel, luminous green sap and leaves.\nBase level: restrained magic, sturdy simple equipment, focused single action.",
-      "status": "pending"
+      "prompt": "Create a square full-bleed trading-card illustration for Cardbound: Rootbind, base level. Massive twisting roots erupt from a mossy ruin floor to bind a broken mechanical sentinel, luminous green sap and leaves. Detailed pixel art with visible crisp pixel clusters, stepped edges, richly shaded metal and bark, dark navy shadows, emerald magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Restrained base-level magic and a focused single action. Centered subject readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "rootbind",
       "level": 1,
       "path": "assets/cards/level1/rootbind.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: Massive twisting roots erupt from a mossy ruin floor to bind a broken mechanical sentinel, luminous green sap and leaves.\nUpgrade level 1: awakened magic, additional illuminated inlays and brighter energy arcs; preserve the subject identity.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "rootbind",
       "level": 2,
       "path": "assets/cards/level2/rootbind.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: Massive twisting roots erupt from a mossy ruin floor to bind a broken mechanical sentinel, luminous green sap and leaves.\nUpgrade level 2: evolved ornate equipment, layered luminous crystal details, expanding magical effects and powerful dramatic action.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "rootbind",
       "level": 3,
       "path": "assets/cards/level3/rootbind.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: Massive twisting roots erupt from a mossy ruin floor to bind a broken mechanical sentinel, luminous green sap and leaves.\nUpgrade level 3, ultimate form: magnificent gold and crystal embellishments, spectacular controlled magical corona, strongest heroic action; preserve subject identity and readable silhouette.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "tidecall",
       "level": 0,
       "path": "assets/cards/level0/tidecall.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An armored spellcaster's hand summons a spiraling turquoise tidal wave around an ancient stone water shrine.\nBase level: restrained magic, sturdy simple equipment, focused single action.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An armored spellcaster's hand summons a spiraling turquoise tidal wave around an ancient stone water shrine.\nBase level: restrained magic, sturdy simple equipment, focused single action.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "tidecall",
       "level": 1,
       "path": "assets/cards/level1/tidecall.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An armored spellcaster's hand summons a spiraling turquoise tidal wave around an ancient stone water shrine.\nUpgrade level 1: awakened magic, additional illuminated inlays and brighter energy arcs; preserve the subject identity.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "tidecall",
       "level": 2,
       "path": "assets/cards/level2/tidecall.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An armored spellcaster's hand summons a spiraling turquoise tidal wave around an ancient stone water shrine.\nUpgrade level 2: evolved ornate equipment, layered luminous crystal details, expanding magical effects and powerful dramatic action.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "tidecall",
       "level": 3,
       "path": "assets/cards/level3/tidecall.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An armored spellcaster's hand summons a spiraling turquoise tidal wave around an ancient stone water shrine.\nUpgrade level 3, ultimate form: magnificent gold and crystal embellishments, spectacular controlled magical corona, strongest heroic action; preserve subject identity and readable silhouette.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "verdantPact",
       "level": 0,
       "path": "assets/cards/level0/verdantPact.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: Two gauntleted hands cradle a luminous rose and faceted green life crystal, curling vines link the hands in an overgrown mystical shrine.\nBase level: restrained magic, sturdy simple equipment, focused single action.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: Two gauntleted hands cradle a luminous rose and faceted green life crystal, curling vines link the hands in an overgrown mystical shrine.\nBase level: restrained magic, sturdy simple equipment, focused single action.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "verdantPact",
       "level": 1,
       "path": "assets/cards/level1/verdantPact.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: Two gauntleted hands cradle a luminous rose and faceted green life crystal, curling vines link the hands in an overgrown mystical shrine.\nUpgrade level 1: awakened magic, additional illuminated inlays and brighter energy arcs; preserve the subject identity.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "verdantPact",
       "level": 2,
       "path": "assets/cards/level2/verdantPact.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: Two gauntleted hands cradle a luminous rose and faceted green life crystal, curling vines link the hands in an overgrown mystical shrine.\nUpgrade level 2: evolved ornate equipment, layered luminous crystal details, expanding magical effects and powerful dramatic action.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "verdantPact",
       "level": 3,
       "path": "assets/cards/level3/verdantPact.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: Two gauntleted hands cradle a luminous rose and faceted green life crystal, curling vines link the hands in an overgrown mystical shrine.\nUpgrade level 3, ultimate form: magnificent gold and crystal embellishments, spectacular controlled magical corona, strongest heroic action; preserve subject identity and readable silhouette.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "tempestSurge",
       "level": 0,
       "path": "assets/cards/level0/tempestSurge.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A turbulent turquoise cyclone threaded with gold lightning erupts above an ancient futuristic storm altar.\nBase level: restrained magic, sturdy simple equipment, focused single action.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A turbulent turquoise cyclone threaded with gold lightning erupts above an ancient futuristic storm altar.\nBase level: restrained magic, sturdy simple equipment, focused single action.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "tempestSurge",
       "level": 1,
       "path": "assets/cards/level1/tempestSurge.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A turbulent turquoise cyclone threaded with gold lightning erupts above an ancient futuristic storm altar.\nUpgrade level 1: awakened magic, additional illuminated inlays and brighter energy arcs; preserve the subject identity.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "tempestSurge",
       "level": 2,
       "path": "assets/cards/level2/tempestSurge.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A turbulent turquoise cyclone threaded with gold lightning erupts above an ancient futuristic storm altar.\nUpgrade level 2: evolved ornate equipment, layered luminous crystal details, expanding magical effects and powerful dramatic action.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "tempestSurge",
       "level": 3,
       "path": "assets/cards/level3/tempestSurge.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A turbulent turquoise cyclone threaded with gold lightning erupts above an ancient futuristic storm altar.\nUpgrade level 3, ultimate form: magnificent gold and crystal embellishments, spectacular controlled magical corona, strongest heroic action; preserve subject identity and readable silhouette.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "stormBattery",
       "level": 0,
       "path": "assets/cards/level0/stormBattery.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An ornate metallic energy accumulator with cyan crystal cells storing a captured lightning bolt in a storm-lit laboratory.\nBase level: restrained magic, sturdy simple equipment, focused single action.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An ornate metallic energy accumulator with cyan crystal cells storing a captured lightning bolt in a storm-lit laboratory.\nBase level: restrained magic, sturdy simple equipment, focused single action.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "stormBattery",
       "level": 1,
       "path": "assets/cards/level1/stormBattery.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An ornate metallic energy accumulator with cyan crystal cells storing a captured lightning bolt in a storm-lit laboratory.\nUpgrade level 1: awakened magic, additional illuminated inlays and brighter energy arcs; preserve the subject identity.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "stormBattery",
       "level": 2,
       "path": "assets/cards/level2/stormBattery.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An ornate metallic energy accumulator with cyan crystal cells storing a captured lightning bolt in a storm-lit laboratory.\nUpgrade level 2: evolved ornate equipment, layered luminous crystal details, expanding magical effects and powerful dramatic action.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "stormBattery",
       "level": 3,
       "path": "assets/cards/level3/stormBattery.webp",
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An ornate metallic energy accumulator with cyan crystal cells storing a captured lightning bolt in a storm-lit laboratory.\nUpgrade level 3, ultimate form: magnificent gold and crystal embellishments, spectacular controlled magical corona, strongest heroic action; preserve subject identity and readable silhouette.",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "mirrorguard",
       "level": 0,
       "path": "assets/cards/level0/mirrorguard.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An angular polished silver shield reflects an incoming violet energy beam, prismatic shards of light in a ruined palace.\nBase level: restrained magic, sturdy simple equipment, focused single action.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An angular polished silver shield reflects an incoming violet energy beam, prismatic shards of light in a ruined palace.\nBase level: restrained magic, sturdy simple equipment, focused single action.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "mirrorguard",
@@ -398,8 +409,9 @@
       "id": "prismLance",
       "level": 0,
       "path": "assets/cards/level0/prismLance.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A long crystalline lance thrust diagonally through the air, splitting white light into a brilliant spectral trail inside a dark ancient citadel.\nBase level: restrained magic, sturdy simple equipment, focused single action.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A long crystalline lance thrust diagonally through the air, splitting white light into a brilliant spectral trail inside a dark ancient citadel.\nBase level: restrained magic, sturdy simple equipment, focused single action.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "prismLance",
@@ -426,8 +438,9 @@
       "id": "arcBulwark",
       "level": 0,
       "path": "assets/cards/level0/arcBulwark.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A massive amethyst and steel tower shield encloses a living lightning core, electrical arcs form a protective wall in a dark storm citadel.\nBase level: restrained magic, sturdy simple equipment, focused single action.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A massive amethyst and steel tower shield encloses a living lightning core, electrical arcs form a protective wall in a dark storm citadel.\nBase level: restrained magic, sturdy simple equipment, focused single action.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "arcBulwark",
@@ -454,8 +467,9 @@
       "id": "lunarEdict",
       "level": 0,
       "path": "assets/cards/level0/lunarEdict.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An elegant silver crescent sword raised beneath a vast moon above a futuristic ruined cathedral, pale blue lunar magic and rippling water.\nBase level: restrained magic, sturdy simple equipment, focused single action.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An elegant silver crescent sword raised beneath a vast moon above a futuristic ruined cathedral, pale blue lunar magic and rippling water.\nBase level: restrained magic, sturdy simple equipment, focused single action.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "lunarEdict",
@@ -482,8 +496,9 @@
       "id": "phantomResonance",
       "level": 0,
       "path": "assets/cards/level0/phantomResonance.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A mysterious armored spectral figure releases concentric violet and cyan sonic shockwaves in a haunted technological cathedral.\nBase level: restrained magic, sturdy simple equipment, focused single action.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A mysterious armored spectral figure releases concentric violet and cyan sonic shockwaves in a haunted technological cathedral.\nBase level: restrained magic, sturdy simple equipment, focused single action.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "phantomResonance",
@@ -510,8 +525,9 @@
       "id": "sovereignGale",
       "level": 0,
       "path": "assets/cards/level0/sovereignGale.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A regal emerald and gold wind crown floats above a powerful swirling turquoise gale in a skyborne ruined temple.\nBase level: restrained magic, sturdy simple equipment, focused single action.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A regal emerald and gold wind crown floats above a powerful swirling turquoise gale in a skyborne ruined temple.\nBase level: restrained magic, sturdy simple equipment, focused single action.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "sovereignGale",
@@ -538,8 +554,9 @@
       "id": "tidebound",
       "level": 0,
       "path": "assets/cards/level0/tidebound.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An ornate blue and silver shield rises from a curling ocean wave, luminous water enfolds its crystal crest amid ancient coastal ruins.\nBase level: restrained magic, sturdy simple equipment, focused single action.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An ornate blue and silver shield rises from a curling ocean wave, luminous water enfolds its crystal crest amid ancient coastal ruins.\nBase level: restrained magic, sturdy simple equipment, focused single action.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "tidebound",
@@ -566,78 +583,89 @@
       "id": "static",
       "level": 0,
       "path": "assets/cards/level0/static.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A shattered arcane monitor and cracked crystal conduit overwhelmed by jagged magenta and cyan electrical interference, corrupted pixel fragments in a dark technological chamber.\nStandalone illustration.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A shattered arcane monitor and cracked crystal conduit overwhelmed by jagged magenta and cyan electrical interference, corrupted pixel fragments in a dark technological chamber.\nStandalone illustration.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "purify",
       "level": null,
       "path": "assets/cards/side/purify.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A gauntleted hand channels brilliant ivory and gold cleansing light, dissolving violet curse chains into motes in a dark shrine.\nStandalone illustration.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A gauntleted hand channels brilliant ivory and gold cleansing light, dissolving violet curse chains into motes in a dark shrine.\nStandalone illustration.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "dispel",
       "level": null,
       "path": "assets/cards/side/dispel.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A brilliant pink and silver lance pierces and shatters a violet magical barrier in an ancient technological temple.\nStandalone illustration.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A brilliant pink and silver lance pierces and shatters a violet magical barrier in an ancient technological temple.\nStandalone illustration.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "aegis",
       "level": null,
       "path": "assets/cards/side/aegis.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A blue steel and gold knightly shield projects a protective honeycomb ward in a dark neon stone corridor.\nStandalone illustration.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A blue steel and gold knightly shield projects a protective honeycomb ward in a dark neon stone corridor.\nStandalone illustration.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "anchor",
       "level": null,
       "path": "assets/cards/side/anchor.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A heavy ornate silver anchor sunk into cracked stone, violet energy chains bind a swirling curse into a still point in a dark shrine.\nStandalone illustration.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A heavy ornate silver anchor sunk into cracked stone, violet energy chains bind a swirling curse into a still point in a dark shrine.\nStandalone illustration.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "restore",
       "level": null,
       "path": "assets/cards/side/restore.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A luminous pink flower blooms from emerald crystals held in a healer's hands, green healing light washes over damaged armor in an overgrown shrine.\nStandalone illustration.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A luminous pink flower blooms from emerald crystals held in a healer's hands, green healing light washes over damaged armor in an overgrown shrine.\nStandalone illustration.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "ground",
       "level": null,
       "path": "assets/cards/side/ground.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An elaborate copper grounding rod planted in stone conducts cyan lightning safely into glowing earth runes in a stormy ruin.\nStandalone illustration.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An elaborate copper grounding rod planted in stone conducts cyan lightning safely into glowing earth runes in a stormy ruin.\nStandalone illustration.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "mirror",
       "level": null,
       "path": "assets/cards/side/mirror.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A floating ornate silver mirror sigil returns a violet beam toward its source, reflected light and crystal facets in a dark mystical hall.\nStandalone illustration.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: A floating ornate silver mirror sigil returns a violet beam toward its source, reflected light and crystal facets in a dark mystical hall.\nStandalone illustration.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "phase",
       "level": null,
       "path": "assets/cards/side/phase.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An armored adventurer becomes translucent while stepping through a cyan and violet veil as a blade passes harmlessly through, ruined neon hall.\nStandalone illustration.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An armored adventurer becomes translucent while stepping through a cyan and violet veil as a blade passes harmlessly through, ruined neon hall.\nStandalone illustration.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "overflow",
       "level": null,
       "path": "assets/cards/side/overflow.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An ornate aether vessel overflows with golden white and violet star energy, luminous streams coil around floating crystals in a mystical laboratory.\nStandalone illustration.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An ornate aether vessel overflows with golden white and violet star energy, luminous streams coil around floating crystals in a mystical laboratory.\nStandalone illustration.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     },
     {
       "id": "stasis",
       "level": null,
       "path": "assets/cards/side/stasis.webp",
-      "prompt": "Square full-bleed trading-card illustration for Cardbound. Match the reference's elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An ornate golden hourglass suspends time in a cyan crystalline sphere, frozen weapon fragments and motes hang still in an ancient futuristic shrine.\nStandalone illustration.",
-      "status": "pending"
+      "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail pixel art with visible crisp pixel clusters, stepped edges, carefully shaded materials, dark navy shadows, jewel-tone magic, cyan/violet rim lighting and atmospheric depth. Rich scene illustration rather than flat symbol. Focal subject centered, readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI. Style reference only; create the requested distinct subject.\nSubject: An ornate golden hourglass suspends time in a cyan crystalline sphere, frozen weapon fragments and motes hang still in an ancient futuristic shrine.\nStandalone illustration.\nDeliberate 16-bit game pixel art with visibly stepped edges and clustered pixel shading throughout. No smooth 3D rendering.",
+      "status": "complete",
+      "completed_batch": "2026-10-11"
     }
   ]
 }

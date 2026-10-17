@@ -29,7 +29,7 @@ let stat=c=>({...defs[c.id],...defs[c.id].tiers[c.level]});
 function rules(c){const d=stat(c),p=[];if(d.damage)p.push('Deal '+d.damage+' damage.'+(d.pierce?' Pierce: ignores enemy armor.':''));if(d.block)p.push('Gain '+d.block+' block.');if(d.heal)p.push('Heal '+d.heal+' HP.');if(d.draw)p.push('Draw '+d.draw+'.');if(d.energy)p.push('Gain '+d.energy+' energy.');if(d.exhaust)p.push('Exhaust.');return p.join(' ')}
 // New illustrations use compact WebP assets; the original collection keeps
 // its existing filenames. One resolver serves battles, decks and compendium.
-const refreshedCardArt={arcJab:[0,1,2,3],breachSpike:[0,1,2,3],bulwarkBash:[0,1,2,3],chainLightning:[0,1,2,3],overclock:[0,1,2,3],staticShield:[0,2,3],thornlash:[0,1,2],wildfire:[1]};
+const refreshedCardArt={"arcJab":[0,1,2,3],"breachSpike":[0,1,2,3],"bulwarkBash":[0,1,2,3],"chainLightning":[0,1,2,3],"overclock":[0,1,2,3],"staticShield":[0,1,2,3],"thornlash":[0,1,2,3],"wildfire":[0,1,2,3],"rootbind":[0,1,2,3],"tidecall":[0,1,2,3],"verdantPact":[0,1,2,3],"tempestSurge":[0,1,2,3],"stormBattery":[0,1,2,3],"mirrorguard":[0],"prismLance":[0],"arcBulwark":[0],"lunarEdict":[0],"phantomResonance":[0],"sovereignGale":[0],"tidebound":[0],"static":[0]};
 function cardArtPath(id,level){
  const stages=refreshedCardArt[id];
  // Until the remaining illustrations are ready, use the nearest completed

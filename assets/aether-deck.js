@@ -139,7 +139,8 @@ function fillSideDeck(s = state) { // equip unequipped side cards into newly ope
   for (const c of s.side.pool) { if (s.side.deck.length >= sideDeckMax(s)) break; if (!s.side.deck.includes(c.uid) && s.side.deck.map(u => s.side.pool.find(x => x.uid === u)).filter(x => x && x.id === c.id).length < SIDE_COPIES) s.side.deck.push(c.uid); }
 }
 function sidePoolFor(region = regionIndex()) { return Object.keys(SIDE_CARDS).filter(id => SIDE_CARDS[id].tier <= region); }
-function sideArtPath(id) { return 'assets/cards/side/' + id + '.png'; }
+const refreshedSideArt=["purify", "dispel", "aegis", "anchor", "restore", "ground", "mirror", "phase", "overflow", "stasis"];
+function sideArtPath(id) { return 'assets/cards/side/' + id + (refreshedSideArt.includes(id) ? '.webp' : '.png'); }
 
 function ensureSide(s = state) {
   if (!s) return;
