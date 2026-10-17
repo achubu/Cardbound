@@ -11,26 +11,23 @@ dark navy shadows, jewel-tone magic, and atmospheric cyan/violet lighting.
 
 ## Current status — 2026-10-17
 
-**70 unique illustrations complete; 21 original prompts remain pending.**
-The latest batch adds 17 upgrades, completing the four-stage sets for Wildfire,
-Rootbind, Tidecall, Verdant Pact, Tempest Surge, and Storm Battery.
-The previous 26-image batch includes base replacements and all ten side cards.
-Thirteen upgradeable cards now have complete four-stage sets.
+**93 unique illustrations complete; all original prompts are finished.**
+The latest batch adds 21 upgrades, completing the four-stage sets for
+Mirrorguard, Prism Lance, Arc Bulwark, Lunar Edict, Phantom Resonance,
+Sovereign Gale, and Tidebound. Twenty upgradeable cards now have complete
+four-stage sets, and all ten side cards have finished artwork. It also adds
+Chronospire base artwork for Temporal Barrage and Clockwork Volley.
 
-Shared artwork resolvers use the completed stages in battles, decks, and the
-compendium. Pending stages continue to reuse their completed base illustration.
+Shared artwork resolvers use every completed stage in battles, decks, and the
+compendium.
 
 ## Remaining work
 
-1. Generate levels 1–3 for Mirrorguard, Prism Lance, Arc Bulwark, Lunar Edict,
-   Phantom Resonance, Sovereign Gale, and Tidebound (21 illustrations).
-2. Replace all four stages of the seven Chronospire designs: Temporal Barrage,
-   Delayed Bulwark, Clockwork Volley, Rewind Mend, Accelerate, Chrono Spike,
-   and Future Sight (28 illustrations, outside the original prompt manifest).
+1. Generate base artwork for Delayed Bulwark, Rewind Mend, Accelerate,
+   Chrono Spike, and Future Sight.
+2. Generate levels 1–3 for all seven Chronospire designs.
 
-**49 illustrations remain in total**, including Chronospire.
-Generation hit its usage limit before Mirrorguard level 1; the reported reset
-is October 18, 2026 at 10:59 AM EDT.
+**26 illustrations remain in total**, all for Chronospire.
 
 Stop on the first usage-limit response and retain every successful output.
 After each batch, visually review the images, update the completion statuses
