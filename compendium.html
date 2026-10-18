@@ -247,6 +247,8 @@
          expansion.js / encounter-depth.js depend on the game's own globals
          and crashed here, silently dropping 10 of the 23 cards. -->
     <script src="assets/cards.js?v=art-20261017b" onerror="console.warn('assets/cards.js not found')"></script>
+<link rel="stylesheet" href="assets/concepts/compendium.css?v=concepts-20261018">
+<script defer src="assets/concepts/compendium.js?v=concepts-20261018"></script>
 </head>
 <body>
 
@@ -257,6 +259,7 @@
 
     <nav>
         <a href="#cards">Cards</a>
+        <a href="#concepts">Card Concepts · Review</a>
         <a href="#side">Side deck</a>
         <a href="#bosses">Bosses</a>
         <a href="#monsters">Bestiary</a>
@@ -269,6 +272,12 @@
             <h2>Player Cards &amp; Upgrades</h2>
             <p class="lead">Every card has four forms: Level 0 plus three upgrades. Tap a level to see its artwork and what it does.</p>
             <div class="grid" id="card-grid"></div>
+        </section>
+
+        <section id="concepts">
+            <h2>Card Concepts · Review Lab</h2>
+            <div id="concept-lab">Loading text-only concepts…</div>
+            <noscript>Enable JavaScript to browse the concept cards.</noscript>
         </section>
 
         <section id="side">
@@ -296,7 +305,7 @@
     </div>
 
     <footer>
-        <p>Cardbound Compendium &mdash; card and enemy data is read live from the game.</p>
+        <p>Cardbound Compendium &mdash; playable card and enemy data is read live from the game. The Concepts Lab contains separate, unimplemented design proposals.</p>
     </footer>
 
     <script>

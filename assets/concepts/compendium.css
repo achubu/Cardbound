@@ -1,0 +1,14 @@
+nav{overflow-x:auto;justify-content:flex-start}nav a{flex:0 0 auto}
+#concepts{scroll-margin-top:6rem}#concept-lab a{color:#9bd5ff;overflow-wrap:anywhere}
+.concept-notice{border-left:3px solid #bca0ff;padding:1rem;background:#242238}
+#concept-lab summary{cursor:pointer;font-weight:600;padding:.6rem 0}
+#concept-lab details{margin:.8rem 0}#concept-lab details section{border-top:1px solid #687188;padding-top:.5rem}
+.concept-controls{display:flex;flex-wrap:wrap;gap:1rem;margin-top:1.5rem}
+.concept-controls label{display:flex;flex:1 1 180px;flex-direction:column;gap:.4rem}
+.concept-controls input,.concept-controls select{box-sizing:border-box;width:100%;min-height:44px;padding:.7rem;border:1px solid #687188;border-radius:6px;background:#171b29;color:#e0e6ed;font:inherit}
+#concept-lab :focus-visible{outline:3px solid #a6ddff;outline-offset:3px}
+.concept-grid{align-items:start}.concept-card{border-top:3px solid #bca0ff;min-width:0}
+.concept-status{color:#cbb6ff;font-size:.75rem;font-weight:700;letter-spacing:.08em}
+.concept-meta{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;font-size:.9rem}
+.concept-rules{font-size:1.05rem;min-height:6rem}
+@media(max-width:420px){.concept-grid{grid-template-columns:minmax(0,1fr)}}

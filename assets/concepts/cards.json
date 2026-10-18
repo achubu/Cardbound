@@ -1,0 +1,629 @@
+{
+  "version": 1,
+  "status": "review-only",
+  "title": "Card Concepts Lab",
+  "summary": "16 text-only concepts across 8 mechanics. Not playable. All numbers are provisional and require future combat balancing.",
+  "selection": "A curated fit assessment, not an objective all-time ranking: favor meaningful choices, readable turns and bounded combinations in small decks against telegraphed attacks.",
+  "baseline": "Level 0 reference: Ember Blade costs 1 for 6 damage; Crystal Ward costs 1 for 5 Block; Sundering Arc costs 2 for 13 damage; Winter Bastion costs 2 for 11 Block. Proposed cards cost energy, not Aether. Existing Block expiry, Armor, hand limits and encounter rules still apply unless stated.",
+  "boundaries": [
+    "Review only: no registration in card definitions, side cards, rewards, shops, starters or saves.",
+    "No graphics. Every level is a text-only proposal.",
+    "Preserves Pitch/Aether, Retain, Suspend and Prismatic Counter.",
+    "No new creature board, land system, reaction stack or unlimited extra turns."
+  ],
+  "sources": {
+    "mtg": {
+      "title": "Magic: flexibility and replay",
+      "url": "https://magic.wizards.com/en/news/making-magic/looking-back-part-1"
+    },
+    "cycling": {
+      "title": "Magic: Cycling Cycling",
+      "url": "https://magic.wizards.com/en/news/making-magic/cycling-cycling-2002-09-16"
+    },
+    "scry": {
+      "title": "Magic Origins: Scry",
+      "url": "https://magic.wizards.com/en/news/feature/magic-origins-mechanics"
+    },
+    "ratings": {
+      "title": "Magic player research: Scry ratings",
+      "url": "https://magic.wizards.com/en/news/making-magic/storm-scale-mirrodin-and-scars-mirrodin-blocks-2018-06-11"
+    },
+    "choice": {
+      "title": "Hearthstone: Power of the Wild",
+      "url": "https://hearthstone.blizzard.com/en-gb/cards/69593-power-of-the-wild/"
+    },
+    "combo": {
+      "title": "Hearthstone: Edwin VanCleef",
+      "url": "https://hearthstone.blizzard.com/en-us/cards/306-edwin-vancleef/"
+    },
+    "arsenal": {
+      "title": "Flesh and Blood: Arsenal",
+      "url": "https://rules.fabtcg.com/en/cr/03-zones/#33-arsenal"
+    },
+    "discover": {
+      "title": "Hearthstone: Discover introduction",
+      "url": "https://news.blizzard.com/en-us/article/19932699/join-the-league-of-explorers-on-november-12"
+    }
+  },
+  "mechanics": [
+    {
+      "id": "amplify",
+      "name": "Amplify",
+      "inspiration": "Magic — Kicker",
+      "priority": "Start here",
+      "rule": "Pay the extra energy once when playing this card to receive its bonus.",
+      "fit": "Flexible spending competes with banking unused energy as Aether.",
+      "risk": "Power Boost modifies the base effect only, not the bonus.",
+      "sources": [
+        "mtg"
+      ]
+    },
+    {
+      "id": "cycle",
+      "name": "Cycle",
+      "inspiration": "Magic — Cycling",
+      "priority": "Start here",
+      "rule": "Instead of playing, pay 1 energy, discard this card and draw 1. Only one Cycle per turn across all cards.",
+      "fit": "Situational cards can improve a poor hand without free card advantage.",
+      "risk": "No play, mastery, combo or Aether triggers. The cycled card cannot enter a reshuffle until the replacement draw finishes; draw nothing if no other card is available.",
+      "sources": [
+        "cycling"
+      ]
+    },
+    {
+      "id": "foresee",
+      "name": "Foresee",
+      "inspiration": "Magic — Scry",
+      "priority": "Start here",
+      "rule": "Look at up to the top 2 cards of your draw pile. Put any on the bottom and the others on top in your chosen order. Do not reshuffle to inspect more.",
+      "fit": "Plans a counter or defense for already telegraphed enemy attacks.",
+      "risk": "No extra draw or new enemy information; small decks make selection powerful.",
+      "sources": [
+        "scry",
+        "ratings"
+      ]
+    },
+    {
+      "id": "choice",
+      "name": "Choose one",
+      "inspiration": "Hearthstone — Choose One",
+      "priority": "Start here",
+      "rule": "Choose exactly one printed mode when playing this card. Only that mode resolves.",
+      "fit": "Respond to the enemy intent with one flexible deck slot.",
+      "risk": "Both modes must remain weaker than dedicated cards; cloning never grants both modes.",
+      "sources": [
+        "choice"
+      ]
+    },
+    {
+      "id": "combo",
+      "name": "Follow-through",
+      "inspiration": "Hearthstone — Combo",
+      "priority": "Second pass",
+      "rule": "Gain the bonus if the immediately previous card manually played this turn meets the printed condition. Any other manual main-deck play breaks the sequence.",
+      "fit": "Makes the order of attack and defense matter.",
+      "risk": "Automatic Suspend effects, side cards, pitching, Cycle and temporary tools neither start nor advance a sequence. Bonuses never scale with unlimited card counts.",
+      "sources": [
+        "combo"
+      ]
+    },
+    {
+      "id": "reserve",
+      "name": "Prepared",
+      "inspiration": "Flesh and Blood — Arsenal, adapted through Retain",
+      "priority": "Second pass",
+      "rule": "Uses the existing Retain talent and its single card slot. Gain the bonus only if this exact card was retained from your previous turn; playing consumes Prepared.",
+      "fit": "Gives the existing talent situational payoffs without adding a reserve zone.",
+      "risk": "No free Retain, no multi-turn stacking. Clones start unprepared and Suspend is not Retain.",
+      "sources": [
+        "arsenal"
+      ]
+    },
+    {
+      "id": "reprise",
+      "name": "Reprise",
+      "inspiration": "Magic — Flashback",
+      "priority": "Explore later",
+      "rule": "On your turn, pay 2 energy to play this from discard once per encounter across all copies of this concept ID, then exhaust it.",
+      "fit": "Reuses a known answer at a premium, at the cost of losing it from rotation.",
+      "risk": "Never retrieve pitched or exhausted cards. Disable if fewer than four non-exhausted, non-pitched main-deck cards would remain. Copies share the once-per-encounter limit.",
+      "sources": [
+        "mtg"
+      ]
+    },
+    {
+      "id": "discover",
+      "name": "Improvise",
+      "inspiration": "Hearthstone — Discover, adapted to a fixed menu",
+      "priority": "Explore later",
+      "rule": "Choose one printed temporary tool and add it to hand. Each tool costs 1 energy and vanishes when played, discarded or at encounter end. Source exhausts.",
+      "fit": "A fixed three-option menu supports tactical choice without a random collection-wide pool.",
+      "risk": "Tools cannot be pitched, retained, cloned, suspended, boosted or Reprised. No mastery, Aether, on-play talent or sequence triggers; tools do not count toward the four-card minimum. Respect the existing hand limit.",
+      "sources": [
+        "discover"
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "id": "concept_cinderCapacitor",
+      "name": "Cinder Capacitor",
+      "mechanic": "amplify",
+      "kind": "Attack",
+      "region": "Neon Aftermath",
+      "cost": 1,
+      "status": "review-only",
+      "art": null,
+      "tiers": [
+        {
+          "level": 0,
+          "rules": "Deal 5 damage. Amplify +1 energy: deal 6 additional damage in the same hit."
+        },
+        {
+          "level": 1,
+          "rules": "Deal 7 damage. Amplify +1 energy: deal 7 additional damage in the same hit."
+        },
+        {
+          "level": 2,
+          "rules": "Deal 9 damage. Amplify +1 energy: deal 8 additional damage in the same hit."
+        },
+        {
+          "level": 3,
+          "rules": "Deal 12 damage. Amplify +1 energy: deal 10 additional damage in the same hit."
+        }
+      ],
+      "decision": "Spend energy now or bank Aether for utility.",
+      "tradeoff": "At level 0, two energy gives 11 damage versus Sundering Arc’s 13."
+    },
+    {
+      "id": "concept_crystalAegis",
+      "name": "Crystal Aegis",
+      "mechanic": "amplify",
+      "kind": "Defense",
+      "region": "Elaris",
+      "cost": 1,
+      "status": "review-only",
+      "art": null,
+      "tiers": [
+        {
+          "level": 0,
+          "rules": "Gain 4 Block. Amplify +1 energy: gain 5 additional Block."
+        },
+        {
+          "level": 1,
+          "rules": "Gain 6 Block. Amplify +1 energy: gain 6 additional Block."
+        },
+        {
+          "level": 2,
+          "rules": "Gain 8 Block. Amplify +1 energy: gain 7 additional Block."
+        },
+        {
+          "level": 3,
+          "rules": "Gain 10 Block. Amplify +1 energy: gain 9 additional Block."
+        }
+      ],
+      "decision": "Scale defense to the incoming hit.",
+      "tradeoff": "At level 0, two energy gives 9 Block versus Winter Bastion’s 11."
+    },
+    {
+      "id": "concept_shiftingEdge",
+      "name": "Shifting Edge",
+      "mechanic": "cycle",
+      "kind": "Attack",
+      "region": "Neon Aftermath",
+      "cost": 1,
+      "status": "review-only",
+      "art": null,
+      "tiers": [
+        {
+          "level": 0,
+          "rules": "Deal 5 damage. Cycle 1: instead pay 1 energy, discard this and draw 1."
+        },
+        {
+          "level": 1,
+          "rules": "Deal 7 damage. Cycle 1: instead pay 1 energy, discard this and draw 1."
+        },
+        {
+          "level": 2,
+          "rules": "Deal 9 damage. Cycle 1: instead pay 1 energy, discard this and draw 1."
+        },
+        {
+          "level": 3,
+          "rules": "Deal 12 damage. Cycle 1: instead pay 1 energy, discard this and draw 1."
+        }
+      ],
+      "decision": "Use damage or search for an answer.",
+      "tradeoff": "Damage trails Ember Blade; Cycle costs energy and is capped."
+    },
+    {
+      "id": "concept_mistVeil",
+      "name": "Mist Veil",
+      "mechanic": "cycle",
+      "kind": "Defense",
+      "region": "Elaris",
+      "cost": 1,
+      "status": "review-only",
+      "art": null,
+      "tiers": [
+        {
+          "level": 0,
+          "rules": "Gain 4 Block. Cycle 1: instead pay 1 energy, discard this and draw 1."
+        },
+        {
+          "level": 1,
+          "rules": "Gain 6 Block. Cycle 1: instead pay 1 energy, discard this and draw 1."
+        },
+        {
+          "level": 2,
+          "rules": "Gain 8 Block. Cycle 1: instead pay 1 energy, discard this and draw 1."
+        },
+        {
+          "level": 3,
+          "rules": "Gain 10 Block. Cycle 1: instead pay 1 energy, discard this and draw 1."
+        }
+      ],
+      "decision": "Trade unused defense for a different card on setup turns.",
+      "tradeoff": "Cannot create free draw loops or Aether."
+    },
+    {
+      "id": "concept_starChart",
+      "name": "Star Chart",
+      "mechanic": "foresee",
+      "kind": "Skill",
+      "region": "Neon Aftermath",
+      "cost": 1,
+      "status": "review-only",
+      "art": null,
+      "tiers": [
+        {
+          "level": 0,
+          "rules": "Gain 2 Block. Foresee 2."
+        },
+        {
+          "level": 1,
+          "rules": "Gain 3 Block. Foresee 2."
+        },
+        {
+          "level": 2,
+          "rules": "Gain 4 Block. Foresee 2."
+        },
+        {
+          "level": 3,
+          "rules": "Gain 5 Block. Foresee 2."
+        }
+      ],
+      "decision": "Arrange tomorrow’s defense or counter.",
+      "tradeoff": "Less immediate Block than Crystal Ward; does not draw."
+    },
+    {
+      "id": "concept_horizonNeedle",
+      "name": "Horizon Needle",
+      "mechanic": "foresee",
+      "kind": "Attack",
+      "region": "Vespera",
+      "cost": 1,
+      "status": "review-only",
+      "art": null,
+      "tiers": [
+        {
+          "level": 0,
+          "rules": "Deal 3 damage. Foresee 2."
+        },
+        {
+          "level": 1,
+          "rules": "Deal 5 damage. Foresee 2."
+        },
+        {
+          "level": 2,
+          "rules": "Deal 7 damage. Foresee 2."
+        },
+        {
+          "level": 3,
+          "rules": "Deal 9 damage. Foresee 2."
+        }
+      ],
+      "decision": "Trade damage now for a better next hand.",
+      "tradeoff": "Ember Blade deals 6/9/12/16; selection is the compensation."
+    },
+    {
+      "id": "concept_duskProtocol",
+      "name": "Dusk Protocol",
+      "mechanic": "choice",
+      "kind": "Skill",
+      "region": "Neon Aftermath",
+      "cost": 1,
+      "status": "review-only",
+      "art": null,
+      "tiers": [
+        {
+          "level": 0,
+          "rules": "Choose one: deal 5 damage; or gain 4 Block."
+        },
+        {
+          "level": 1,
+          "rules": "Choose one: deal 7 damage; or gain 6 Block."
+        },
+        {
+          "level": 2,
+          "rules": "Choose one: deal 9 damage; or gain 8 Block."
+        },
+        {
+          "level": 3,
+          "rules": "Choose one: deal 12 damage; or gain 10 Block."
+        }
+      ],
+      "decision": "Match the card to the current intent.",
+      "tradeoff": "Each mode is weaker than a dedicated card."
+    },
+    {
+      "id": "concept_tidalDecision",
+      "name": "Tidal Decision",
+      "mechanic": "choice",
+      "kind": "Skill",
+      "region": "Elaris",
+      "cost": 1,
+      "status": "review-only",
+      "art": null,
+      "tiers": [
+        {
+          "level": 0,
+          "rules": "Choose one: gain 7 Block; or draw 1 card. Exhaust."
+        },
+        {
+          "level": 1,
+          "rules": "Choose one: gain 9 Block; or draw 1 card. Exhaust."
+        },
+        {
+          "level": 2,
+          "rules": "Choose one: gain 12 Block; or draw 1 card. Exhaust."
+        },
+        {
+          "level": 3,
+          "rules": "Choose one: gain 15 Block; or draw 1 card. Exhaust."
+        }
+      ],
+      "decision": "Choose protection or another answer.",
+      "tradeoff": "Exhaust applies to either mode; no repeatable draw engine."
+    },
+    {
+      "id": "concept_wardbreakerStep",
+      "name": "Wardbreaker Step",
+      "mechanic": "combo",
+      "kind": "Attack",
+      "region": "Vespera",
+      "cost": 1,
+      "status": "review-only",
+      "art": null,
+      "tiers": [
+        {
+          "level": 0,
+          "rules": "Deal 4 damage. If the previous manually played main-deck card this turn had kind Defense, deal 4 additional damage in the same hit."
+        },
+        {
+          "level": 1,
+          "rules": "Deal 6 damage. If the previous manually played main-deck card this turn had kind Defense, deal 5 additional damage in the same hit."
+        },
+        {
+          "level": 2,
+          "rules": "Deal 8 damage. If the previous manually played main-deck card this turn had kind Defense, deal 6 additional damage in the same hit."
+        },
+        {
+          "level": 3,
+          "rules": "Deal 10 damage. If the previous manually played main-deck card this turn had kind Defense, deal 8 additional damage in the same hit."
+        }
+      ],
+      "decision": "Defend before attacking.",
+      "tradeoff": "A Skill granting Block does not qualify; payoff is bounded."
+    },
+    {
+      "id": "concept_afterimageWard",
+      "name": "Afterimage Ward",
+      "mechanic": "combo",
+      "kind": "Defense",
+      "region": "Vespera",
+      "cost": 1,
+      "status": "review-only",
+      "art": null,
+      "tiers": [
+        {
+          "level": 0,
+          "rules": "Gain 3 Block. If the previous manually played main-deck card this turn had an Attack kind (including elemental and Soulbound Attack), gain 4 additional Block."
+        },
+        {
+          "level": 1,
+          "rules": "Gain 5 Block. If the previous manually played main-deck card this turn had an Attack kind (including elemental and Soulbound Attack), gain 4 additional Block."
+        },
+        {
+          "level": 2,
+          "rules": "Gain 6 Block. If the previous manually played main-deck card this turn had an Attack kind (including elemental and Soulbound Attack), gain 5 additional Block."
+        },
+        {
+          "level": 3,
+          "rules": "Gain 8 Block. If the previous manually played main-deck card this turn had an Attack kind (including elemental and Soulbound Attack), gain 6 additional Block."
+        }
+      ],
+      "decision": "Attack first while saving energy to protect yourself.",
+      "tradeoff": "Automatic effects and side cards cannot enable it."
+    },
+    {
+      "id": "concept_patientBastion",
+      "name": "Patient Bastion",
+      "mechanic": "reserve",
+      "kind": "Defense",
+      "region": "Elaris",
+      "cost": 1,
+      "status": "review-only",
+      "art": null,
+      "tiers": [
+        {
+          "level": 0,
+          "rules": "Gain 4 Block. Prepared: gain 4 additional Block if retained from your previous turn."
+        },
+        {
+          "level": 1,
+          "rules": "Gain 6 Block. Prepared: gain 5 additional Block if retained from your previous turn."
+        },
+        {
+          "level": 2,
+          "rules": "Gain 8 Block. Prepared: gain 6 additional Block if retained from your previous turn."
+        },
+        {
+          "level": 3,
+          "rules": "Gain 10 Block. Prepared: gain 8 additional Block if retained from your previous turn."
+        }
+      ],
+      "decision": "Save for a visible upcoming heavy attack.",
+      "tradeoff": "Requires the existing Retain talent and competes for its one slot."
+    },
+    {
+      "id": "concept_ambushPrism",
+      "name": "Ambush Prism",
+      "mechanic": "reserve",
+      "kind": "Attack",
+      "region": "Vespera",
+      "cost": 1,
+      "status": "review-only",
+      "art": null,
+      "tiers": [
+        {
+          "level": 0,
+          "rules": "Deal 5 damage. Prepared: deal 4 additional damage in the same hit if retained from your previous turn."
+        },
+        {
+          "level": 1,
+          "rules": "Deal 7 damage. Prepared: deal 5 additional damage in the same hit if retained from your previous turn."
+        },
+        {
+          "level": 2,
+          "rules": "Deal 9 damage. Prepared: deal 6 additional damage in the same hit if retained from your previous turn."
+        },
+        {
+          "level": 3,
+          "rules": "Deal 12 damage. Prepared: deal 7 additional damage in the same hit if retained from your previous turn."
+        }
+      ],
+      "decision": "Hold through a guard turn, then attack.",
+      "tradeoff": "Competes with retaining Prismatic Counter; no accumulating bonus."
+    },
+    {
+      "id": "concept_echoBrand",
+      "name": "Echo Brand",
+      "mechanic": "reprise",
+      "kind": "Attack",
+      "region": "Chronospire",
+      "cost": 1,
+      "status": "review-only",
+      "art": null,
+      "tiers": [
+        {
+          "level": 0,
+          "rules": "Deal 5 damage. Reprise 2: play this from discard for 2 energy once per encounter across all copies, then exhaust it."
+        },
+        {
+          "level": 1,
+          "rules": "Deal 7 damage. Reprise 2: play this from discard for 2 energy once per encounter across all copies, then exhaust it."
+        },
+        {
+          "level": 2,
+          "rules": "Deal 9 damage. Reprise 2: play this from discard for 2 energy once per encounter across all copies, then exhaust it."
+        },
+        {
+          "level": 3,
+          "rules": "Deal 12 damage. Reprise 2: play this from discard for 2 energy once per encounter across all copies, then exhaust it."
+        }
+      ],
+      "decision": "Reuse known damage at a premium.",
+      "tradeoff": "Cannot recur pitched/exhausted cards; leave four other circulating cards."
+    },
+    {
+      "id": "concept_memoryRampart",
+      "name": "Memory Rampart",
+      "mechanic": "reprise",
+      "kind": "Defense",
+      "region": "Chronospire",
+      "cost": 1,
+      "status": "review-only",
+      "art": null,
+      "tiers": [
+        {
+          "level": 0,
+          "rules": "Gain 4 Block. Reprise 2: play this from discard for 2 energy once per encounter across all copies, then exhaust it."
+        },
+        {
+          "level": 1,
+          "rules": "Gain 6 Block. Reprise 2: play this from discard for 2 energy once per encounter across all copies, then exhaust it."
+        },
+        {
+          "level": 2,
+          "rules": "Gain 8 Block. Reprise 2: play this from discard for 2 energy once per encounter across all copies, then exhaust it."
+        },
+        {
+          "level": 3,
+          "rules": "Gain 10 Block. Reprise 2: play this from discard for 2 energy once per encounter across all copies, then exhaust it."
+        }
+      ],
+      "decision": "Buy emergency defense from discard.",
+      "tradeoff": "Two energy for a one-energy effect; observe the four-card minimum."
+    },
+    {
+      "id": "concept_fieldFabricator",
+      "name": "Field Fabricator",
+      "mechanic": "discover",
+      "kind": "Skill",
+      "region": "Vespera",
+      "cost": 1,
+      "status": "review-only",
+      "art": null,
+      "tiers": [
+        {
+          "level": 0,
+          "rules": "Improvise: choose a temporary 1-energy tool — Bolt (deal 7 damage), Plate (gain 6 Block), or Lens (Foresee 2, then draw 1). Exhaust this source card."
+        },
+        {
+          "level": 1,
+          "rules": "Improvise: choose a temporary 1-energy tool — Bolt (deal 9 damage), Plate (gain 8 Block), or Lens (Foresee 2, then draw 1). Exhaust this source card."
+        },
+        {
+          "level": 2,
+          "rules": "Improvise: choose a temporary 1-energy tool — Bolt (deal 12 damage), Plate (gain 10 Block), or Lens (Foresee 2, then draw 1). Exhaust this source card."
+        },
+        {
+          "level": 3,
+          "rules": "Improvise: choose a temporary 1-energy tool — Bolt (deal 15 damage), Plate (gain 13 Block), or Lens (Foresee 2, then draw 1). Exhaust this source card."
+        }
+      ],
+      "decision": "Choose and budget for the right tool.",
+      "tradeoff": "Two energy total, source exhausts, tool vanishes; no recursive generation."
+    },
+    {
+      "id": "concept_riftToolkit",
+      "name": "Rift Toolkit",
+      "mechanic": "discover",
+      "kind": "Skill",
+      "region": "Chronospire",
+      "cost": 1,
+      "status": "review-only",
+      "art": null,
+      "tiers": [
+        {
+          "level": 0,
+          "rules": "Improvise: choose a temporary 1-energy tool — Spike (deal 6 damage ignoring Armor, not Block), Screen (gain 6 Block), or Lens (Foresee 2, then draw 1). Exhaust this source card."
+        },
+        {
+          "level": 1,
+          "rules": "Improvise: choose a temporary 1-energy tool — Spike (deal 8 damage ignoring Armor, not Block), Screen (gain 8 Block), or Lens (Foresee 2, then draw 1). Exhaust this source card."
+        },
+        {
+          "level": 2,
+          "rules": "Improvise: choose a temporary 1-energy tool — Spike (deal 10 damage ignoring Armor, not Block), Screen (gain 10 Block), or Lens (Foresee 2, then draw 1). Exhaust this source card."
+        },
+        {
+          "level": 3,
+          "rules": "Improvise: choose a temporary 1-energy tool — Spike (deal 13 damage ignoring Armor, not Block), Screen (gain 13 Block), or Lens (Foresee 2, then draw 1). Exhaust this source card."
+        }
+      ],
+      "decision": "Choose penetration, defense or planning.",
+      "tradeoff": "Does not cancel elemental attacks or replace Prismatic Counter."
+    }
+  ]
+}
