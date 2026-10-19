@@ -9,25 +9,23 @@ tracked in `tools/art-refresh/prompts.json`. The original style reference is
 `assets/cards/level0/strike.png`: crisp pixel clusters, richly shaded materials,
 dark navy shadows, jewel-tone magic, and atmospheric cyan/violet lighting.
 
-## Current status — 2026-10-17
+## Current status — 2026-10-18
 
-**93 unique illustrations complete; all original prompts are finished.**
-The latest batch adds 21 upgrades, completing the four-stage sets for
-Mirrorguard, Prism Lance, Arc Bulwark, Lunar Edict, Phantom Resonance,
-Sovereign Gale, and Tidebound. Twenty upgradeable cards now have complete
-four-stage sets, and all ten side cards have finished artwork. It also adds
-Chronospire base artwork for Temporal Barrage and Clockwork Volley.
+**117 unique illustrations complete.** The latest batch adds 24 Chronospire
+illustrations: five missing base scenes and nineteen upgrade stages. Temporal
+Barrage, Delayed Bulwark, Clockwork Volley, Future Sight, Rewind Mend, and
+Chrono Spike now have complete four-stage sets. Accelerate has its base and
+level-1 artwork. Twenty-six upgradeable cards now have complete four-stage
+sets, and all ten side cards have finished artwork.
 
 Shared artwork resolvers use every completed stage in battles, decks, and the
 compendium.
 
 ## Remaining work
 
-1. Generate base artwork for Delayed Bulwark, Rewind Mend, Accelerate,
-   Chrono Spike, and Future Sight.
-2. Generate levels 1–3 for all seven Chronospire designs.
+Generate Accelerate levels 2 and 3 after the image-generation allowance resets.
 
-**26 illustrations remain in total**, all for Chronospire.
+**2 illustrations remain in total**, both for Chronospire.
 
 Stop on the first usage-limit response and retain every successful output.
 After each batch, visually review the images, update the completion statuses

@@ -703,6 +703,198 @@
       "prompt": "Square full-bleed trading-card illustration for Cardbound. Use Cardbound's established elaborate high-detail 16-bit pixel art with visible crisp pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone magic, and atmospheric cyan/violet lighting. Rich scene illustration rather than a flat icon or smooth 3D render. Focal subject centered and readable at thumbnail size. No words, letters, numbers, watermarks, card borders or UI.\nSubject: Three compact brass clockwork crossbows fire in perfect sequence, bolts tracing cyan and violet arcs between turning gears and pendulums in a dark mechanical gallery inside the Chronospire.\nBase level: sturdy simple machinery, restrained amber highlights, and focused action.",
       "status": "complete",
       "completed_batch": "2026-10-17"
+    },
+    {
+        "id": "delayedBulwark",
+        "level": 0,
+        "path": "assets/cards/level0/delayedBulwark.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: delayedBulwark, base level.\nSubject: A heavy bronze and blue-steel tower shield materializes from three overlapping cyan and violet temporal afterimages around a glowing hourglass core in a ruined clocktower hall.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "rewindMend",
+        "level": 0,
+        "path": "assets/cards/level0/rewindMend.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: rewindMend, base level.\nSubject: A bronze healing gauntlet reverses scattered cyan crystal fragments into a glowing heart-shaped core while clock hands turn backward in a clockwork infirmary.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "accelerate",
+        "level": 0,
+        "path": "assets/cards/level0/accelerate.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: accelerate, base level.\nSubject: A bronze chronometer surges along luminous cyan time rails, leaving violet and cyan afterimages through a clockwork transit hall.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "chronoSpike",
+        "level": 0,
+        "path": "assets/cards/level0/chronoSpike.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: chronoSpike, base level.\nSubject: A bronze-and-crystal temporal spike pierces an armored target echoed across layered cyan and violet clock rings in a shattered clocktower arena.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "futureSight",
+        "level": 0,
+        "path": "assets/cards/level0/futureSight.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: futureSight, base level.\nSubject: An ornate brass mechanical eye with a cyan crystal pupil reveals three branching possible futures in floating violet clock shards inside a shadowed observatory.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "temporalBarrage",
+        "level": 1,
+        "path": "assets/cards/level1/temporalBarrage.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: temporalBarrage, upgrade level 1.\nSubject: An enhanced bronze-and-steel temporal cannon array fires a synchronized barrage of frozen golden projectiles through clock rings, with illuminated inlays and brighter cyan-violet arcs.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "temporalBarrage",
+        "level": 2,
+        "path": "assets/cards/level2/temporalBarrage.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: temporalBarrage, upgrade level 2.\nSubject: An evolved ornate array of bronze-and-steel temporal cannons fires frozen golden projectiles through layered clock rings in a fractured clockwork citadel, with luminous crystal details and expanded time effects.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "temporalBarrage",
+        "level": 3,
+        "path": "assets/cards/level3/temporalBarrage.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: temporalBarrage, upgrade level 3.\nSubject: A magnificent gold-and-crystal temporal cannon array unleashes its strongest synchronized barrage through a controlled corona of concentric clock rings in a starless time rift.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "delayedBulwark",
+        "level": 1,
+        "path": "assets/cards/level1/delayedBulwark.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: delayedBulwark, upgrade level 1.\nSubject: A heavy bronze and blue-steel tower shield materializes from three overlapping cyan and violet temporal afterimages around a glowing hourglass core, with illuminated inlays.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "delayedBulwark",
+        "level": 2,
+        "path": "assets/cards/level2/delayedBulwark.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: delayedBulwark, upgrade level 2.\nSubject: An evolved massive bronze, blue-steel and crystal tower shield manifests through layered temporal afterimages around a bright hourglass core in a ruined clocktower hall.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "delayedBulwark",
+        "level": 3,
+        "path": "assets/cards/level3/delayedBulwark.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: delayedBulwark, upgrade level 3.\nSubject: A magnificent gold, blue-steel and crystal tower shield stands within a corona of overlapping temporal shields and clock rings, with a radiant hourglass core.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "clockworkVolley",
+        "level": 1,
+        "path": "assets/cards/level1/clockworkVolley.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: clockworkVolley, upgrade level 1.\nSubject: Three brass and blue-steel clockwork crossbows fire in precise sequence through small cyan and violet clock rings from an elevated clocktower workshop.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "clockworkVolley",
+        "level": 2,
+        "path": "assets/cards/level2/clockworkVolley.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: clockworkVolley, upgrade level 2.\nSubject: Three evolved ornate brass, blue-steel and crystal clockwork crossbows fire a synchronized volley through layered clock rings in a fractured chronospire arsenal.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "clockworkVolley",
+        "level": 3,
+        "path": "assets/cards/level3/clockworkVolley.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: clockworkVolley, upgrade level 3.\nSubject: Three masterwork gold, blue-steel and crystal clockwork crossbows unleash an ultimate synchronized volley through a controlled corona of clock rings and frozen bolts.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "futureSight",
+        "level": 1,
+        "path": "assets/cards/level1/futureSight.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: futureSight, upgrade level 1.\nSubject: An ornate brass mechanical eye with a cyan crystal pupil opens toward three branching possible futures reflected in floating violet clock shards.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "futureSight",
+        "level": 2,
+        "path": "assets/cards/level2/futureSight.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: futureSight, upgrade level 2.\nSubject: An evolved ornate brass-and-crystal mechanical eye with a luminous cyan pupil reveals many branching possible futures in layered violet clock shards.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "futureSight",
+        "level": 3,
+        "path": "assets/cards/level3/futureSight.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: futureSight, upgrade level 3.\nSubject: A masterwork gold-and-crystal mechanical eye opens within a spectacular corona of clock rings, revealing countless branching futures in radiant cyan and violet shards.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "rewindMend",
+        "level": 1,
+        "path": "assets/cards/level1/rewindMend.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: rewindMend, upgrade level 1.\nSubject: An ornate bronze healing gauntlet rewinds scattered cyan crystal fragments into a glowing heart-shaped core while clock hands turn backward.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "rewindMend",
+        "level": 2,
+        "path": "assets/cards/level2/rewindMend.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: rewindMend, upgrade level 2.\nSubject: An evolved ornate bronze-and-crystal healing gauntlet rewinds a storm of cyan fragments into a radiant heart-shaped core amid layered backward-turning clock hands.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "rewindMend",
+        "level": 3,
+        "path": "assets/cards/level3/rewindMend.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: rewindMend, upgrade level 3.\nSubject: A masterwork gold-and-crystal healing gauntlet restores a brilliant heart-shaped time crystal inside a corona of reversed clock rings and reassembling fragments.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "chronoSpike",
+        "level": 1,
+        "path": "assets/cards/level1/chronoSpike.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: chronoSpike, upgrade level 1.\nSubject: A long bronze-and-crystal temporal spike pierces a layered armored target echoed across overlapping cyan and violet clock rings.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "chronoSpike",
+        "level": 2,
+        "path": "assets/cards/level2/chronoSpike.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: chronoSpike, upgrade level 2.\nSubject: An evolved ornate bronze-and-crystal temporal spike pierces multiple layered echoes of an armored target through nested cyan and violet clock rings.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "chronoSpike",
+        "level": 3,
+        "path": "assets/cards/level3/chronoSpike.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: chronoSpike, upgrade level 3.\nSubject: A masterwork gold-and-crystal time spike pierces the same armored target across many moments inside a corona of shattered and reformed clock rings.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "accelerate",
+        "level": 1,
+        "path": "assets/cards/level1/accelerate.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: accelerate, upgrade level 1.\nSubject: An ornate bronze chronometer races along luminous cyan time rails, leaving violet and cyan afterimages while gears spin rapidly around it.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-18"
     }
   ]
 }

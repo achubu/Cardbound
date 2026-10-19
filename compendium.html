@@ -246,7 +246,7 @@
          read from the running game (see loadGameData below), because
          expansion.js / encounter-depth.js depend on the game's own globals
          and crashed here, silently dropping 10 of the 23 cards. -->
-    <script src="assets/cards.js?v=art-20261017b" onerror="console.warn('assets/cards.js not found')"></script>
+    <script src="assets/cards.js?v=art-20261018" onerror="console.warn('assets/cards.js not found')"></script>
 <link rel="stylesheet" href="assets/concepts/compendium.css?v=concepts-20261018">
 <script defer src="assets/concepts/compendium.js?v=concepts-20261018"></script>
 </head>
@@ -319,7 +319,7 @@
         function loadGameData() {
             return new Promise(resolve => {
                 const frame = document.createElement('iframe');
-                frame.src = 'index.html?v=art-20261017b';
+                frame.src = 'index.html?v=art-20261018';
                 frame.setAttribute('aria-hidden', 'true');
                 frame.tabIndex = -1;
                 frame.style.cssText = 'position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;left:-9999px';
