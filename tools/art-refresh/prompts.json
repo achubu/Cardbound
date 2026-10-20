@@ -895,6 +895,22 @@
         "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nPrimary request: accelerate, upgrade level 1.\nSubject: An ornate bronze chronometer races along luminous cyan time rails, leaving violet and cyan afterimages while gears spin rapidly around it.\nComposition/framing: square, centered focal subject, readable at thumbnail size\nConstraints: preserve the named card identity; no text, letters, numbers, watermark, card border, or UI",
         "status": "complete",
         "completed_batch": "2026-10-18"
+    },
+    {
+        "id": "accelerate",
+        "level": 2,
+        "path": "assets/cards/level2/accelerate.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nPrimary request: Accelerate, upgrade level 2.\nScene/backdrop: vast clockwork transit nexus fractured across several moments\nSubject: an evolved ornate bronze-and-crystal pocket chronometer rockets along layered luminous cyan time rails with many violet afterimages and spinning gear halos. Keep the card's identity: circular brass timepiece, cyan dial, exposed gears, diamond crystal accents, afterimages trailing backward.\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone cyan/violet magic; rich scene, no smooth 3D\nComposition/framing: square, centered speeding chronometer with powerful forward motion and readable silhouette\nLighting/mood: formidable velocity with luminous crystal mechanisms and expanded motion trails\nConstraints: preserve Accelerate identity; no people, text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-20"
+    },
+    {
+        "id": "accelerate",
+        "level": 3,
+        "path": "assets/cards/level3/accelerate.webp",
+        "prompt": "Use case: stylized-concept\nAsset type: square full-bleed trading-card illustration for Cardbound\nPrimary request: Accelerate, upgrade level 3 ultimate form.\nScene/backdrop: magnificent golden transit nexus suspended within a controlled temporal rift\nSubject: a masterwork gold-and-crystal pocket chronometer reaches impossible speed along a spectacular corona of luminous cyan rails, violet afterimages and concentric spinning clock rings. Keep the card's identity: circular gold timepiece, cyan dial, exposed gears, diamond crystal accents, afterimages trailing backward. Make this distinctly more ornate and powerful than level 2, with gold crystal embellishments and controlled magical radiance.\nStyle/medium: elaborate high-detail 16-bit pixel art, crisp visible pixel clusters, stepped edges, richly shaded metal, dark navy shadows, jewel-tone magic; rich scene, no smooth 3D\nComposition/framing: square, heroic speeding chronometer with dominant readable silhouette and dramatic forward motion\nLighting/mood: ultimate velocity, brilliant gold, cyan and violet temporal radiance\nConstraints: preserve Accelerate identity; no people, text, letters, numbers, watermark, card border, or UI",
+        "status": "complete",
+        "completed_batch": "2026-10-20"
     }
   ]
 }
