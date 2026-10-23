@@ -124,7 +124,8 @@ move=function(dt){
   if(!target){const exit=touchRoute.exit;cancelTouchRoute();if(exit&&exit.key===state.room)transition(exit.dir);save();return}
   const dx=target.x-pos.x,dy=target.y-pos.y;
   if(Math.abs(dx)<1&&Math.abs(dy)<1){touchRoute.points.shift();continue}
-  if(remaining<=0)break;
+  // Ignore sub-microsecond rounding residue; it is not a blocked step.
+  if(remaining<=1e-6)break;
   const horizontal=Math.abs(dx)>=1,delta=horizontal?dx:dy,key=horizontal?(dx>0?'ArrowRight':'ArrowLeft'):(dy>0?'ArrowDown':'ArrowUp');
   const original=keys;let spent=Math.min(remaining,Math.abs(delta)/175);touchFacing=key;
   try{keys={[key]:true};keyboardMove(spent)}finally{keys=original}

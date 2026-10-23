@@ -530,6 +530,9 @@ $('closeMenu').onclick=closeMenu}
 // Each direction has a 3x3 atlas: standing, then eight distinct gait phases.
 // Facing and gait follow actual displacement, including tap routes and sliding along a wall.
 const HERO_DIRECTIONS=['down','left','right','up'],HERO_STRIDE=84;
+// Warm all four textures while the opening screen/tutorial is visible, so a
+// first turn never swaps to a blank, still-downloading direction.
+const HERO_ATLASES=HERO_DIRECTIONS.map(direction=>{const image=new Image();image.src='assets/characters/protagonist-'+direction+'-v2.webp';if(image.decode)image.decode().catch(()=>{});return image});
 let heroFacing=0,heroWalkTime=0,heroWalkDistance=0;
 function heroDirection(dx,dy,previous=heroFacing){
  const horizontal=dx<0?1:2,vertical=dy<0?3:0,ax=Math.abs(dx),ay=Math.abs(dy);
@@ -602,7 +605,7 @@ requestAnimationFrame(loop);
 <script src="assets/waypoints.js?v=round229"></script>
 <script src="assets/deck-choice.js?v=round233"></script>
 <script src="assets/room-preload.js?v=round208"></script>
-<script src="assets/touch-controls.js?v=round185"></script>
+<script src="assets/touch-controls.js?v=hero-20261023"></script>
 <script src="assets/map-terrain.js?v=round185"></script>
 <script src="assets/enemy-labels.js?v=round229"></script>
 <script src="assets/layout-polish.js?v=round225"></script>
