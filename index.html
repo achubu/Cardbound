@@ -84,10 +84,10 @@
 /* Fixed cast: original reference art is kept intact. */
 .hero-portrait{display:block;width:100%;max-height:340px;object-fit:cover;object-position:center;border:1px solid #8cb8bf;border-radius:8px;margin:15px auto}.opening-portrait{aspect-ratio:16/9;max-height:none;box-shadow:0 0 28px #50d6ff35,0 14px 35px #000a;border-color:#64dce7}.sheet-portrait{max-height:240px;object-position:center 32%}
 #player{width:84px;height:84px;overflow:visible;filter:drop-shadow(0 3px 2px #0008);pointer-events:none}
-#player:after{display:block;left:31px;bottom:2px;width:22px;height:7px;border:0;border-radius:50%;background:#0005;z-index:-1}
-#player .hero-sprite{display:block;width:84px;height:84px;background-image:url('assets/characters/protagonist-walk.png');background-size:336px 336px;background-repeat:no-repeat;image-rendering:pixelated;transform-origin:50% 90%;transform:scale(.8)}
+#player:after{display:block;left:29px;bottom:14px;width:26px;height:8px;border:0;border-radius:50%;background:#0005;z-index:-1}
+#player .hero-sprite{display:block;position:absolute;left:0;top:-14px;width:84px;height:84px;background-image:url('assets/characters/protagonist-down-v2.webp');background-size:252px 252px;background-repeat:no-repeat;image-rendering:auto;transform-origin:50% 93%;will-change:transform}
 #player:not(.walking) .hero-sprite{animation:hero-breathe 2.4s ease-in-out infinite}
-@keyframes hero-breathe{0%,100%{transform:scale(.8)}50%{transform:scale(.8,.812)}}
+@keyframes hero-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1,1.012)}}
 @media(prefers-reduced-motion:reduce){#player:not(.walking) .hero-sprite{animation:none}}
 
 .meadow-ground{position:absolute;inset:0;image-rendering:pixelated;z-index:0}.meadow-object{position:absolute;pointer-events:none;image-rendering:pixelated}.way-sign{position:absolute;z-index:5;transform:translateX(-50%);font:700 8px system-ui;color:#ffe0a0;background:#483725;border:2px solid #b3884d;padding:4px 6px;white-space:nowrap;box-shadow:0 3px #211c1b}.spring-ripple{position:absolute;left:612px;top:88px;width:65px;height:18px;border:2px solid #a6f9ef88;border-radius:50%;z-index:2;animation:water-shimmer 3s ease-in-out infinite}.meadow-rest{font-size:24px;z-index:6;color:#d2fff2}.environment-loading{position:absolute;inset:0;display:grid;place-items:center;background:#284e3a;color:#fff;z-index:0}#world[data-environment="meadowrest"]{border:0;background:#437b39}#world[data-environment="meadowrest"] .door{background:transparent;border:0;box-shadow:none;z-index:3}#world[data-environment="meadowrest"] .door:after{content:''}.art-credits{color:#d8c38c;font:11px system-ui;align-self:center;padding:8px}@keyframes water-shimmer{50%{opacity:.35;transform:scale(1.15)}}@media(prefers-reduced-motion:reduce){.spring-ripple{animation:none}}
@@ -527,20 +527,41 @@ const destroy=document.createElement('button');destroy.className='danger';destro
 destroy.onclick=()=>{const victim=out.length?out.reduce((a,b)=>(a.uses||0)<=(b.uses||0)?a:b):inDeck[inDeck.length-1];if(!victim)return;if(state.deck.includes(victim.uid)&&state.deck.length<=MIN_DECK)return toast('Replace this active card first.');state.pool=state.pool.filter(x=>x.uid!==victim.uid);state.deck=state.deck.filter(id=>id!==victim.uid);const salvage=destroySalvage(victim);state.shards=(state.shards||0)+salvage;toast(stat(victim).name+' destroyed: +'+salvage+' Shards ('+state.shards+' total).');save();showDeck()};
 actions.append(add,rem,up,destroy);wrap.append(actions);$('poolCards').append(wrap)});
 $('closeMenu').onclick=closeMenu}
-// Four rows: down, left, right, up; four gait frames per row.
-let heroFacing=0,heroWalkTime=0;
-function animateHero(dt,moved){
- const p=$('player');if(!p)return;
- if(moved){const dx=(keys.ArrowRight||keys.d?1:0)-(keys.ArrowLeft||keys.a?1:0),dy=(keys.ArrowDown||keys.s?1:0)-(keys.ArrowUp||keys.w?1:0);heroFacing=dx?(dx<0?1:2):(dy<0?3:0);heroWalkTime+=dt}else heroWalkTime=0;
- p.classList.toggle('walking',moved);
- const frame=moved?Math.floor(heroWalkTime/.12)%4:0;
- p.querySelector('.hero-sprite').style.backgroundPosition=(-frame*84)+'px '+(-heroFacing*84)+'px';
+// Each direction has a 3x3 atlas: standing, then eight distinct gait phases.
+// Facing and gait follow actual displacement, including tap routes and sliding along a wall.
+const HERO_DIRECTIONS=['down','left','right','up'],HERO_STRIDE=84;
+let heroFacing=0,heroWalkTime=0,heroWalkDistance=0;
+function heroDirection(dx,dy,previous=heroFacing){
+ const horizontal=dx<0?1:2,vertical=dy<0?3:0,ax=Math.abs(dx),ay=Math.abs(dy);
+ if(ax>ay*1.2)return horizontal;if(ay>ax*1.2)return vertical;
+ return (ax&&previous===horizontal)||(ay&&previous===vertical)?previous:ax?horizontal:vertical;
 }
-function loop(t){const dt=Math.min(.033,(t-last)/1000||0);last=t;const previous=state?{...state.pos,room:state.room}:null;move(dt);animateEnemy(dt);const moved=!!(previous&&state&&!state.battle&&$('menuOverlay').classList.contains('hidden')&&(previous.room!==state.room||Math.hypot(state.pos.x-previous.x,state.pos.y-previous.y)>.01));animateHero(dt,moved);requestAnimationFrame(loop)}
+function animateHero(dt,moved,motion){
+ const p=$('player');if(!p)return;const sprite=p.querySelector('.hero-sprite');if(!sprite)return;
+ if(moved){
+  const dx=motion?motion.x:(keys.ArrowRight||keys.d?1:0)-(keys.ArrowLeft||keys.a?1:0),dy=motion?motion.y:(keys.ArrowDown||keys.s?1:0)-(keys.ArrowUp||keys.w?1:0);
+  if(dx||dy)heroFacing=heroDirection(dx,dy);
+  heroWalkTime+=dt;heroWalkDistance=(heroWalkDistance+(motion?motion.distance:175*dt))%HERO_STRIDE;
+ }else if(dt>0){heroWalkTime=0;heroWalkDistance=0}
+ const frame=moved?1+Math.floor(heroWalkDistance/HERO_STRIDE*8):0,direction=HERO_DIRECTIONS[heroFacing];
+ p.classList.toggle('walking',moved);sprite.style.backgroundImage='url("assets/characters/protagonist-'+direction+'-v2.webp")';
+ sprite.style.backgroundPosition=(-(frame%3)*84)+'px '+(-Math.floor(frame/3)*84)+'px';
+ sprite.dataset.facing=direction;sprite.dataset.frame=String(frame);
+}
+function loop(t){
+ const dt=Math.min(.1,Math.max(0,(t-last)/1000||0));last=t;
+ const previous=state?{...state.pos,room:state.room}:null;
+ // Small collision steps preserve travel speed when rendering drops below 30 fps.
+ // A suspended tab never catches up more than 100 ms in one frame.
+ const steps=Math.max(1,Math.ceil(dt*60));for(let i=0;i<steps;i++){move(dt/steps);animateEnemy(dt/steps)}
+ const sameRoom=previous&&state&&previous.room===state.room,dx=sameRoom?state.pos.x-previous.x:0,dy=sameRoom?state.pos.y-previous.y:0;
+ const moved=!!(previous&&state&&!state.battle&&$('menuOverlay').classList.contains('hidden')&&(!sameRoom||Math.hypot(dx,dy)>.01));
+ animateHero(dt,moved,sameRoom?{x:dx,y:dy,distance:Math.hypot(dx,dy)}:undefined);requestAnimationFrame(loop);
+}
 function fitWorld(){$('world').style.setProperty('--world-scale',Math.min(innerWidth/800,innerHeight/500))}
 const inputKey=e=>e.key.length===1?e.key.toLowerCase():e.key;
 addEventListener('keydown',e=>{const key=inputKey(e);if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key))e.preventDefault();if(key==='m'&&!e.repeat&&state&&!state.battle){e.preventDefault();keys={};$('menuOverlay').classList.contains('hidden')?showMap():$('menuModal').querySelector('.world-map, .region-map')?closeMenu():null;return}if(key==='Escape'&&!e.repeat&&state&&!$('menuOverlay').classList.contains('hidden')){e.preventDefault();closeMenu();return}keys[key]=true});addEventListener('keyup',e=>keys[inputKey(e)]=false);addEventListener('blur',()=>{keys={};save()});addEventListener('pagehide',save);
-document.querySelectorAll('#touch button').forEach(b=>{const release=()=>{keys[b.dataset.key]=false;b.classList.remove('touching')};b.onpointerdown=e=>{e.preventDefault();keys[b.dataset.key]=true;b.classList.add('touching');move(.14);animateHero(.14,true);if(b.setPointerCapture)b.setPointerCapture(e.pointerId)};b.onpointerup=b.onpointercancel=b.onlostpointercapture=release});
+document.querySelectorAll('#touch button').forEach(b=>{const release=()=>{keys[b.dataset.key]=false;b.classList.remove('touching')};b.onpointerdown=e=>{e.preventDefault();keys[b.dataset.key]=true;b.classList.add('touching');if(b.setPointerCapture)b.setPointerCapture(e.pointerId)};b.onpointerup=b.onpointercancel=b.onlostpointercapture=release});
 $('newBtn').onclick=newGame;$('resumeBtn').onclick=load;$('mapBtn').onclick=showMap;$('deckBtn').onclick=showDeck;$('charBtn').onclick=showCharacter;$('saveBtn').onclick=()=>{save();toast('Journey saved in this browser.')};
 if(localStorage.getItem(SAVE_KEY))$('resumeBtn').classList.remove('hidden');
 addEventListener('resize',()=>{fitWorld();fitMap();renderTalentConnectors()});fitWorld();

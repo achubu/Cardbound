@@ -116,20 +116,40 @@ move=function(dt){
  if(!state||state.battle||!$('menuOverlay').classList.contains('hidden')||!$('startOverlay').classList.contains('hidden')){cancelTouchRoute();return}
  if(['ArrowRight','ArrowLeft','ArrowUp','ArrowDown','w','a','s','d'].some(k=>keys[k])){cancelTouchRoute();return keyboardMove(dt)}
  const area=joinedArea();if(touchRoute.area!==activeRegion+':'+area.cells.join('|')){cancelTouchRoute();return}
- const pos=touchWorldPoint(),target=touchRoute.points[0];
- if(!target){const exit=touchRoute.exit;cancelTouchRoute();if(exit&&exit.key===state.room)transition(exit.dir);save();return}
- const dx=target.x-pos.x,dy=target.y-pos.y;
- if(Math.abs(dx)<1&&Math.abs(dy)<1){touchRoute.points.shift();return}
- const horizontal=Math.abs(dx)>=1,delta=horizontal?dx:dy,key=horizontal?(dx>0?'ArrowRight':'ArrowLeft'):(dy>0?'ArrowDown':'ArrowUp');
- touchFacing=key;const original=keys;keys={[key]:true};keyboardMove(Math.min(dt,Math.abs(delta)/175));keys=original;
- // Round 92: on narrow painted streets one axis can be blocked by a kerb corner; try the other before giving up.
- {const moved=touchWorldPoint();if(Math.hypot(moved.x-pos.x,moved.y-pos.y)<.001){const alt=horizontal?dy:dx;if(Math.abs(alt)>=1){const k2=horizontal?(dy>0?'ArrowDown':'ArrowUp'):(dx>0?'ArrowRight':'ArrowLeft');keys={[k2]:true};keyboardMove(Math.min(dt,Math.abs(alt)/175));keys=original}else{touchRoute.points.shift();if(touchRoute.points.length)return}}}
- if(state.battle){cancelTouchRoute();return}
- const now=touchWorldPoint();if(Math.hypot(now.x-pos.x,now.y-pos.y)<.001){cancelTouchRoute();toast('Path blocked. Tap a different spot.');return}
+ // Spend this frame's remaining travel time on the next segment immediately.
+ // The old follower stopped for one frame at every 8px waypoint.
+ let remaining=Math.max(0,Math.min(.1,dt));
+ for(let guard=0;touchRoute&&guard<32;guard++){
+  const pos=touchWorldPoint(),target=touchRoute.points[0];
+  if(!target){const exit=touchRoute.exit;cancelTouchRoute();if(exit&&exit.key===state.room)transition(exit.dir);save();return}
+  const dx=target.x-pos.x,dy=target.y-pos.y;
+  if(Math.abs(dx)<1&&Math.abs(dy)<1){touchRoute.points.shift();continue}
+  if(remaining<=0)break;
+  const horizontal=Math.abs(dx)>=1,delta=horizontal?dx:dy,key=horizontal?(dx>0?'ArrowRight':'ArrowLeft'):(dy>0?'ArrowDown':'ArrowUp');
+  const original=keys;let spent=Math.min(remaining,Math.abs(delta)/175);touchFacing=key;
+  try{keys={[key]:true};keyboardMove(spent)}finally{keys=original}
+  if(state.battle||!$('menuOverlay').classList.contains('hidden')){cancelTouchRoute();return}
+  if(activeRegion+':'+joinedArea().cells.join('|')!==touchRoute?.area){cancelTouchRoute();return}
+  // Keep the existing kerb-corner fallback, including its collision checks.
+  let now=touchWorldPoint();
+  if(Math.hypot(now.x-pos.x,now.y-pos.y)<.001){
+   const alt=horizontal?dy:dx;
+   if(Math.abs(alt)>=1){
+    const k2=horizontal?(dy>0?'ArrowDown':'ArrowUp'):(dx>0?'ArrowRight':'ArrowLeft');spent=Math.min(remaining,Math.abs(alt)/175);touchFacing=k2;
+    try{keys={[k2]:true};keyboardMove(spent)}finally{keys=original}
+    if(state.battle||!$('menuOverlay').classList.contains('hidden')){cancelTouchRoute();return}
+    if(activeRegion+':'+joinedArea().cells.join('|')!==touchRoute?.area){cancelTouchRoute();return}
+    now=touchWorldPoint();
+   }else if(touchRoute.points.length>1){touchRoute.points.shift();continue}
+   if(Math.hypot(now.x-pos.x,now.y-pos.y)<.001){cancelTouchRoute();toast('Path blocked. Tap a different spot.');return}
+  }
+  remaining-=spent;
+ }
+ if(!touchRoute)return;
  drawMoveMarker();
 };
 const originalTouchAnimation=animateHero;
-animateHero=function(dt,moved){const original=keys;if(touchFacing&&moved)keys={[touchFacing]:true};originalTouchAnimation(dt,moved);keys=original};
+animateHero=function(dt,moved,motion){const original=keys;if(touchFacing&&moved)keys={[touchFacing]:true};try{originalTouchAnimation(dt,moved,motion)}finally{keys=original}};
 addEventListener('blur',cancelTouchRoute);addEventListener('pagehide',cancelTouchRoute);
 addEventListener('keydown',e=>{if(['ArrowRight','ArrowLeft','ArrowUp','ArrowDown','w','a','s','d'].includes(e.key))cancelTouchRoute()});
 document.querySelectorAll('#touch button').forEach(button=>{const down=button.onpointerdown;button.onpointerdown=e=>{cancelTouchRoute();down(e)}});

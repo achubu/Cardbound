@@ -1,0 +1,48 @@
+name: Character animation checks
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - assets/touch-controls.js
+      - assets/characters/**
+      - tests/hero*
+      - tests/touch-route-smoothness.test.cjs
+      - .github/workflows/character-checks.yml
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install browser checks outside the repository
+        run: |
+          npm install --prefix "$RUNNER_TEMP/cardbound-browser" playwright
+          "$RUNNER_TEMP/cardbound-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Check gait, movement and desktop and mobile browsers
+        env:
+          NODE_PATH: ${{ runner.temp }}/cardbound-browser/node_modules
+          HERO_SCREENSHOT_DIR: ${{ runner.temp }}/hero-screenshots
+        run: |
+          node tests/hero-animation.test.cjs
+          node tests/touch-route-smoothness.test.cjs
+          node tests/room-art.test.cjs
+          node tests/neon-world-pathing.test.cjs
+          node tests/hero-browser.test.cjs
+          node tests/battle-header.test.cjs
+          node tests/mech-badge.test.cjs
+          node tests/reward-escape.test.cjs
+          node tests/tutorial.test.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hero-preview
+          path: ${{ runner.temp }}/hero-screenshots
+          if-no-files-found: ignore
