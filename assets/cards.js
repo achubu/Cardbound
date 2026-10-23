@@ -13,6 +13,8 @@ const defs={
  riposte:{name:'Silver Riposte',cost:1,kind:'Attack',icon:'⟡',tiers:[{damage:4,block:3},{damage:5,block:4},{damage:7,block:5},{damage:9,block:7}]},
  bastion:{name:'Winter Bastion',cost:2,kind:'Defense',icon:'❄',tiers:[{block:11},{block:14},{block:17},{block:21}]},
  mend:{name:'Bloom of Life',cost:0,kind:'Healing',icon:'❀',exhaust:true,tiers:[{heal:7},{heal:9},{heal:12},{heal:16}]},
+ // Round 226: a starter heal you can use every time you draw it (Bloom of Life is free but once a fight).
+ nanoMend:{name:'Nano Mend',cost:1,kind:'Healing',icon:'✚',tiers:[{heal:7},{heal:9},{heal:11},{heal:14}]},
  spark:{name:'Astral Needle',cost:0,kind:'Attack',icon:'✧',exhaust:true,tiers:[{damage:3},{damage:4},{damage:6},{damage:8}]},
  shatter:{name:'Shatter Lance',cost:2,kind:'Attack',icon:'⚒',pierce:true,tiers:[{damage:10},{damage:13},{damage:16},{damage:20}]},
  phoenix:{name:'Phoenix Covenant',cost:2,kind:'Soulbound Attack',icon:'♨',soulbound:true,tiers:[{damage:14,heal:2},{damage:17,heal:3},{damage:21,heal:4},{damage:26,heal:6}]},
@@ -27,13 +29,12 @@ const defs={
 // in `tiers`, and `rules()` is what turns that into readable text).
 let stat=c=>({...defs[c.id],...defs[c.id].tiers[c.level]});
 function rules(c){const d=stat(c),p=[];if(d.damage)p.push('Deal '+d.damage+' damage.'+(d.pierce?' Pierce: ignores enemy armor.':''));if(d.block)p.push('Gain '+d.block+' block.');if(d.heal)p.push('Heal '+d.heal+' HP.');if(d.draw)p.push('Draw '+d.draw+'.');if(d.energy)p.push('Gain '+d.energy+' energy.');if(d.exhaust)p.push('Exhaust.');return p.join(' ')}
-// New illustrations use compact WebP assets; the original collection keeps
-// its existing filenames. One resolver serves battles, decks and compendium.
-const refreshedCardArt={"arcJab":[0,1,2,3],"breachSpike":[0,1,2,3],"bulwarkBash":[0,1,2,3],"chainLightning":[0,1,2,3],"overclock":[0,1,2,3],"staticShield":[0,1,2,3],"thornlash":[0,1,2,3],"wildfire":[0,1,2,3],"rootbind":[0,1,2,3],"tidecall":[0,1,2,3],"verdantPact":[0,1,2,3],"tempestSurge":[0,1,2,3],"stormBattery":[0,1,2,3],"mirrorguard":[0,1,2,3],"prismLance":[0,1,2,3],"arcBulwark":[0,1,2,3],"lunarEdict":[0,1,2,3],"phantomResonance":[0,1,2,3],"sovereignGale":[0,1,2,3],"tidebound":[0,1,2,3],"temporalBarrage":[0,1,2,3],"delayedBulwark":[0,1,2,3],"clockworkVolley":[0,1,2,3],"futureSight":[0,1,2,3],"rewindMend":[0,1,2,3],"chronoSpike":[0,1,2,3],"accelerate":[0,1,2,3],"static":[0]};
+// Round 94: refreshed pixel-art illustrations (512x512 WebP, see
+// assets/cards/art-refresh.md). Stages not yet painted reuse the nearest lower
+// painted stage (or the first one); stats always follow the real level.
+const refreshedCardArt={nanoMend:[0],sift:[0],accelerate:[0,1,2,3],chronoSpike:[0,1,2,3],clockworkVolley:[0,1,2,3],delayedBulwark:[0,1,2,3],futureSight:[0,1,2,3],rewindMend:[0,1,2,3],temporalBarrage:[0,1,2,3],arcBulwark:[0,1,2,3],arcJab:[0,1,2,3],breachSpike:[0,1,2,3],bulwarkBash:[0,1,2,3],chainLightning:[0,1,2,3],lunarEdict:[0,1,2,3],mirrorguard:[0,1,2,3],overclock:[0,1,2,3],phantomResonance:[0,1,2,3],prismLance:[0,1,2,3],rootbind:[0,1,2,3],sovereignGale:[0,1,2,3],static:[0,1,2,3],staticShield:[0,1,2,3],stormBattery:[0,1,2,3],tempestSurge:[0,1,2,3],thornlash:[0,1,2,3],tidebound:[0,1,2,3],tidecall:[0,1,2,3],verdantPact:[0,1,2,3],wildfire:[0,1,2,3]}; // Round 180: 36 more paintings from achubu/Cardbound
 function cardArtPath(id,level){
  const stages=refreshedCardArt[id];
- // Until the remaining illustrations are ready, use the nearest completed
- // lower stage (or the first available stage). Card stats still use level.
  if(stages){const artLevel=stages.filter(n=>n<=level).at(-1)??stages[0];return 'assets/cards/level'+artLevel+'/'+id+'.webp'}
  return 'assets/cards/level'+level+'/'+id+(id==='neonCovenant'?'.webp':id==='stormglass'&&level===2?'.jpeg':'.png');
 }

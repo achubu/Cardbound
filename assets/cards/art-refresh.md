@@ -23,6 +23,13 @@ compendium.
 
 **No illustrations remain in the tracked refresh.**
 
+The 2026-10-23 import from Claudebound through Round 248 expands the active
+game to 98 card designs. Those newer designs include procedural stand-ins;
+Nano Mend and Sift each have only a base image and reuse it at higher levels.
+The original 119 completed illustration jobs remain intact. The expanded
+game therefore has additional artwork to commission beyond this completed
+refresh; importing the game does not mark those images as generated.
+
 Stop on the first usage-limit response and retain every successful output.
 After each batch, visually review the images, update the completion statuses
 and shared resolvers, check all card and side-card paths, run the existing tests,
