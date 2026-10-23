@@ -4,7 +4,7 @@ test('catalog is complete, sourced and excluded from gameplay',()=>{
  assert.equal(data.cards.length,16);assert.equal(new Set(data.cards.map(c=>c.id)).size,16);assert.equal(data.mechanics.length,8);
  for(const c of data.cards){assert.equal(c.status,'review-only');assert.equal(c.art,null);assert.deepEqual(c.tiers.map(t=>t.level),[0,1,2,3]);assert(data.mechanics.some(m=>m.id===c.mechanic));}
  for(const m of data.mechanics)for(const id of m.sources)assert.match(data.sources[id].url,/^https:\/\//);
- for(const file of ['index.html',...fs.readdirSync(path.join(root,'assets')).filter(x=>x.endsWith('.js')).map(x=>'assets/'+x)]){assert(!read(file).includes('assets/concepts/'));for(const c of data.cards)assert(!read(file).includes(c.id));}
+ for(const file of ['index.html',...fs.readdirSync(path.join(root,'assets')).filter(x=>x.endsWith('.js')).map(x=>'assets/'+x)]){const source=read(file).replace(/^\s*\/\/.*$/gm,'');assert(!source.includes('assets/concepts/'));for(const c of data.cards)assert(!source.includes(c.id));}
 });
 test('presentation supports search, filtering, upgrades and no graphics',async()=>{
  const nodes={};for(const id of ['concept-search','concept-mechanic','concept-level','concept-count','concept-grid'])nodes['#'+id]={value:id==='concept-level'?'0':'',addEventListener(type,fn){this[type]=fn;},innerHTML:'',textContent:''};

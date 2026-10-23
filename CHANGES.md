@@ -1,5 +1,18 @@
 # Balance pass — changes from upstream `achubu/Cardbound`
 
+## Round 249: synchronize Cardbound with Claudebound through Round 248
+
+- Import source commit `6dce16c12176b3ae6bc98a03dd7eecccae9fd70b`, including
+  the six-world game, current maps, deck choice, Sift, enemy pairs and Armor.
+- Retire all four Reversal cards. Keep upstream's save/import migration and
+  remove their sixteen active placeholder files and generator entries.
+- Preserve all 119 completed Cardbound illustrations and their prompt history,
+  plus the separate text-only concept review catalog in the compendium.
+- Keep Cardbound's GitHub Pages address; exclude the source custom domain,
+  machine metadata and unused-asset archive from the import.
+- Reuse the existing real-script regression suites for verification. Browser
+  suites require an installed Playwright Chromium binary.
+
 All changes validated against the repo's own real-script Node test harness
 (`tests/*.test.cjs`, run via `node tests/<file>.test.cjs`). 8/8 pass, including
 a new `tests/rebalance.test.cjs` written specifically to cover the new
@@ -2614,3 +2627,2763 @@ Tests: tests/chronospire.test.cjs. The sims now cover Chronospire, and NO_SUSPEN
   - The harness now loads the page scripts in page order and skips duplicate
     loads.
   - City room references in the older tests were moved to the new layout.
+
+## Round 92: Neon Aftermath pathing playtest and fixes
+
+A full pathing playtest of the painted city with the real controls (now
+`tests/neon-world-pathing.test.cjs`). It walks across 1,600+ street crossings
+and back, taps from every exit to every other exit, enemy, point of interest,
+relic and chest, random-walks with keyboard and taps, and reaches every room
+using exit labels alone.
+
+**Fixed**
+- **Junkyard sealed off:** the Scrap Fortress, Collapsed Freeway and Overpass
+  Ramp couldn't be entered. The street joining them was traced narrower than
+  the link threshold. Links are now found on the cleaned 8px mask (24px or
+  wider).
+- **Thorn Warden unreachable by tapping:** the road out of the Warden's Crown
+  hugs the room edge. The walk mask now grows by one 8px cell, so narrow
+  necks are passable and tappable.
+- **Signal Tower unreachable by tapping:** a side street had two crossings
+  into it but only one label. Each side now gets a label for every separate
+  street crossing (150px+ apart), and labels follow the patch of street you're
+  on. Exits you can't reach from where you stand aren't labelled.
+- **Arrivals inside buildings:** landings within the 12px margin the movement
+  clamps to pushed you into scenery. Landings now stay inside it, and a clamp
+  that would put you on scenery is undone.
+- **Sideways landings:** crossing could drop you a few streets over, so you
+  couldn't walk straight back. Crossings now continue the same street. You
+  enter right at the edge and walk in while it stays street, with only 12px
+  of sideways slack. If the street doesn't carry on, there's no crossing.
+- **Accidental crossings:** a tap-to-move route could stray over a room edge
+  on its way somewhere. Routes now cross only at the end, through the exit
+  they were sent to. Edge crossings also only fire while you're heading that
+  way (no auto-bounce), which replaces the old 0.7s guard.
+- **Traced artefacts:**
+  - Water in the Crystal Citadel was traced as street; teal water is now
+    excluded.
+  - Thin park paths that touched only corner-to-corner are joined, since
+    movement is axis by axis.
+  - Small isolated scraps of street are removed.
+  - The Neon Square plaza steps are joined to the tower plaza.
+- **Spots you can't reach:** enemies, points of interest, relics, chests and
+  the merchant are never placed on a patch of street with no exit of its own.
+  You also never land on one.
+- **Doors:** a door must be a spot you can stand on (14px from an edge) and
+  must land you on a reachable street.
+- **Tap-to-move:**
+  - Painted and organic rooms use a finer 8px grid, aligned to the walk
+    mask, so narrow streets route.
+  - Routes try the other axis before giving up on a kerb corner.
+  - Organic districts' internal seams are unaffected.
+
+## Round 93: wider paths, interactables beside the paths
+
+- **Wider paths (about 20%):** every walkable path grows by 10% of its local
+  width on each side, capped at 28px a side (`tools/widen_paths.py`).
+  - Neon Aftermath's painted city gains about 18% more walkable ground. The
+    widening is done on the 4px trace before the game mask is built, in
+    `tools/build_world_rooms.py`.
+  - The five organic districts' masks (Emerald, Sunpetal, Foundry, Promenade,
+    Stormglass) are widened the same way, gaining 17–23% more ground.
+- **Interactables off the path:** chests, relics, points of interest, events,
+  the Wandering Merchant and Nexus Waypoints in painted and organic rooms now
+  stand beside the street rather than on it.
+  - A spot is used when it is not walkable itself, the nearest street is
+    12–28px away (aiming for 20px), and that street is one you can reach.
+    Interaction radii are 38–48px, so you can always use the item.
+  - Spots keep 90px clear of exit doors. Points of interest and the merchant
+    also keep 150px from patrols. Chests keep clear of the room's relic and
+    boss.
+  - Tapping an item routes you to the street beside it.
+  - Bosses and patrols still stand on the paths.
+  - Code: `organicItemSpot()` in `organic-paths.js`; wrappers for `poiSpot`,
+    `poiAt` and relics (applied on `configureRegion`) in `neon-world.js`.
+- **Room links match where you can stand:** feet sit 22px below your position
+  and movement is clamped to a 12px margin. That leaves a band at the top of
+  each room, and the outermost column, where you can never stand.
+  - The world generator now works out pockets and links on the cells you can
+    actually stand on.
+  - Before, a street that only joined up inside that band (a sliver at the
+    top of Scrap Fortress) looked connected but wasn't.
+  - One new real link: Ruined Tower Lot ↔ Collapsed Freeway. Relic gates and
+    progression are unchanged.
+- **Tests:**
+  - New `tests/item-placement.test.cjs` checks every item in organic rooms
+    across three seeds and three worlds: beside a reachable path, within
+    reach, and tap-routable.
+  - neon-world and exploration tests now expect items beside the street.
+  - The pathing playtest only starts crossings from street you can reach.
+
+## Round 94: refreshed card illustrations
+
+- Integrated the new pixel-art card illustrations added to the repo: 27
+  paintings, 512×512 WebP, in `assets/cards/level0`–`level3`.
+  - Arc Jab, Breach Spike, Bulwark Bash, Chain Lightning and Overclock have
+    all four levels.
+  - Static Shield has levels 0, 2 and 3; Thornlash has 0, 1 and 2; Wildfire
+    has level 1.
+- `cardArtPath()` in `assets/cards.js` uses them in battles, the deck
+  workshop and the compendium.
+  - A level without its own painting borrows the nearest lower painted stage,
+    or the first painted stage if there's none lower. Stats always follow the
+    real level.
+  - Every other card keeps its existing art.
+- The card script's cache tag is bumped (`?v=art-refresh-27`) in `index.html`
+  and `compendium.html`, so browsers fetch the new resolver.
+- Brought over `assets/cards/art-refresh.md` (status and follow-up list) and
+  `tools/art-refresh/` (prompts and packaging script).
+- Left out:
+  - `.DS_Store` files.
+  - The duplicate `Cardbound/` and top-level `characters/`, `environment/`
+    and `monsters/` folders. These are copies of files that already live
+    under `assets/`.
+  - A 500px `level2/stormglass.png`; the game keeps the 2048px `.jpeg`.
+  - The older world/room data in `origin/main`, because Round 93's map is
+    newer.
+- New `tests/card-art.test.cjs` checks that all 51 cards × 4 levels resolve
+  to an existing image and that the refreshed paintings are wired in.
+
+## Round 95: cache tags and a small handoff bundle
+
+- Every local script and stylesheet in `index.html`, and the compendium's
+  game frame, now loads with `?v=round94`. Browsers (and GitHub Pages
+  visitors) then fetch the new files instead of stale cached ones. This
+  matches the cache-busting `origin/main` already used. Bump the tag when
+  shipping a new round.
+- Added `CLAUDE.md`, handoff notes that Claude reads automatically in new
+  sessions.
+
+## Round 96: tidy folders and set aside unused art
+
+- claudebound is now the primary repo (see `CLAUDE.md`). Achubu/Cardbound is
+  worked on by ChatGPT and is only a source of image assets.
+- Deleted files the game never loads:
+  - The nested `Cardbound/` copy of the project. It held older code, and
+    images byte-identical to `assets/`.
+  - Root-level duplicates of `assets/` content: `characters/`,
+    `environment/`, `items/`, `monsters/`, and the `.js`/`.css` copies.
+  - `.DS_Store` files.
+  - `assets/environment/meadowrest.js`, which `index.html` no longer loads.
+- Moved graphics the game no longer uses into `unused assets/`, keeping their
+  old paths. `unused assets/README.md` lists what is there and why. Usage was
+  checked against:
+  - every literal path in the page code;
+  - `cardArtPath()` for every card and level;
+  - `talentArt()`;
+  - the district paintings `JOINED_AREAS` actually uses;
+  - `diagArtFor()` across every room in every region.
+- Merged `assets/Talent Graphics/` into `assets/talents/`, so all talent art
+  lives in one folder. Updated `talentArt()` and `talents.css`.
+- `tests/area-art.test.cjs` now derives the district paintings to check from
+  `JOINED_AREAS` instead of a fixed list that still named `burnout`.
+- Cache tags bumped to `?v=round96`.
+- Verified that the full test suite passes, and that a browser run through all
+  four regions, every card's art, the talent art and the compendium makes no
+  failed requests.
+
+## Round 97: the game is now Aethercede
+
+- Renamed Cardbound to Aethercede everywhere it appears:
+  - page titles, the start screen, the main menu, the Battle Lab and the
+    compendium;
+  - credits, docs and the art-generation prompts.
+- The GitHub repo name `achubu/Cardbound` and its Pages URL are left as they
+  are, because they name the real repository. Earlier CHANGES.md entries are
+  history and keep the old name.
+- localStorage keys moved from `cardbound-` to `aethercede-`. New
+  `assets/save-migration.js` runs first in `index.html` and `arena.html`. It
+  copies every old key to its new name once, never overwriting a new key, so
+  these carry over:
+  - adventure saves;
+  - shared upgrade materials;
+  - Battle Lab progress;
+  - map zoom and the touch-mode setting.
+- Exported save files now use format `aethercede-save`. Import still accepts
+  older `cardbound-save` files.
+- Test harness env var `CARDBOUND_RENDER` is now `AETHERCEDE_RENDER`.
+- Removed a stray tracked `tools/__pycache__` file.
+- New `tests/save-migration.test.cjs`. Cache tags bumped to `?v=round97`.
+
+
+## Round 98: hidden Upgrade Crystal moved to mid-map
+
+- The hidden Upgrade Crystal in Neon Aftermath moved from Lighthouse Pier
+  (`2,4`), two rooms from the start, to Broadcast Row (`5,6`).
+  - Broadcast Row sits in the central row, at the east edge of the open city.
+  - It is next to the Moon Temple and the Ember Sigil gate into the sealed
+    Citadel/Junkyard half, where the final boss waits.
+  - It is still reachable without any relic.
+- It sits at (444, 254), just off the street, and the `organicItemSpot()`
+  placement check confirms that spot is beside the street.
+- `tools/build_world_rooms.py` now places it there too, so a map rebuild
+  keeps the new spot.
+- The objective hint now points to Broadcast Row instead of the old "Memory
+  Annex" name.
+- `tests/neon-world.test.cjs` asserts there is exactly one hidden crystal, on
+  `5,6`, reachable from the start with no relics.
+- Cache tags bumped to `?v=round98`.
+
+## Round 99: live site link
+
+- Merged `main`'s new `CNAME` (`aethercede.com`). The README's live-build
+  link now points to https://aethercede.com/ instead of the old Cardbound
+  Pages URL.
+- The only remaining `cardbound` strings are intentional:
+  - the save migration, which reads old `cardbound-` storage keys;
+  - import of old `cardbound-save` files;
+  - the `achubu/Cardbound` repo name;
+  - CHANGES.md history.
+
+## Round 100: Neon Aftermath rooms painted one image each (first 12)
+
+- Neon Aftermath is being repainted one room per image, so each room gets about
+  three times the detail of a 3×3-room district painting.
+  - Rooms with their own painting live in `assets/environment/rooms/room-X-Y.webp`.
+  - The first 12: the whole top row (`0,4`–`8,4`) and the three harbor rooms
+    `0,5`, `1,5` and `2,5`.
+  - Every other room keeps its slice of the old district painting until it is
+    repainted.
+- `paintNeonWorld()` draws a room's own painting onto a full-resolution canvas
+  (2000×1250, still shown at 800×500 by CSS), so it stays sharp when scaled up
+  on large and high-DPI screens.
+- New `tools/build_room_masks.py`:
+  - traces each room image's pale teal streets (plus crosswalk and lane paint);
+  - joins pieces split by a short straight gap, such as the Spire Gate arch and
+    tower or the Warden's Crown crosswalk;
+  - keeps only street that reaches the room's exits;
+  - writes the result into the world walk mask and the `NEON_ROOM_ART` list in
+    `assets/neon-world.js`.
+  - Re-run it after adding room images.
+- Looser crossings (`neonLoose()` / `neonLandingFrom()`):
+  - Separately painted rooms don't line their streets up exactly with their
+    neighbours.
+  - Between two rooms where either has its own painting, any street reaching
+    the shared edge is a door, and you arrive on the nearest street along the
+    far edge.
+  - Old district rooms keep the strict street-to-street rule, so their painted
+    dead ends stay closed.
+- Mask cells straddling a room boundary: rooms are 500px tall but mask cells
+  are 8px. Lookups inside a room now never read past the room's own last full
+  cell, so a room's bottom edge no longer reads the street of the room below.
+- Points of interest keep the base rule of standing 150px clear of patrols.
+  The 100px fallback is gone, and a room with no such spot gets none.
+- New `tests/room-art.test.cjs` checks every painted room:
+  - its image exists;
+  - its exits have usable doors;
+  - crossings land on a street, both ways;
+  - it is drawn at full resolution.
+- `tests/neon-world.test.cjs` now checks landings with `neonLandingFrom()`.
+- Cache tags bumped to `?v=round100`.
+
+## Round 101: small chests and objects on their own spots off the road
+
+- Chests, relics and every point of interest are now small markers, about a
+  third of their old size. That includes data terminals, shrines, campfires,
+  caches, events, the merchant and Nexus Waypoints. Labels are 9px.
+  - Chests: 20px.
+  - Points of interest: 20px.
+  - Relics: 24px.
+  - Hidden crystal: 14×18.
+- In painted Neon Aftermath rooms they stand on hand-checked open ground off
+  the road (`NOOKS` in `tools/build_room_masks.py`, written to `NEON_NOOKS`).
+  - Spots were found by growing outline-free ground out from the road edge,
+    since buildings and props in the pixel art have dark outlines.
+  - Every spot was then checked by eye. Spots on roofs, props, rails or
+    container stacks were dropped, as were any closer than 30px to the road.
+  - The three Citadel rooms' spots were picked by hand on their paved
+    courtyards.
+- Each spot has its own footpath from the street:
+  - baked into the walk mask, starting 12px inside the road;
+  - ending 16px short of the object's base, so you stand in front of it;
+  - drawn as a faint dotted trail over the painting.
+- Order per room: relic first, then chest, then the room's point of interest.
+  A point of interest moves on to a later spot to stay 150px clear of patrols.
+  The start waypoint and the Moon Lens use spots too.
+- `tests/room-art.test.cjs` now also checks every spot:
+  - it is off the road;
+  - it is not walkable itself;
+  - it is within reach of its path;
+  - it is reachable.
+  It also checks that the points of interest, the relic and the waypoint use
+  spots, and that the markers are small.
+- Cache tags bumped to `?v=round101`.
+
+## Round 102: the Neon Aftermath map is drawn from the streets
+
+- The exploration map (M) no longer pastes room paintings together, because
+  separately painted rooms don't line up as one picture. Each explored Neon
+  Aftermath room is drawn from the walk mask instead (`mapPathTile()` in
+  `assets/map-terrain.js`):
+  - a dark street surface with a one-cell neon rim and a soft glow;
+  - set on dark ground with faint city blocks.
+- The mask is one continuous world, so streets run cleanly from room to room.
+- Other worlds keep their art-based map.
+- Cache tags bumped to `?v=round102`.
+
+## Round 103: new Sunken Warehouses painting
+
+- Room `2,5` (Sunken Warehouses) is repainted with a fountain roundabout, a
+  quay and the city edge. The fountain island is part of the walkable plaza.
+- Its item spot moved to the open quay paving beside the crane, (250, 233).
+- Cache tags bumped to `?v=round103`.
+
+## Round 104: relaxed pathing in Neon Aftermath
+
+- Playtest finding: you could only walk on the painted asphalt, so sidewalks,
+  kerbs and plaza edges blocked you. On touch, any tap within 170px of a side
+  edge or 110px of the top/bottom (plus the outer 20% of the screen) was taken
+  as "leave the room", which made roads near the edges hard to use.
+- Streets are widened by `NEON_RELAX` = 2 mask cells (16px) on every side, at
+  load time in `assets/neon-world.js`.
+  - This covers sidewalks, kerbs, plaza edges and narrow necks.
+  - Widening happens only inside each room, never across a room boundary, and
+    not in the outer 16px band of a room, so the crossings between rooms are
+    exactly as before.
+  - Object spots stay off the path.
+- Touch controls (`assets/touch-controls.js`):
+  - Only a tap within 44px (sides) or 34px (top/bottom) of an edge, or the outer
+    5% of the screen, means "exit".
+  - Exits, from a tap at an edge or on an exit sign, head for the street that
+    actually leaves on that side (`organicDoor`), not the middle of the edge.
+  - A tap on a spot that can't be reached walks you to the closest reachable
+    spot within 90px, instead of "Tap an open path nearby".
+  - The bottom hint bar no longer swallows taps (`pointer-events:none`).
+- Playtested in the browser across all 12 painted rooms:
+  - keyboard movement in four directions;
+  - tap-to-move to 12 street points per room (all reached, apart from taps right
+    at an exit, which correctly take you through);
+  - walking by exit signs from the start through the harbor.
+- The pathing playtest test passes.
+- New checks in `tests/room-art.test.cjs`.
+- Cache tags bumped to `?v=round104`.
+
+## Round 105: map connections always line up
+
+- On the exploration map, every Neon Aftermath room's streets are trimmed back
+  32px from its edges.
+- Each real exit is redrawn as one connector (`mapSeam()`):
+  - Both rooms compute it from the same shared-edge data, so the two halves
+    meet at the same point and width.
+  - Further crossings on the same edge are kept only where the two rooms'
+    streets really meet (within 70px).
+- Street stubs that reach an edge with no exit, or with no partner across it,
+  are cut from the map. Gameplay pathing is unchanged.
+- Cache tags bumped to `?v=round105`.
+- Follow-up: connectors attach only to street patches of at least 120 mask
+  cells, so a thin sliver next to an edge can't capture a crossing. Smaller
+  patches are cut from the map. This fixes Lantern Market → Neon Arcade, which
+  had hooked onto an isolated sliver at the top of Neon Arcade.
+
+## Round 106: Holo Stage painting
+
+- Room `5,5` (Holo Stage) has its own painting: a four-way crossroads with the
+  hologram stage. That makes 13 painted rooms.
+- Its item spot is in the open plaza in front of the stage, (118, 128).
+- Cache tags bumped to `?v=round106`.
+
+## Round 107: Fountain Row painting
+
+- Room `1,6` (Fountain Row) has its own painting: a four-way crossroads with a
+  paved fountain plaza, which is walkable. That makes 14 painted rooms.
+- Its item spot is beside the scrap pile in the dock yard, (560, 420).
+  Candidate spots on rooftops and planters were rejected.
+- Cache tags bumped to `?v=round107`.
+
+## Round 108: Neon Square painting
+
+- Room `4,5` (Neon Square) has its own painting: a T-junction lined with
+  shops. That makes 15 painted rooms.
+- Its sidewalks are walkable, so the only open ground off the path is a
+  storefront alcove between a kiosk and the planters, (236, 120).
+  - That spot holds the room's point of interest, including Neon Aftermath's
+    second Nexus Waypoint.
+  - Spots on café umbrellas and shop signs were rejected.
+- A Nexus Waypoint now always takes its spot, even with a patrol within 150px
+  (it is not a fight). Before, it fell back to the middle of the road.
+- Cache tags bumped to `?v=round108`.
+
+## Round 109: Harbor Gardens painting
+
+- Room `0,6` (Harbor Gardens) has its own painting: a bend in the harbor road
+  with the lighthouse and piers. That makes 16 painted rooms.
+- Streets reach its top and right exits. The street stub at the bottom edge
+  is a painted dead end.
+- Its item spot is on the concrete quay beside the crane, (330, 200).
+  Candidates in the water, on a container, or with a footpath across props
+  were rejected.
+- Cache tags bumped to `?v=round109`.
+
+## Round 110: Amethyst Causeway painting
+
+- Room `6,5` (Amethyst Causeway) has its own painting: a T-junction among the
+  Citadel waterfalls. That makes 17 painted rooms.
+- Streets reach its exits on the top, bottom and left (the east side has no
+  exit).
+- Its item spot is on open stone ground by the south gate, (520, 440).
+- Cache tags bumped to `?v=round110`.
+
+## Round 111: Citadel Heart and Prism Steps paintings
+
+- Room `7,5` (Citadel Heart) has its own painting: a gothic-arched avenue with
+  a castle row on the east side. Streets reach its exits on the top, bottom
+  and right.
+- Room `8,5` (Prism Steps) has its own painting: a crossroads among crystal
+  spires and falls. Streets reach its exits on the top, bottom and left.
+- That makes 19 painted rooms.
+- Item spots:
+  - `7,5`: the terrace by the chapel door, (300, 240).
+  - `8,5`: the stone plaza in front of the twin falls, (590, 175).
+  - Candidates in a fenced pool and on rooftops were rejected.
+- Cache tags bumped to `?v=round111`.
+
+## Round 112: Neon Arcade painting
+
+- Room `3,5` (Neon Arcade) has its own painting: an arcade street with a side
+  road east. Streets reach its exits on the top, bottom and right.
+- That makes 20 painted rooms, and the top two rows are complete.
+- Its item spot is on the shopfront pavement beside an arcade cabinet,
+  (300, 395). A candidate on a vending machine was rejected.
+- Cache tags bumped to `?v=round112`.
+
+## Round 113: Tidewall Street painting
+
+- Room `2,6` (Tidewall Street) has its own painting: a harbor-side bend with
+  warehouses and piers. Streets reach its exits on the top and left.
+- That makes 21 painted rooms.
+- No item spot yet: from here on, rooms go in first and their spots are
+  picked in one pass once every room is painted. Until then chests and relics
+  use the automatic placement beside the road.
+- Cache tags bumped to `?v=round113`.
+
+## Round 114: the rest of row 6 painted
+
+- Rooms `3,6` Canal Walk, `4,6` Glowstep Lane, `5,6` Broadcast Row,
+  `6,6` Shattered Aqueduct, `7,6` Violet Crossing and `8,6` Crystal Falls have
+  their own paintings. That makes 27 painted rooms: rows 4, 5 and 6 are
+  complete.
+- `tools/build_room_masks.py` gained `extend_to_edges()`. Some paintings have a
+  dark border strip (10px in Glowstep Lane, 60px in Violet Crossing), so a
+  street stopped just short of its exit edge. Any street within 80px of an exit
+  side with no street at the edge is now carried straight out to it.
+- No item spots for these rooms yet. Spots for every room are picked in one
+  pass once all rooms are painted.
+- Cache tags bumped to `?v=round114`.
+
+## Round 115: row 7 west half painted
+
+- Rooms `0,7` Bandstand Ruins, `1,7` Blossom Grove, `2,7` Carousel Green,
+  `3,7` Pagoda Court and `4,7` Dragon Gate have their own paintings. Each
+  reaches all of its exits.
+- That makes 32 painted rooms.
+- The tracer also picks up the paved park footpaths in these garden rooms, so
+  they are walkable, in line with the relaxed pathing.
+- No item spots yet; they will be picked once all rooms are painted.
+- Cache tags bumped to `?v=round115`.
+
+## Round 116: Moon Temple and Scrapyard Gate painted
+
+- Room `5,7` Moon Temple has its own painting: a wide temple plaza, which gives
+  room for the boss fight and holds the Ember Sigil relic and a chest. Streets
+  reach its exits on the left and bottom.
+- Room `6,7` Scrapyard Gate has its own painting: the junkyard entrance.
+  Streets reach its exits on the right and bottom. The street stub at the top
+  edge is a painted dead end.
+- That makes 34 painted rooms.
+- Re-uploaded `2,7`, `3,7` and `4,7` were byte-identical to the earlier files,
+  so nothing changed for them.
+- Item spots (including the Ember Sigil and the chest) will be picked once all
+  rooms are painted. Until then they use the automatic placement beside the
+  road.
+- Cache tags bumped to `?v=round116`.
+- `tests/rebalance.test.cjs`: the Elaris chest check reused the city chest's
+  position, which now depends on Moon Temple's painting. It now checks Elaris
+  rooms at the default chest spot (330, 180).
+
+## Round 117: Parking Garage and Overpass Ramp painted
+
+- Room `7,7` Parking Garage has its own painting. Streets reach its exits on
+  the top and left. The top exit still needs the Ember Sigil.
+- Room `8,7` Overpass Ramp has its own painting. Its street reaches its bottom
+  exit. The overpass stubs at the top and right edges are painted dead ends.
+- Row 7 is complete; that makes 36 painted rooms.
+- Cache tags bumped to `?v=round117`.
+
+## Round 118: row 8 west third painted
+
+- Rooms `0,8` Willow Paths, `1,8` Old Oak Lawn and `2,8` Lake Bridge have their
+  own park paintings. Each reaches all of its exits. Lake Bridge's east exit
+  still needs the Moon Lens.
+- That makes 39 painted rooms.
+- Re-uploaded `2,6` and `8,7` were identical to the files already in, so
+  nothing changed for them.
+- Cache tags bumped to `?v=round118`.
+
+## Round 119: new Willow Paths painting (room 0,8)
+
+- Replaced `assets/environment/rooms/room-0-8.webp` with the owner's new Willow Paths
+  painting. Its streets reach the top, right and bottom exits, so all three crossings work.
+- Re-ran `tools/build_room_masks.py`. Still 39 painted rooms.
+- No item spots for this room yet. Per the owner, spots are picked in one pass once every
+  room image is in place.
+
+## Round 120: rooms 3,8 to 7,8 painted (Koi Garden, Lantern Street, Noodle Row, Faded Lots, Ruined Tower Lot)
+
+- Wired in five new room paintings in row 8. The streets in each one reach every exit the
+  room needs (3,8 / 4,8 / 5,8: all four; 6,8: top, bottom, left; 7,8: right and bottom).
+- Re-ran `tools/build_room_masks.py`. 44 painted rooms.
+- The room-art test's "old rooms stay strict" pair moves to 3,9 / 4,9, which are still unpainted.
+- No item spots for these rooms yet, per the owner's hold until every room is in.
+
+## Round 121: rooms 8,8, 0,9 and 1,9 painted (Collapsed Freeway, Statue Garden, row 9)
+
+- Wired in three new room paintings. Their streets reach every exit the room needs
+  (8,8: top, bottom, left; 0,9: top and right; 1,9: top, left, right).
+- The 3,5 and 1,6 uploads in the same batch match the paintings already in the game, so
+  those files are unchanged.
+- Re-ran `tools/build_room_masks.py`. 47 painted rooms.
+- No item spots for the new rooms yet, per the owner's hold until every room is in.
+
+## Round 122: rooms without item spots fall back to beside-the-street placement
+
+- `neonNooks()` now treats a painted room with an empty spot list as having no spots. Before,
+  the Koi Garden (3,8) Nexus Waypoint stood in the middle of the crossroads. That broke the
+  neon-world, item-placement and exploration tests. Those rooms' points of interest, chests and
+  relics now use `organicItemSpot` beside the street until their spots are picked.
+
+## Round 123: market card upgrades cost three times as much
+
+- The Wandering Merchant's card upgrades now cost ◇ 36 to level 1, ◇ 60 to level 2 and ◇ 90 to
+  level 3 (were 12 / 20 / 30), at the owner's request. The merchant's listing and the upgrade
+  menu show the new prices. Nothing else in the shop changes.
+- `tests/exploration.test.cjs` checks the new prices and the purchase amounts.
+
+## Round 124: the minimap looks like the large map
+
+- The minimap now draws the same terrain as the exploration map: the stylized neon streets
+  (or each world's room art), the fog and survey grid, the ragged frontier and the gold frame
+  on your room. It is framed on the rooms around you (one room out, clamped to the world).
+- `drawMapTerrain(canvas, tileW, bounds)` takes optional bounds. `renderMinimap` is wrapped in
+  `assets/map-terrain.js`, and redraws only when the room or the explored set changes.
+- `tests/map-terrain.test.cjs` checks the minimap framing and size.
+
+## Round 125: victory loot shows as pictures
+
+- Every piece of loot on the victory screen now has a graphic, not just a line of text
+  (end of `assets/pickups.js`):
+  - Cards won in the fight show as cards. That includes the covenant cards, boss Soulbound
+    cards and a side deck card offered alongside a card choice.
+  - Crystals keep their existing art.
+  - Potions, Shards, completed bounties, Vigil healing, XP, level-ups, new side deck slots and
+    an empty chest each get a small illustrated tile (inline SVG; the empty chest uses the
+    loot-chest image, greyed).
+- The text lines those tiles replace are removed. Story lines (a portal opening) and missed
+  bounties stay as text.
+- `winBattle` records the cards each win adds (`b.newCards`).
+- New `tests/loot-art.test.cjs` checks which lines become tiles and that won cards are tracked.
+
+## Round 126: talents use a fixed ×1.4, no world scaling
+
+- `talentScale()` is now a flat 1.4 in every world. It was ×1, ×1.3, ×1.6 and ×1.9 for Neon
+  Aftermath, Elaris, Vespera and Chronospire.
+- Affects the talents that used it, rounded per rank total: Reactive Plating, Bulwark Doctrine,
+  Retaliation Coil, Siphon Edge, Counter Weave, Reflux, and Weaken strength (Deep Interference).
+- Talent descriptions say "Boosted ×1.4" instead of the per-world multipliers.
+- Tests updated: round76, chronospire, talent-matrix, card-variety, plating-armor.
+
+## Round 127: objects standing on a road count as road
+
+- `tools/build_room_masks.py` has a new `fill_road_objects` step. Along every row and column,
+  a gap of up to 170px between two stretches of wide street (at least 50px across) is filled
+  in, so a gate arch, a bridge, a fountain or debris lying across a street no longer blocks the
+  way. Alleys and paths between buildings are too narrow to count, so buildings stay blocked.
+  Thin slivers along kerbs and walls are dropped.
+- Prime example: the Dragon Gate (4,7) arch is now walked straight through. The fountain plaza
+  in Fountain Row (1,6) and debris on the Collapsed Freeway (8,8) also open up.
+- Re-ran the tool. `tests/room-art.test.cjs` checks the Dragon Gate.
+
+## Round 128: smaller hero
+
+- The main character is drawn 20% smaller in the world (`#player .hero-sprite` scaled to 0.8,
+  from the feet, so they still stand where the game puts them). The breathing animation keeps
+  the smaller size, and the ground shadow is narrower to match. Movement and hit areas are
+  unchanged.
+
+## Round 129: tap a card's copy count to see every copy
+
+- In the Deck Workshop, the ×N count on a card is now a button. It opens a window listing every
+  copy of that card (Soulbound and Impermanent, all levels). Each copy shows its art, type,
+  level, a mastery bar with uses so far, and whether it is in the active deck.
+- Each copy has its own buttons: put in deck / remove from deck (same deck size, copy limit and
+  minimum rules as before) and Upgrade · 1 crystal for a mastered Soulbound copy. Impermanent
+  copies show "Upgrades itself".
+- The count also appears on a single tile when other copies of the card exist at another level.
+- New helpers in `index.html`: `cardCopies`, `addCopyToDeck`, `removeCopyFromDeck`,
+  `upgradeCopy`, `showCardCopies`. New `tests/card-copies.test.cjs`.
+
+## Round 130: 30% fewer card drops
+
+- Loot chests now hold a card choice 28% of the time (was 40%). The 12 points go to healing
+  potions (35% to 47%). Soulbound jackpot, Upgrade Crystal and empty-chest odds are unchanged.
+- Elites used to turn every potion or empty chest into a card choice. Now they do it 70% of the
+  time (`ELITE_CARD_ODDS`), so their card drops are also cut by 30%.
+- Boss, mini-boss, covenant and side deck card drops are unchanged.
+- `tests/rebalance.test.cjs` checks the new 72% boundary and the elite odds.
+
+## Round 131: new Sunken Warehouses (2,5) and Neon Square (4,5) paintings
+
+- Replaced both room images with the owner's new versions. Sunken Warehouses' street reaches
+  top and bottom; Neon Square's reaches left, right and bottom, as each room needs.
+- Their old item spots (picked for the old paintings) are removed. Those rooms' points of
+  interest, chests and relics fall back to beside-the-street placement until the item-spot pass
+  once every room is in.
+- Re-ran `tools/build_room_masks.py`. Still 47 painted rooms.
+
+## Round 132: the last seven rooms are painted (row 9), all 54 done
+
+- Wired in Fountain Circle (2,9), Jade Alley (3,9), Paper Lantern Way (4,9), Red Lantern
+  Market (5,9), Tire Mountains (6,9), South Lot (7,9) and Scrap Fortress (8,9). Every street
+  reaches the exits its room needs.
+- Every Neon Aftermath room now has its own painting, so every crossing uses the loose rule.
+  The room-art test's "old rooms stay strict" check is now "all 54 rooms are painted".
+- Re-ran `tools/build_room_masks.py`. Next: the item-spot pass for the rooms that have none.
+
+## Round 133: item spots for every painted room
+
+- With all 54 rooms painted, every room painted after Round 101 now has hand-checked item spots
+  (`NOOKS` in `tools/build_room_masks.py`): 35 rooms, 101 spots in all.
+- Candidates were traced automatically (open ground 40-85px from the street, away from water,
+  low texture), then checked by eye on each painting. Spots sit on open ground (dirt, grass,
+  sidewalks, docks, parking lots), never on roofs, statues, benches, stalls or water. Three
+  hand-placed spots on paving that counts as road were swapped out.
+- The Briarstep Boots relic in Statue Garden (0,9) now stands at the boots cave in the painting.
+- Broadcast Row (5,6) has no open ground beside its street, so it keeps beside-the-street
+  placement.
+- `tests/room-art.test.cjs` now expects 100+ spots and that only 5,6 has none. Every spot passes
+  the existing checks: off the path, its own footpath, reachable.
+
+## Round 134: side deck on the left of the hand
+
+- In battle, the side deck column now sits on the left of your hand instead of the right
+  (`row.prepend(col)` in `assets/aether-deck.js`), on desktop and phone.
+- `tests/aether-deck.test.cjs` checks the order.
+
+## Round 135: new Holo Stage painting (room 5,5)
+
+- Replaced the Holo Stage image with the owner's new version (concert stage in the south-west
+  block). The crossroads reaches all four exits.
+- New item spots on open ground in the concert lot, (268, 318) and (255, 440), replacing the
+  spot picked for the old painting.
+- Re-ran `tools/build_room_masks.py`.
+
+## Round 136: first-world unlock items are visible while guarded
+
+Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briarstep Boots 0,9):
+- All three relic rooms are reachable from the start, you can stand next to each relic, each is
+  collected once its room is cleared, and the six locked doors open with their relic. With all
+  three, every one of the 54 rooms is reachable.
+- The problem: a relic stayed invisible until every enemy in its room was beaten, and nothing
+  said so. Now a guarded relic is always shown, dimmed with a 🔒, and walking up to it says how
+  many enemies are left ("Briarstep Boots is guarded. Defeat the 2 enemies in this area to claim
+  it."). Picking it up still needs the room cleared (end of `assets/pickups.js`).
+- The objective hints name the exact rooms and say to beat the guards (Moon Temple, Statue
+  Garden in the south-west of the park, Billboard Steps above the Holo Stage).
+- New `tests/relic-quest.test.cjs` plays the whole chain.
+
+## Round 137: painted sprites for points of interest
+
+- Five new owner sprites (Gemini, magenta background keyed out, cropped, 256px WebP with alpha)
+  in `assets/items/poi/`: Nexus Waypoint, Data Terminal, Sealed Cache, Supply Cache, Aether
+  Shrine.
+- In the world they replace the round emoji badges: 44px, standing on their spot (anchored near
+  the bottom), name label below, greyed out once used (end of `assets/pickups.js`).
+- The Data Terminal sprite is used for Neon Aftermath's lore points only; Elaris and Vespera
+  lore stones, the campfire and the merchant keep their badges until they get art.
+- New `tests/poi-art.test.cjs`.
+
+## Round 138: merchant, campfire and event sprites; Elaris map chest
+
+- Three more owner sprites in `assets/items/poi/` (magenta keyed out, cropped, 256px WebP):
+  Wandering Merchant, Campfire and the event marker (glowing "?" beacon). They replace those
+  emoji badges in every world.
+- Map chests in Elaris now use the new `elaris-chest.webp`. Map chests in the other worlds keep
+  the original `assets/items/loot-chest.png`, and the loot chest shown after a battle is
+  unchanged.
+- `tests/poi-art.test.cjs` covers the new sprites and the Elaris chest.
+
+## Round 139: Neon Aftermath 10% harder
+
+- New `BALANCE.difficulty` knob (per world, applied last in `enemyStats`). Neon Aftermath is set
+  to 1.1: every enemy there (regulars, elites, mini-bosses and the Thorn Warden) has 10% more
+  health and 10% more attack, rounded. Other worlds stay at 1.
+- Examples: Emberling 36/7 → 40/8, Moon Knight 73/13 → 80/14, Thorn Warden 149/17 → 164/19.
+
+## Round 140: Upgrade Crystals 1%, card choices 25%
+
+- Loot chest after a fight: Soulbound card 1% (unchanged), Upgrade Crystal 1% (was 4%), empty
+  20% (unchanged), healing potion 53% (was 47%), card choice 25% (was 28%).
+- Mini-bosses still always drop one Upgrade Crystal; elites still turn a potion or empty chest
+  into a card choice 70% of the time.
+- `tests/rebalance.test.cjs` checks the new boundaries.
+
+## Round 141: destroying a card gives Shards
+
+- Destroying an Impermanent card in the Deck Workshop now salvages Shards (◇):
+  5 × (level + 1), so Level 0 → 5, Level 1 → 10, Level 2 → 15, Level 3 → 20
+  (`destroySalvage` in `index.html`). The button shows the amount ("Destroy card · +◇ 15") and
+  a message confirms it. Soulbound cards still can't be destroyed.
+- `tests/card-copies.test.cjs` checks the amounts. (First pushed as Upgrade Crystals; the owner meant Shards.)
+
+## Round 142: destroy salvage by level
+
+- Destroying a card now gives ◇ 5 / 20 / 50 / 100 Shards for Level 0 / 1 / 2 / 3
+  (`DESTROY_SHARDS` in `index.html`), replacing Round 141's 5 per level.
+
+## Round 143: bigger Wandering Merchant
+
+- The merchant sprite is drawn at 72px (other points of interest stay 44px) with a warm glow
+  so it stands out; its name label sits below it. `tests/poi-art.test.cjs` checks the size.
+
+## Round 144: choose your side card at the merchant (◇ 100)
+
+- The merchant's side deck card now costs ◇ 100 (was 10) and is no longer random: "Buy Side
+  deck card" opens a picker with every side card available in this world (as cards, with how
+  many you already own). Picking one pays and adds it; still one per merchant visit.
+- `buySideCard` / `openSidePicker` in `assets/exploration.js`; `tests/exploration.test.cjs`
+  covers the price, the free picker, getting the chosen card and the once-per-visit limit.
+
+## Round 145: Aetherlink crystals 20% rarer
+
+- Elites now drop an Aetherlink crystal 6.4% of the time (was 8%), as `ELITE_AETHERLINK_ODDS`
+  in `assets/expansion.js`. Type (Capacity / Assault / Aegis) and rarity odds (80 / 17 / 3%)
+  are unchanged. `tests/rebalance.test.cjs` checks the value.
+
+## Round 146: points of interest show what you got
+
+- Using a point of interest that gives you something now opens an "Acquired" window with
+  pictures instead of only a passing message: side cards and cards as cards, plus Shards,
+  potion, healing and blessing tiles (end of `assets/pickups.js`). Covers the Data Terminal
+  (its +2 Shards, and on the fifth terminal the +15 Shards and side card that weren't shown
+  before), supply and sealed caches, events, campfire rests and shrines. The merchant keeps
+  its own screens.
+- New `tests/poi-rewards.test.cjs`.
+
+## Round 147: Aetherlink gauntlet art
+
+- The owner's gauntlet painting (magenta keyed out, the purple glow kept as a soft halo) is in
+  `assets/items/aetherlink-gauntlet.webp` and shown at the top of the Aetherlink screen.
+- Its five painted sockets show the game state: each slotted crystal is drawn in its socket
+  with a rarity glow, open sockets stay empty, and sockets not yet unlocked are dimmed with a
+  lock; hovering a socket names it (`gauntletHTML` in `assets/pickups.js`).
+- The screen's drop-rate note now reads the real elite odds (6.4%) instead of a fixed "8%".
+- `tests/poi-art.test.cjs` checks the five sockets, a slotted crystal and the locks.
+
+## Round 148: the Aetherlink interface on the new gauntlet screen
+
+- New owner gauntlet painting (`assets/items/aetherlink-gauntlet.webp`, from the clean
+  "blankaetherlink" version, magenta keyed out) replaces Round 147's.
+- The real Aetherlink socket panels are drawn on its screen (`GAUNTLET_SCREEN` in
+  `assets/pickups.js`): five sockets side by side, each with its crystal, name, effect and
+  crystal picker, or its unlock level. Text is sized to the gauntlet (container units) and
+  checked to fit at desktop and tablet widths.
+- On narrow screens each socket shows just its number and crystal; tapping a socket opens the
+  crystal picker. Names and effects are still listed in the collection below.
+- `tests/poi-art.test.cjs` checks the screen position and that the panels move onto it.
+
+## Round 149: world 2 becomes Solaris (work in progress)
+
+- World 2 (region id still `elaris`, so saves carry over; the name "Elaris" is kept for a
+  later world) is now **Solaris**, a sun-scorched desert city on a 9×6, 54-room grid: Neon
+  Aftermath's layout mirrored top-to-bottom, start at 0,0 (Dawnfire Gate), mini-bosses at 5,2
+  (Temple of the Noon Bell) and 8,0 (Mirror Fortress), the Bloom Tyrant at 8,5 (The Solar
+  Crown). Levels 10-17 by distance from the start, 18 for the boss room.
+- Rooms are painted from a small kit of flippable tiles: `tools/build_solaris.py` picks a tile
+  and a flip for every room (neighbours get different variants), traces the streets once per
+  tile and writes the world walk mask, plan and layout to `assets/solaris-data.js`.
+  `assets/solaris.js` draws the flipped tile and plugs the mask into the painted-world engine
+  (loose crossings, stylized map).
+- Owner tiles so far (`assets/environment/solaris/src/`): corner-a, corner-b, t-bottom-a,
+  t-bottom-b, t-right-a. Placeholders cut from them stand in for the crossroads, straight
+  road and both dead ends until those are painted.
+- Old saves standing in an Elaris room resume at Dawnfire Gate. Visible "Elaris" text now
+  says "Solaris".
+
+## Round 150: killing blows through enemy Block, Frail and Barrier land
+
+- Bug (owner report): "Bulwark Bash · 31 damage − 5 block = 1 dealt" and "30 damage − 5 block
+  = 6 dealt · Frail: −2". When a hit took the enemy to 0 HP, enemy Block, Frail and Barrier
+  were subtracted from the HP the enemy had left instead of from the whole hit, so a hit
+  that should have killed left the enemy alive with a few HP.
+- The base card effect now records the full hit (`b._hitTotal`); the Block wrapper
+  (`encounter-depth.js`) and the Frail/Barrier wrapper (`aether-deck.js`) work from the full
+  hit on a killing blow and set the enemy's HP once at the end. Hits that don't kill are
+  unchanged.
+- `tests/card-variety.test.cjs` covers kills and non-kills with Block, Frail and Barrier.
+
+## Round 151: Solaris portal art; smaller, glowing portals
+
+- New owner painting `assets/environment/solaris-portal.webp` (magenta keyed out by flood fill
+  from the edges, so the neon signs inside the arch survive): a sandstone sun-gate with the
+  neon city inside. It replaces the old forest portal for the Solaris portal that leads back
+  to Neon Aftermath (`assets/solaris.js`).
+- Every portal is drawn at half its old size (48×72, the sun-gate 59×79) and pulses with a
+  soft glow (cyan; gold and cyan for the sun-gate). Reduced-motion players get a steady glow.
+- `tests/poi-art.test.cjs` checks the art and sizes.
+
+## Round 152: make a card Soulbound for 500 Shards
+
+- Impermanent cards get a "Make Soulbound · ◇ 500" button in the Deck Workshop (it binds the
+  most-used copy in the stack) and on each copy in the all-copies window. The card keeps its
+  level and mastery uses; from then on it is protected and levels up the Soulbound way
+  (mastery plus an Upgrade Crystal). `soulbindCard` / `SOULBIND_COST` in `index.html`.
+- `tests/card-copies.test.cjs` checks the price, the kept level and uses, and that it binds once.
+
+## Round 153: the Cardsmith
+
+- Every world now has a **Cardsmith** (⚒) in its start room, beside the Nexus Waypoint
+  (`assets/cardsmith.js`). Walk up to it to:
+  - upgrade an Impermanent card by one level (◇ 36 / 60 / 90, same prices as the merchant);
+  - make an Impermanent card Soulbound (◇ 500; it keeps its level and mastery).
+- The "Make Soulbound" buttons added to the Deck Workshop in Round 152 moved to the Cardsmith.
+  The merchant still sells card upgrades too.
+- New `tests/cardsmith.test.cjs`. CLAUDE.md now lists `solaris` and `cardsmith` in the script
+  order and notes that `elaris` is shown as Solaris.
+
+## Round 154: Solaris sprites for the merchant, Cardsmith, Sun Dials and chests
+
+- Four owner sprites (magenta keyed out by flood fill from the edges, plus enclosed pockets of
+  the background colour, e.g. under the awnings) in `assets/items/poi/`: `sol-merchant`,
+  `sol-cardsmith`, `sol-sundial`, `sol-chest`.
+- In Solaris they replace the merchant, the ⚒ Cardsmith badge, the ☀ Sun Dial badge and the
+  forest chest on the map (end of `assets/cardsmith.js`). Other worlds keep their own art.
+- `tests/cardsmith.test.cjs` checks the files and that they are used in Solaris only.
+
+## Round 155: city portal into Solaris
+
+- New owner painting `assets/environment/city-solaris-portal.webp`: a steel-and-neon gate with
+  the sunlit desert city inside. It replaces the old forest portal for the Neon Aftermath
+  portal into Solaris (Warden's Crown), half size with the cyan pulsing glow
+  (`assets/solaris.js`). `tests/poi-art.test.cjs` checks it.
+
+## Round 156: the Cardsmith moves to the middle of each world
+
+- The Cardsmith now stands in the room of each world's middle Nexus Waypoint instead of the
+  start room: Neon Square (city), Brass Yards (Solaris), Glasswind Reach (Vespera), Hourglass
+  Hall (Chronospire), about halfway in. Its spot keeps clear of the waypoint and the room's
+  patrols. `tests/cardsmith.test.cjs` checks the room and the clearance.
+
+## Round 157: lore points hold 15 Shards
+
+- Each lore point (Data Terminal in Neon Aftermath, Sun Dial in Solaris, Storm Glyph in
+  Vespera, and Chronospire's) now gives ◇ 15 Shards when read, up from 2 (`LORE_SHARDS` in
+  `assets/exploration.js`). Reading all five in a world still adds ◇ 15 and a side card.
+- `tests/exploration.test.cjs` checks the new total.
+
+## Round 158: caches hold more Shards
+
+- Supply caches now give ◇ 15 Shards (was 3-6; the 25% chance of a potion is unchanged).
+- Sealed caches now give ◇ 25 on a good pry (was 9); the other 50% still shocks you for 15%
+  of your max HP. They stay worth more than a supply cache because of that risk.
+- `CACHE_SHARDS` / `SEALED_SHARDS` in `assets/exploration.js`; `tests/exploration.test.cjs`
+  checks both.
+
+## Round 159: side deck cards stack; destroy a copy for 5 Shards
+
+- In the Deck Workshop's side deck panel, copies of the same side card now stack into one tile
+  with a ×N count and an "x of N copies in side deck" line, like the main deck. Each stack has
+  "+ Add a copy", "− Remove a copy" and "Destroy a copy · +◇ 5".
+- Destroying a side card removes a spare copy first (one not in the side deck) and gives
+  ◇ 5 Shards (`destroySideCard`, `SIDE_DESTROY_SHARDS` in `assets/aether-deck.js`).
+- `tests/aether-deck.test.cjs` checks the stacking and the Shards.
+
+## Round 160: boosted talents climb in steps
+
+- The ×1.4 multiplier on talents is gone (`talentScale()` is now 1). Boosted talents use fixed
+  steps instead: ranks 1-5 count as 1, 2, 4, 6, 8 (`TALENT_STEPS` in `index.html`).
+  - Bulwark Doctrine: +1 / +2 / +4 Block on Defense cards.
+  - Retaliation Coil: 1 / 2 / 4 damage back.
+  - Counter Weave: +2 / +4 / +8 counter damage. Reflux: 2 / 4 / 8 HP.
+  - Siphon Edge: 1 / 2 HP.
+  - Reactive Plating: +1 / +2 / +4 / +6 / +8 Armor.
+  - Deep Interference: Weaken 3 + 3 per step (6 / 9 / 15 / 21 / 27); base Weaken is 3 again.
+- Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
+  talent-matrix, card-variety, plating-armor.
+
+## Round 248: a pair walks side by side, without overlapping
+
+- Owner request: a group's units should stand close together but never overlap.
+- The partner is drawn full size right beside the leader with a small gap (about 10px between the
+  sprites), on the side the leader walks away from.
+- The patrol loop turns only the leader's sprite (`--enemy-facing`); a small frame loop in
+  `enemy-pairs.js` copies that onto the pair, so the partner swaps sides when the patrol turns.
+- Checked in the browser: no overlap either way.
+
+## Round 247: more pairs, walking together
+
+- Owner request: pair the enemies so the two walk together in the room, and more pair patrols from
+  the Sky Isles on.
+- 70% of regular patrols from the Sky Isles on are now pairs (was half). On the map the partner
+  walks with its leader as one patrol, full size, instead of a small figure on its shoulder.
+- `enemy-pairs` test: it clears a Swipe's discard before switching target. With Round 246's offset
+  the partner can charge on turn 1, and its Swipe's discard rightly holds back a switch.
+
+## Round 246: a pair's charged strikes come on different turns
+
+- The owner found it too hard to counter two charged strikes at once. The second enemy of a pair now
+  runs its move pattern offset (`b.patternShift`, read by the base `enemyPlan` in
+  `encounter-depth.js`), chosen when the fight starts (`staggerShift` in `enemy-pairs.js`) as the
+  first offset with no shared charged-strike turn over the next dozen turns.
+- So one enemy charges while the other attacks or guards, and a single Prismatic Counter can answer
+  each charged strike in turn. In every pair fight in all four worlds no turn has both charged
+  strikes (checked in `tests/enemy-pairs.test.cjs`).
+
+## Round 244: enemy Armor grows with the worlds; the pair panel shows Armor
+
+- The owner noticed enemies hardly showed Armor any more. Only Neon Aftermath's species had real
+  Armor (Round 1, 0-6). Later worlds grew HP and attack instead, while cards grew to 8-16 damage, so
+  their 0-2 Armor barely mattered, and the battle screen hides it at 0.
+- `assets/enemy-armor.js`: every enemy after Neon Aftermath has at least its world's Armor.
+  - Regular enemies range from the low to the high end of the world's range, rising toward the far
+    side (`regionDistanceFrac`): Solaris 1-2, Sky Isles 2-3, Elaris 2-4, Vespera 3-5, Chronospire 4-6.
+  - Elites +1; mini-bosses the high end +2; final bosses +3.
+  - Solaris's bosses keep their own Armor: its cards are still small, and they were already hard.
+  - A species whose own Armor is higher keeps it. Both of a pair are armored.
+  - Pierce and Breach Spike now count for more.
+- **HP compensation:** enemies that gained Armor have less HP, per world (`ARMOR_HP_FACTOR`):
+  Solaris 95%, Sky Isles 88%, Elaris 75%, Vespera 80%, Chronospire 82%. Tuned in two Difficulty lab
+  passes (with pairs at 70%). Typical wins:
+  - Bosses: Zenith Roc 22%, Bloom Tyrant 38%, Tempest Colossus 19%, Chronarch 25% (target 22-36).
+    The Bloom Tyrant was 53% before.
+  - Regular enemies mostly 70-100%. A few late species are 33-56%: Storm Moth, Static Fox,
+    Pendulum Stag.
+  - Mini-bosses 47-81%, above target as after Round 240.
+  - Solaris's bosses were already under target before this round (Noon Toller 14%, Sun Pharaoh 9%);
+    left for the owner.
+- **Fix:** the second enemy's panel in a pair fight now shows its Armor (🛡 N).
+- New `tests/enemy-armor.test.cjs`.
+
+## Round 245: a pop-up when a Swipe makes you discard
+
+- The owner found it unclear when a Swipe happens. Now the turn after one opens with a pop-up:
+  "<enemy> swiped at you", how many HP it took (and how much was blocked), and your hand to pick
+  the card to discard.
+- Clicking a card discards it and closes the pop-up. Closing the pop-up without picking leaves the
+  choice on the battle screen as before. Pair partners' swipes open it too; the simulator's bot
+  skips it (`swipePopup` in `assets/charge-swipe.js`).
+- `charge-swipe` test checks the pop-up's text; checked in the browser on desktop and phone.
+
+## Round 243: pairs of enemies from the Sky Isles on
+
+- The owner asked for regular enemies that are harder without being boring or too hard. Of the
+  options offered, they chose pairs of enemies, starting in the Sky Isles, with a new battle
+  tutorial and without making the battle screen taller.
+- `assets/enemy-pairs.js`:
+  - **Which patrols:** half of the regular patrols in the Sky Isles, Elaris, Vespera and
+    Chronospire are two enemies (`pairMateFor`; fixed per patrol and journey). The partner is a
+    species from a neighbouring zone. Bosses, mini-bosses and elites never pair.
+  - **On the map:** the partner stands beside the patrol, with "×2 · A + B" in its name.
+  - **In battle:**
+    - Both act every turn. Block and Armor protect you from both.
+    - Your cards and the effects on an enemy (Burn, Poison, Weaken, Freeze, Hack, the Prismatic
+      Counter) apply to your target, which you switch by clicking the other panel.
+    - When one falls the other fights on. Beating both wins, with 1.5× XP.
+  - **How it runs:** the target lives in the usual battle fields. The other enemy's fields wait in
+    `b.pair.other` and are swapped in (`withPairMate`) to read its intent or let it act
+    (`pairMateActs`: attacks, charged strikes, Block, afflictions, Swipe, Shear). It acts first at
+    the end of your turn, then the turn resolves as usual.
+  - **Screen:** the same height or less. The enemy panel splits in two side by side (the target
+    outlined in gold), and the two intent bubbles show each enemy's next move instead of one
+    enemy's next two.
+  - **Tutorial:** the first pair fight opens a short guide (`state.tips.pairs`).
+- **Strength:** each of the pair has part of a lone enemy's HP and attack:
+  - Sky Isles 70%/78%
+  - Elaris 72%/80%
+  - Vespera 82%/87%
+  - Chronospire 72%/80%
+
+  Tuned with the Difficulty lab on regular encounters with every patrol a pair. Typical pair-fight
+  win rates: Sky Isles 68%, Elaris 67%, Vespera 73%, Chronospire 73%, against 93-100% for single
+  enemies. With half the patrols paired, regular encounters come to roughly 80-85%.
+- **Known limit:** when your target dies at the end of a turn from Burn or Poison, the other enemy
+  can act twice that turn.
+- New `tests/enemy-pairs.test.cjs`.
+
+## Round 242: enemies swipe while they charge
+
+- The owner asked for something to happen during an enemy's charge-up turn, for example a swipe that
+  forces a discard.
+- 🗡 **Swipe** (`assets/charge-swipe.js`):
+  - On a charge turn ("Gathering … energy") the enemy now swipes for 30% of its attack, rounded up.
+    Block and Armor apply as usual.
+  - At the start of your next turn you discard 1 card of your choice. It uses Sift's discard screen
+    (any card in hand may go; nothing else can be played until you choose).
+  - The intent shows it a turn ahead. Frozen or silenced enemies don't swipe.
+  - Neon Aftermath's patrols have no element and never charge, so there it comes only from its
+    elemental bosses. From Solaris on, every charging creature swipes.
+- `cycle-card.js` labels the discard by its cause (`b.siftReason`: Sift or Swipe).
+- New `tests/charge-swipe.test.cjs`.
+
+## Round 241: Tailwind cards show their printed numbers outside the fight
+
+- The owner reported Tailwind cards showing wrong values on the reward page and elsewhere.
+- Cause: Tailwind, Growth and Discharge add their live bonus whenever a battle is loaded. The reward
+  screen opens while the finished battle is still loaded, so a Gust Chain on offer added last turn's
+  Tailwind to its damage.
+- Fix (`liveBattleCard` in `assets/world-mechanics.js`): the live bonus applies only during a fight
+  and only to that fight's own cards (hand, draw pile, discard, exhaust, or the card being played).
+  Everywhere else a card shows its printed numbers (after the Round 240 boost in later worlds).
+- New `tests/mech-live-values.test.cjs`.
+
+## Round 240: attack cards +25% after Neon Aftermath
+
+- Owner request: attack cards deal 25% more damage in every world after Neon Aftermath.
+- `assets/attack-boost.js` scales each attack card's printed damage numbers (rounded) when a later
+  world is configured, and puts them back in Neon Aftermath. So text, live bonuses and the damage
+  dealt agree:
+  - base damage;
+  - Tempest Surge's damage per energy;
+  - the damage in Tailwind, Follow-through, Amplify and Choose-one modes.
+
+  Strike 6 → 8, Cleave 13 → 16, Tempest Surge 7 → 9 per energy, Gust Chain's Tailwind +2 → +3.
+- Not scaled:
+  - **Bulwark Bash** (it hits with your Block): the owner counts it as a defensive card.
+  - **Defense cards and Skills:** Dusk Protocol's damage mode is unchanged.
+  - **Block on hybrid attacks:** Silver Riposte and Lunar Edict scale their damage only.
+  - **Talent, crystal and Boost bonuses:** added on top as before.
+- Difficulty lab, typical win rate over 16 builds × 2 styles, before Round 237 → with Rounds
+  237 and 240 (before Swipe, Round 242):
+  - Mini-bosses mostly rose above their 34-50% target: Stormbell Warden 48 → 88, Tidebound Warden
+    46 → 77, Gale Sovereign 40 → 59, Arc Sentinel 32 → 55, Resonant Phantom 47 → 66, Clockwarden
+    36 → 63. Featherfall Matriarch 44 → 36 and Paradox Twin 41 → 47 held.
+  - Final bosses: Zenith Roc 28 → 40, Bloom Tyrant 33 → 61, Tempest Colossus 41 → 30, Chronarch
+    29 → 33 (target 22-36).
+  - Regular enemies: 90-100% almost everywhere.
+
+  Boss HP was not retuned; that is left to the owner.
+- New `tests/attack-boost.test.cjs`.
+
+## Round 239: Overdrive's button
+
+- Owner request: the Overdrive button on the battle screen's encounter line is renamed
+  "Overdrive - Double Value" (it was "Overdrive ×2"). It no longer sits right against the " · "
+  before it: talent buttons on that line get an 8px gap (`layout-polish.css`). Echo and Overload
+  get the gap too.
+
+## Round 238: mechanic tags on the card, so the Deck screen shows them
+
+- The owner asked for the Tailwind tag right after the card's description, because the Deck screen
+  didn't show it. Round 229 drew it as a badge above the card, in battle only.
+- Every world-mechanic card now carries its tag (⌁ HACK, ☀ HEAT, 🪶 TAILWIND, 🌱 GROWTH,
+  ⚡ STORMCHARGE) as a small pill at the end of its rules text, wherever it is drawn: hand, Deck
+  screen, rewards, merchant. Chronospire's ⏳ Suspend cards keep their own markings.
+- It is added in a `cardHTML` wrapper in `assets/world-mechanics.js`. In battle a Growth card's
+  pill still shows how far it has grown. The badge above the card and its spacers are gone.
+- Tests: `mech-badge` checks the tag after the description in battle and in the Deck screen, on
+  desktop and phone.
+
+## Round 237: the Sky Isles push back on turtling: Shear and stronger damage over time
+
+- **Why:** the owner found the Sky Isles too easy with a defensive build (save file at player
+  level 25: Reactive Plating 5, which is 8 Armor, plus Block cards, gear and potions). The
+  simulator played that save through every Sky Isles fight:
+  - Regular enemies cost 0-2 HP, fights took 8-14 turns, and boss fights took 33 turns.
+  - Sky Isles hits are 9-12, so 8 Armor took most of every hit before Block.
+- **Options offered:** Shear, a rising storm, paying off defence, or an optional challenge. The
+  owner chose Shear plus stronger statuses instead of the storm.
+- 🌪 **Shear** (`assets/sky-storm.js`, Sky Isles only):
+  - Every 3rd turn's attack ignores your Armor (Reactive Plating). Block from cards still stops it,
+    and the intent says so.
+  - While the turn resolves, the outermost `endTurn` sets `b.shearing`, and `scaledRank('plating')`
+    reads 0.
+  - The sim bot plans its Block for it.
+- 🔥☣🩸 **Stronger damage over time, Sky Isles onward** (`assets/status-dots.js`). Armor and Block
+  can't stop any of it; cleansing (Purifying Light, Static Shield) or healing answers it.
+  - **Scorch** (new): Burn N for 3 turns, refreshing, not stacking (2, 2, 3, 4, 5, 6 by world).
+    It uses the existing Burn, which now has a strength (`b.burnPower`, shown in the battle tags).
+    A charged fire strike still burns for 2.
+  - **Venom** (new): Poison +N, stacking to 3×N, until cleansed (1, 1, 2, 2, 3, 3).
+  - **Bleed** now grows past Solaris: 2, 3, 4, 5, 6, 7.
+  - Sky Isles enemies trade Crush and Barrage (both blunted by Armor) for these: Sunfeather Drake
+    Scorch, Gale Harpy Bleed, Stormbell Warden Shackle + Scorch, Featherfall Matriarch Bleed +
+    Headwind, Zenith Roc Empower + Scorch + Bleed.
+  - Some enemies in Elaris, Vespera and Chronospire carry them too.
+- **Effect on the owner's save:**
+  - In a Sunfeather Drake fight, Scorch did 15 damage through Armor and Block, and Mend healed it
+    back.
+  - Gale Harpy and Thunderhorn Ram fights now cost about 13-22 HP of 59.
+- The rising storm (enemy hits growing late in a fight) was built and measured, then dropped. Every
+  setting killed the slow defensive deck in long boss fights.
+- `tests/sky-storm.test.cjs`.
+
+## Round 236: Sift, a deck-cycling card in every world
+
+- The owner asked for a card in every world that cycles the deck: 0 energy, draw 1, discard 1 of
+  your choice. While it was being built they added that the card just drawn is not a choice.
+- **Sift** (⇄, Skill, 0 energy):
+  - Draw 1 card, then discard 1 card you already held, your choice.
+  - Upgrades: +1 Aether at level 1, draw 2 at level 2, both at level 3.
+  - Like the Prismatic Counter, it is in every world's card rewards. New `assets/cycle-card.js`.
+- **The choice:**
+  - The hand waits: clicking a card you already held discards it, and the drawn card is dimmed
+    and labelled "JUST DRAWN".
+  - Nothing else can be played until you choose. Ending the turn ends the choice, since the hand
+    is discarded anyway.
+  - With nothing drawn, or only the drawn card in hand, there is no choice.
+  - Discarding is not playing: no recap line, no Follow-through, no Pressure.
+- It loads after `touch-controls` and `layout-polish`, so the choice owns the hand's taps in touch
+  mode too, and the touch "Play" button is hidden while choosing.
+- The sim bot discards the weakest card it may (`siftDefaultIndex`: junk first). The Difficulty
+  lab's decks don't include Sift, so its numbers are unchanged.
+- No painting yet: the card shows its ⇄ icon until art comes. The compendium's game frame is
+  bumped to `round236`.
+- Tests: new `tests/sift.test.cjs`; checked in the browser on desktop and phone.
+
+## Round 235: new Sky Isles tiles with glass terraces
+
+- The owner painted six Sky Isles tiles from the Round 232 prompts. They are in the same city,
+  with grey glass terraces beside the deck where items stand. They are kept in
+  `src/owner/` under readable names:
+  - two corners (`corner-a`, and `corner-b` as a second variant);
+  - a T painted with its branch up. Turned top to bottom it is `t-bottom-a` (the paintings are
+    strictly top-down).
+  - the three bridge tiles: `diag-sw-b`, `diag-se` and `diag-nw`.
+- `diag-se` and `diag-nw` were painted with the deck from the top only, which is what the prompt
+  asked for. The rooms beside the cut corners also need it from the right, so `corner-a`'s east arm
+  is laid in with a soft edge, clear of the bridge (the paintings share one base city).
+- `tools/prepare_sky_tiles.py`:
+  - The old built bridges and `parts/bridge.jpg` are gone. All three bridge tiles are the owner's,
+    with hand-drawn bridge outlines.
+  - The trace takes the new set's near-white deck highlights.
+  - Terraces (`TERRACES`) are walkable ground, joined to the deck by a short path when apart from
+    it. A terrace across a deck arm (the corner's top, the T's bottom) runs to the edge, so the
+    doorway stays open.
+- Item squares (`tools/plazas.py`) sit on the terraces. 44 of 51 Sky Isles rooms now have one, up
+  from 33. Only `t-right-a` (7 rooms; no new painting was sent for it) has none.
+- The replaced paintings moved to `unused assets/assets/environment/sky/src/round204/`.
+  `TILE_ART_VERSION` is 235.
+- Tests: plazas, sky-diagonals, tile-worlds, item-placement, walk-past and waypoints pass. The Sky
+  Isles playtest walk is clean.
+
+## Round 234: the Briar Sentinel is animated
+
+- The owner sent two sheets for Neon Aftermath's Briar Sentinel (`vineguard`): four battle poses
+  (stand, shield up, slash with a pink trail, stand) and a six-frame walk, on black.
+- Keyed off the black with a filled silhouette, so the dark armour joints stay. Small enclosed
+  gaps are filled; large ones stay see-through.
+  - Composed with `tools/compose_sprite_sheet.py` into `assets/monsters/city/briar-sentinel.png`.
+  - The walk uses frames 2-5 (shield forward), in `briar-sentinel-walk.png`.
+  - Both padded with `pad_sprite_frames.py`.
+- It is a `WILDLIFE_ART` entry with `poses: { attack: 2, hurt: 1, walk }`. The Arc Sentinel and
+  the Brass Sentry, which borrow its art, animate too (recoloured as before).
+- The Sunwrapped Revenant's pose code (`assets/sun-revenant.js`) now serves any creature that
+  lists `poses` (`posesOf()`, CSS variables for the frames and the walk sheet).
+- Fixed: a `#battleModal .compact-monster` rule pinned every sprite to frame 0, so the
+  attack and hurt poses never showed, not even the Revenant's.
+- `SPRITE_VERSION` 234. New `tests/briar-sentinel.test.cjs`.
+
+## Round 233: a deck slot for every boss; new cards wait for the player
+
+- The owner asked for +1 max deck size for every boss defeated, and that newly acquired cards not
+  go into the deck automatically: the player chooses.
+- **Deck size:** `worldDeckBonus()` now counts every boss beaten, mini-bosses included (three per
+  world, eighteen in all), not only the five bosses that open the next world.
+  - With no talents or devices that is 6 at the start and 24 with every boss down.
+  - The victory screen shows a "Deck slot" tile when a slot opens.
+  - The old `WORLD_BOSSES` list is gone.
+- **New cards wait in the collection.** None of these put cards in the deck any more:
+  - battle rewards (`chooseReward`, `chooseCardReward`, the random card loot);
+  - card bundles;
+  - Solaris's attunement pick;
+  - the worlds' arrival gifts (`mechanicGift`, Chronospire's Suspend cards);
+  - new side cards (`addSideCard`).
+
+  New deck and side-deck slots are left empty (the side deck's `fillSideDeck` is gone). The texts
+  now say the cards are in the collection, to add from Deck.
+- The Deck button counts the cards gained since the Deck screen was last opened
+  ("Deck · 3 new", gold outline). New `assets/deck-choice.js`; it also rebinds the Deck button
+  to the whole `showDeck` chain.
+- The tutorial's deck line says one slot more for every boss beaten.
+- The balance sim and the Difficulty lab equip the sim player's side cards themselves. Their
+  numbers are unchanged: their decks are built before the beaten bosses are set.
+- Tests: `world-deck` (18 bosses, +1 each, counted once; reward, gift and side card stay out of
+  the deck; the badge) and `aether-deck` updated.
+
+## Round 232: items stand in the open squares beside the road
+
+- The owner asked that interactable objects stand only in open areas off the road (like Solaris's
+  little paved yards), and for prompts where a painting has none.
+- `tools/plazas.py` lists hand-checked spots on every tile painting, picked by eye over a grid,
+  never on roofs, props, trees or water:
+  - Solaris: paved yards and sand squares.
+  - Elaris: the ruins' flagstones and clearings beside the trail.
+  - Vespera: flats of rock and sand and the old stone circle.
+  - Sky Isles: the terraces and the round plaza.
+- The builders open each spot up to the walk mask (a disc round it and a footpath to the nearest
+  road) and write each room's spots, flipped with the room, into the data (`SOLARIS_PLAZAS`,
+  `TILE_WORLD_DATA[w].plazas`).
+- `assets/plazas.js`:
+  - `organicItemSpot()` picks the nearest open square first, for chests, gear, points of interest,
+    the merchant, the Cardsmith and Nexus Waypoints. A square may be as close as 70px to a patrol
+    or another item before it is passed over.
+  - Patrols keep 90px out of the squares.
+  - A room whose painting has no square keeps the old spot beside the road.
+- Neon Aftermath already worked this way (hand-picked nooks, Round 101), so it is unchanged.
+- Squares per world:
+  - Solaris, Elaris and Vespera: every room has at least two.
+  - Sky Isles: 33 of 51 rooms. Its plain lanes (the T, the three diagonal walkways, and the corner,
+    which has only one small bay) have nothing but rooftops beside the deck.
+  - Chronospire: none; its tiles are still generated stand-ins.
+
+  Prompts for new paintings of those tiles were given to the owner.
+- Tests: new `tests/plazas.test.cjs`. Items in rooms with a square stand in one, and each can be
+  walked up to.
+
+## Round 231: the last Solaris room in the new look
+
+- The owner painted the tile asked for in Round 230: streets west, east and south with a stone
+  causeway to the top-left. It is `diag-t-b-s1` and serves 5,1 (Mirage Bazaar), the far end of the
+  causeway from 4,0. All 51 Solaris rooms now use the new top-down look.
+- The causeway is grey stone, which the colour trace doesn't pick up, so `prepare_solaris_tiles.py`
+  can outline one by hand (`CAUSEWAY`, at 800x500). Walking up from 4,0 again arrives on it.
+- The old diag-t-b paintings moved to `unused assets/`.
+- Tests: `solaris-landmarks` expects no old-style rooms. The Solaris playtest walk is clean.
+
+## Round 230: two more Solaris tiles; one room left in the old style
+
+- The owner sent four more Solaris paintings. Two fit:
+  - **top-right** (streets east and south, causeway to the top-right corner) is the corner
+    causeway, `diag-corner-s1`. It now serves rooms 0,4 and 8,4 (mirrored).
+  - **dead-left** has a street south as well as west, so it is a corner. Turned half way round it is
+    a second corner tile, `corner-s2`, for variety (corners fill 19 rooms). It also serves the
+    west dead end at 4,5, where its south street runs off the map's bottom edge.
+- **Builder** (`tools/build_solaris.py`):
+  - When no tile fits a room exactly, an extra painted street may run off the map, as diagonal
+    tiles already allowed.
+  - The new look's tiles (`-s1`, `-s2`) are chosen over old ones whenever both fit.
+  - No generated stand-ins once real paintings are in.
+  - `prepare_solaris_tiles.py` can turn a painting half way round (`TURN`) and outlines a
+    causeway to any corner (`CORNER`).
+- The other two (`diag1`: a west street with a boardwalk to the bottom-right corner; `top-left`:
+  streets east and south with a causeway to the top-left) fit no room. Not used.
+- **Still in the old style:** the T causeway room 5,1 (streets west, east and south, causeway to
+  the top-left). It is the only one; `solaris-landmarks` checks that.
+- The old dead-left and diag-corner paintings move to `unused assets/`.
+
+## Round 229: the first Nexus Waypoint is a few rooms in; mechanic badges above the cards; bigger enemies, smaller names
+
+- **First waypoint moved** (`assets/waypoints.js`). Each world's first Nexus Waypoint used to stand in
+  the room you arrive in. It is now three rooms in, in a room with nothing else in it: no point of
+  interest, merchant, Cardsmith, chest, relic, event or patrol. The rooms were picked with the
+  game's own checks, avoiding quiet rooms, bosses, the middle waypoint and dead ends:
+  - Neon Aftermath: Blossom Grove (1,7)
+  - Solaris: Sandglass Terrace (1,2)
+  - Sky Isles: Moonrise Court (5,0)
+  - Elaris: Emerald Thicket (6,4)
+  - Vespera: Mist Marsh (1,3)
+  - Chronospire: Chime Court (0,2)
+- `NEXUS_POINTS[world].start` now names that room, and `.arrival` names the arrival room, which has
+  no waypoint. Points of interest, the merchant and the Cardsmith skip the waypoint's room, and its
+  patrols are removed. Discovering it shows the same message as the middle waypoint.
+- A save that had discovered a world's old start-room waypoint keeps it, moved to the new room.
+- The waypoint list now names any Solaris room (it only knew the old two).
+- **Mechanic badges above the cards** (`assets/world-mechanics.js`). The 🪶 Tailwind badge (and
+  every world's mechanic badge) sat on the card, over its Level row. It now sits centred above the
+  card. In a hand with any badge, the other cards get an invisible spacer of the same height, so the
+  hand stays level.
+- **Enemies on the map are 10% larger** (their sprite scale .8 → .88, `layout-polish.css`), and **their
+  name labels are smaller** (55% of the original size, was 70%; `enemy-labels.js`).
+- New tests: `waypoints` (every world, three seeds: distance, an empty room, travel, old saves) and
+  `mech-badge` (Chromium, desktop and phone).
+- Updated tests for the new waypoint rooms: `pacing`, `rebuilt-worlds-migrate`, `room-art` (the city's
+  waypoint stands on one of Blossom Grove's hand-checked spots), `solaris-patrols` (the waypoint rooms have none).
+
+## Round 228: Solaris gets a new look (the owner's top-down golden city)
+
+- **New tiles.** The owner's seven top-down paintings of a golden desert city (pale sandstone
+  streets between terracotta roofs, palms, turquoise canals, sun-mirrors) replace Solaris's
+  tiles in 47 of its 51 rooms: corner, cross (a sundial plaza), dead-top, straight (a canal
+  bridge), t-bottom and t-right, plus a diagonal causeway tile.
+- `tools/prepare_solaris_tiles.py` traces the streets by colour into walk masks
+  (`src/masks/`), bridges arms the trace stops short of, and fills only small gaps, so the
+  obelisk and fountains stay solid. The new tiles are named `-s1`, so they don't collide with
+  the old tiles' hand-drawn masks.
+- **Builder** (`tools/build_solaris.py`):
+  - Uses a tile's own mask when it has one.
+  - Lets the top-down `-s1` diagonals flip top-to-bottom too (`FLIP_DIAG_ALL`). The old ones
+    had perspective.
+  - Knows the new tile's shape, `diag-t-c` (streets north, east and south, causeway to the
+    top-left). That one tile now serves three of the six diagonal rooms (1,3, 7,3, and 4,0,
+    where its north street runs off the map).
+  - Limits saved tile images to 2000px wide.
+- **Landmarks retired.** The six landmark paintings (the Solar Crown and the Stronghold yards and
+  four relic rooms) were in the old style, so those rooms use the new tiles (`USE_LANDMARKS =
+  False`). Room names, bosses and relics are unchanged. The old tiles and landmarks move to
+  `unused assets/assets/environment/solaris/src/`, and their built images are removed.
+- **Still in the old style until painted:** the west dead end (4,5), the corner causeway with
+  streets east and south (0,4, and mirrored at 8,4), and the T causeway with streets east, south
+  and west (5,1). `tests/solaris-landmarks.test.cjs` lists exactly these four rooms.
+- `node tests/playtest-walk.cjs elaris` reaches every door and item in all 51 rooms.
+- Fix (Round 227's Esc): when the chest held a card choice, Esc left the screen open; it now skips the
+  choice as the Skip button does, then continues. `reward-escape` covers every kind of loot.
+
+## Round 227: Vespera gets the owner's storm coast; Esc closes the victory screens; the merchant buys potions
+
+- **Vespera (world 5) is painted.** The owner's 15 top-down tiles of a storm-lashed glass coast (a
+  pale golden sand path over dark rock, violet crystals, glowing tide pools) replace the grey
+  stand-ins. The new `tools/prepare_vespera_tiles.py` traces the path by colour and bridges arms
+  the trace stops short of (stepping stones at the edges, a stream ford), reusing Elaris's
+  `arms()`. The piers are outlined by hand (`PIER`). Two tiles carry a pier that ends in the water
+  (`corner-b`, `t-right2`): it's decoration, and those are a second corner and a second t-right.
+- **Three storm-sea inlets.** Rooms 2,2, 6,2 and 6,3 are cut, and their neighbours are joined by
+  piers across the water. With the five pier tiles as painted only one room could be cut, so
+  `diag-c` (paths north, east and south with a pier to the top-left) is the owner's
+  top-left pier tile with `t-right`'s north arm laid over it. 51 rooms; `node
+  tests/playtest-walk.cjs vespera` reaches every door and item. `TILE_ART_VERSION` is 227.
+- The straight tile is unused: Vespera's only straight room sits beside an inlet.
+- **Esc closes the victory screens** (`assets/battle-recap.js`). It opens the loot chest first if
+  it's still shut, so potions and Shards are kept. If the chest holds a card choice, Esc skips it
+  as the Skip button does. Then it continues to the map. It does nothing during a fight.
+- **Merchant** (`assets/exploration.js`): card upgrades are no longer sold here (they stay at
+  the Cardsmith, ◇ 36 / 60 / 90). Its stock is now a side card, potions and one other ware. It
+  also buys healing potions back for ◇ 10 each (`POTION_SELL_PRICE`). The merchant's potion price
+  rises from ◇ 4 to ◇ 15, so buying potions to sell back loses Shards.
+- Tests: new `reward-escape` (Chromium). `tile-worlds` and `crystals-touch-boss` expect 51 Vespera
+  rooms; `exploration` covers the new stock and potion sales.
+
+## Round 226: ⚔ Pressure makes decks without Block viable; a new-journey tutorial; Nano Mend
+
+- **The problem, measured.** The owner felt Block was essential, and the Difficulty lab agreed. It
+  compared each world's sim deck with the same deck with its Block and Counter cards swapped for
+  its own attacks (16 builds × 2 styles). The Block-free decks fell to 0–23% against mini-bosses
+  in Neon Aftermath, Solaris and Vespera (the standard decks won about 40%). One enemy hit takes
+  45–72% of your HP (up to 130% for a Solaris mini-boss), and even an all-attack hand needs 4–17
+  turns to kill, so a deck that doesn't block dies in about two hits.
+- **⚔ Pressure** (`assets/pressure.js`). On a turn where you gain no Block from a card, every few
+  damage you deal takes 1 off the enemy's attack that turn, up to half. The rate is per world,
+  because late decks deal far more damage per energy: 2 in Neon Aftermath and Solaris, 3 in the
+  Sky Isles, 4 in Elaris, 6 in Vespera and Chronospire (`PRESSURE_PER_BY_WORLD`, tuned with the
+  lab). It counts damage from hand and side cards. Gaining Block from any card, Counters
+  included, cancels it for that turn. The enemy's move shows the lower number as you play, with
+  a line saying what Pressure is doing or why it isn't ("⚔ No Pressure: you gained Block this turn").
+- **Re-tuned for it.** With Pressure, the standard decks won too often from the Sky Isles on, so
+  boss HP went up (`BALANCE.perEnemy`): Stormbell Warden .76→.93, Featherfall Matriarch .94→1.15,
+  Zenith Roc .5→.79, Tidebound Warden 1.15→1.31, Gale Sovereign (Elaris) .78→1.01, Bloom Tyrant
+  (Elaris) .7→.8, Arc Sentinel .9→1.03, Tempest Colossus .63→.77, Clockwarden 1.16→1.25, Paradox
+  Twin 1.28→1.46, Chronarch .62→.87. In the lab every mini-boss is now 39–49% (target 34–50%), every
+  final boss 25–32% (target 22–36%; Thorn Warden 46%, target 34–50%), and regular enemies 45%+.
+- **Where it lands** (typical win rate, standard deck / no Block or Counter cards):
+
+  | | Neon Aftermath | Solaris | Sky Isles | Elaris | Vespera | Chronospire |
+  |---|---|---|---|---|---|---|
+  | mini-bosses | 47–49 / 16–31 | 43–47 / 0 | 42–45 / 31–47 | 44–47 / 40–41 | 40–44 / 28–31 | 39–41 / 42–72 |
+  | final boss | 46 / 21 | 31 / 0 | 31 / 33 | 32 / 43 | 29 / 60 | 25 / 55 |
+
+  From the Sky Isles on, a deck without Block is as good as one with it, or better against the
+  last bosses. Neon Aftermath's mini-bosses and Solaris's still need Block: they hit for 65–130%
+  of your HP and have about 540 HP, and Solaris's Siphon heals them from every hit you take. Those
+  fights teach Block, as the starting deck and tutorial do.
+- **Nano Mend** (new, `assets/cards.js`): 1 energy, heal 7 (9 / 11 / 14 at higher levels), not
+  Exhaust, so unlike Bloom of Life it can be used every time you draw it. Its picture is a
+  recoloured stand-in of Bloom of Life's (`refreshedCardArt`) until the owner paints one.
+- **New-journey tutorial** (`assets/tutorial.js`). "Begin new journey" and the main menu's "New
+  journey" open six short pages on what Neon Aftermath teaches (exploring and the boss gate,
+  battles and intents, Block and Pressure, Aether and the side deck, ⌁ Hack, Soulbound and
+  Impermanent cards and talents). You then pick the 6 cards your journey starts with, from Ember
+  Blade ×3, Crystal Ward ×3, Silver Riposte, Starlit Focus, Bloom of Life and Nano Mend. The first
+  copy of each picked card is ◆ Soulbound, and the cards show it as you pick. Escape doesn't skip
+  the tutorial, and continuing a journey saved mid-tutorial reopens the pick. `newGame()` is
+  unchanged (tests and the lab still get the old starter deck).
+- Tests: new `pressure`, `tutorial` (Chromium, desktop and phone). `stagger` marks its turns as
+  guarded so it measures the daze alone; `card-art` lists Nano Mend. Pressure is in the harness
+  and sim script lists.
+
+## Round 225: Elaris gets the owner's forest, and one line tops the battle screen
+
+- **Elaris (world 4) is painted.** The owner's 11 top-down forest tiles replace the grey
+  stand-ins. All 11 share one base forest (the ruins and trees sit in the same places), so the new
+  `tools/prepare_wilds_tiles.py` lifts a path arm or a stretch of plain forest from one tile into
+  another with a soft seam, making the shapes that weren't painted:
+  - `t-bottom-a`: the cross with its north arm grown over.
+  - The boardwalk tiles: north and east paths (`diag-a`/`diag-b`, as painted); with a south arm
+    added (`diag-c`); with south instead of north (`diag-d`); and `diag-e` (the owner's diag-se:
+    a path north and a boardwalk to the bottom-right).
+  - The owner's "t-bottom" runs its side path on, under a tree, to the right edge, so it is a
+    second t-right (`t-right-b`).
+- **Three forest lakes.** Rooms 2,0, 2,3 and 6,3 are cut, and their neighbours are joined by
+  boardwalks across the water (`cut`, and the world's own `dshapes` in `build_tile_world.py`). A
+  lake blocks the side path on its own side, and these are the only cuts whose neighbours keep
+  clear of their lakes. 51 rooms.
+- **A path round the fountain.** The owner asked for one: the cross now has a ring of path painted
+  round its fountain, in the paths' own colour and grain, under the standing stones. The ring is
+  walkable; the fountain isn't.
+- **Walk masks** are traced by the path's golden tan. Arms that run on under a tree are bridged to
+  the edge and in to the room's middle (some junctions are painted as moss). The boardwalks are
+  outlined by hand (`BOARDWALK`), and only pieces joined to an exit are kept.
+  `node tests/playtest-walk.cjs wilds` reaches every door and item in all 51 rooms;
+  `PLAYTEST_DETAIL=1` now lists each problem it finds.
+- The two straight tiles are kept but unused: Elaris's only straight room sits beside a lake. The
+  one corner painting covers 18 rooms, so a second corner would add the most variety.
+- `TILE_ART_VERSION` is now 225. The owner's originals are in `assets/environment/wilds/src/owner/`.
+- **Battle screen:** the encounter ("Encounter: Storm Moth") moved from the log line into the top
+  line, beside the element: "Encounter: Storm Moth · Element: air · reserve Prismatic Counter". A
+  fight with no element still gets the top line. The log line above the Aether panel shows only
+  moves, and is hidden until the first one (`assets/layout-polish.js`).
+- A point of interest whose only spot 150px clear of patrols was under the HUD or minimap (Elaris's
+  north-and-west corner rooms) now stands up to 90px from a patrol instead (`assets/neon-world.js`).
+- New tests: `elaris-tiles` (lakes, boardwalk doors, one connected path per tile, the fountain
+  ring) and `battle-header` (Chromium, desktop and phone). `tile-worlds` expects 51 Elaris rooms.
+
+## Round 224: cybernetic robot creatures for the Sky Isles
+
+- The owner's new sheets turn every Sky Isles creature into a cybernetic robot in the sky city's
+  white, chrome, cyan and gold: the Sunfeather Drake, Rain Drone, Gale Harpy, Thunderhorn Ram,
+  the Stormbell Warden and the Featherfall Matriarch (mini-bosses) and the Zenith Roc (boss).
+- Gemini drew 4 to 8 poses per image in two rows rather than four in one, so the new
+  `tools/compose_sprite_sheet.py` builds the sheet: key the image with `cut_sprite_sheet.py`, then
+  pick four poses by box. Each pose takes the pieces that lie mostly inside its box (a neighbour's
+  wing tip is left out). All four are drawn at one scale, standing on one baseline, over their feet,
+  in 3:4 frames. Only the single widest pose (spread wings) may shrink on its own, so wide
+  creatures aren't small in every frame. `--ground-line` clears the thin ground lines Gemini
+  painted under the Roc's and the Matriarch's feet. Poses used:
+  - Drake: wings up, wings low, fire breath, wings raised.
+  - Drone: hover, tilt, water jet, recoil in mist.
+  - Harpy: hover, wings wide, wind slash, hover.
+  - Ram: stand, rear, lightning charge, stamp.
+  - Warden: the top row (stand, hammer raised, strike with lightning, lower). Its bottom row ran
+    off the image.
+  - Matriarch and Roc: their four poses.
+- `SPRITE_VERSION` is now 224 (and `elaris-wildlife.js?v=round224`), so browsers fetch the new
+  sheets. New `tests/sky-sprites.test.cjs` checks each sheet is four 3:4 frames with clear sides.
+
+## Round 223: the new Zenith Roc, and sprite padding drops stray wing tips
+
+- A Zenith Roc sheet had one frame's wing crossing into the next frame's cell, which leaves a
+  sliver at that frame's edge while the creature animates. `tools/pad_sprite_frames.py` now clears
+  small pieces (under 4% of the frame's creature) that touch a frame's left or right edge
+  (`drop_strays`). Re-running it on every installed sheet changes none of them.
+- **The new Zenith Roc**: the owner's armoured silver eagle with an orbiting sun sphere that powers
+  up across the frames (a sun burst and a holographic ring under it in frame 3). Cut from its
+  green background and padded; frame 2's wing tip, which crossed into frame 3, is gone.
+  `SPRITE_VERSION` is now 223, so browsers fetch it. Checked in the Eye of the Sky.
+
+## Round 222: the Rain Drone replaces the Cloud Wisp
+
+- The owner disliked the Cloud Wisp. Their new sheet, a white weather drone with a cyan lens,
+  four rotors and a water tank spraying rain, takes its place as the **Rain Drone** (same id
+  `skyWisp`, so saves carry over; water element, ☔). The sheet is `assets/monsters/sky/rain-drone.png`;
+  the old one moved to `unused assets/`.
+- **Green-background sheets.** The Sky City is full of magenta, so new sheets come on flat green.
+  `tools/cut_sprite_sheet.py` now keys green the same way it keys magenta, and pulls leftover
+  green out of the edges (cyan, white and gold keep their colour). The magenta sheets still come
+  out byte-for-byte the same. Then `pad_sprite_frames.py` leaves the usual gutter.
+- The compendium's Headwind note names the Rain Drone. `tile-worlds`, `elaris-wildlife` and
+  `sky-diagonals` pass, and the drone was checked in a Sky Isles room.
+
+## Round 221: two more painted Sky City diagonals
+
+- The owner painted two more diagonal pieces (in `src/diagonal-owner/`):
+  - `diag-nw.jpg`: deck from the top and right edges, plus a bridge to the top-left. It replaces
+    the built `diag-nw` in rooms 1,5, 7,5 and 7,0 (mirrored to fit; the Sky Isles flip both ways).
+  - `diag-sw-b.jpg`: deck from the top and left edges, plus a bridge to the bottom-right. That is
+    the `diag-sw` shape mirrored, so it is stored mirrored as a second `diag-sw` version, and the
+    builder chose it for Sunbeam Arch (2,4). Round 220's `diag-sw` painting fits the same room
+    and stays as the alternative.
+- Each bridge's glass outline is added by hand (`OWNER_BRIDGE`) and must reach the image edge,
+  or the builder finds no diagonal door.
+- Only `diag-se` is still built by the tool, in rooms 8,1 and 8,4.
+- `TILE_ART_VERSION` is now 221. `sky-diagonals`, `tile-worlds` and `item-placement` pass.
+  `playtest-walk sky`: 51 rooms, 375 crossings, no problems.
+
+## Round 220: the owner's painted diagonal in the Sky Isles
+
+- The owner painted a Sky City diagonal piece: deck from the top and right edges, and a glass
+  bridge to the bottom-left. It replaces the built `diag-sw` tile in Sunbeam Arch (2,4).
+  - Owner diagonals live in `src/diagonal-owner/` and override the built ones
+    (`owner_diagonals()` in `tools/prepare_sky_tiles.py`).
+  - The bridge glass is darker than the deck, so its outline is added by hand (`OWNER_BRIDGE`).
+- The other diagonal rooms need a bridge to a different corner, so they keep the built pieces.
+- `TILE_ART_VERSION` is now 219, so browsers fetch the new painting.
+- `sky-diagonals`, `tile-worlds` and `item-placement` pass. `playtest-walk sky`: 51 rooms, 375
+  crossings, no problems.
+
+## Round 219: a slimmer last-moves line and Aether panel
+
+- The owner asked for the "Encounter / last moves" line and the Aether panel to be smaller, with
+  smaller text. Both are now about 20px tall (from about 33px and 37px): 11px text, 2px padding,
+  and smaller Aether pips (`assets/layout-polish.css`). Checked in the browser.
+
+## Round 218: diagonal crossings land beside the door; Edge Calibration +1 per rank
+
+- **Diagonal crossings landed at the wrong edge.** Taking Ember Crossing's diagonal road into
+  Radiant Causeway (Solaris) put you at the bottom of the room instead of on its diagonal road at
+  the top-left. Every diagonal crossing, in Solaris and the Sky Isles, did the same.
+  - Cause: after any room change, the organic engine moved you to the door matching the opposite
+    straight edge. A diagonal direction has no straight opposite, so it fell back to a default
+    door and replaced the diagonal arrival.
+  - Fix: that step now only runs for straight exits (`assets/organic-paths.js`). Diagonals keep
+    their own arrival beside the partner's diagonal door.
+  - `solaris-diagonals` and `sky-diagonals` now also check that you arrive within 160px of the
+    partner's diagonal door. Before, they only checked that you landed on a road, which is how
+    this slipped through.
+- **Edge Calibration: +1 damage per rank** (+1 / +2 / +3 / +4 / +5), as the owner asked. It was
+  rank ÷ 2 rounded up (+1 / +1 / +2 / +2 / +3). `attackBonus()` in `index.html`. Its description
+  now reads "Attacks deal +1 damage per rank (+5 at rank 5)", and `talent-matrix` checks both.
+
+## Round 217: Edge Calibration says what each rank gives
+
+- The owner flagged Edge Calibration's text. It read "+1 damage to every Attack at ranks 1, 3
+  and 5", which sounds like +1 at every rank (or a flat +1). In fact it adds rank ÷ 2 rounded up:
+  +1 / +1 / +2 / +2 / +3 damage at ranks 1–5 (`attackBonus()`). The description now says exactly
+  that, in the same style as the other talents: "Attacks deal +1 / +1 / +2 / +2 / +3 damage
+  (ranks 1-5)." No change to how it plays.
+
+## Round 216: half-height you / enemy boxes in battle
+
+- The owner asked for the two health boxes at half their size, with the bars along the bottom.
+  Each box is now two rows:
+  - Top row: the name, small Block / Armor badges (the shield and crystal shrink from about 34px
+    to about 20px), and the debuffs, right-aligned.
+  - Bottom row: a slim 16px health bar across the box.
+- Tighter padding and slightly smaller text throughout (`assets/layout-polish.css`).
+- Desktop: the boxes went from 157px to about 52px tall (the whole battle screen from 901px to
+  841px). Phones: from 143px to about 89px. Checked in the browser at both widths, with Block,
+  Armor and debuffs showing, and no page errors.
+
+## Round 215: half-size items, and a tighter battle screen
+
+- **Items at half size.** Points of interest, chests, gear and the merchant (everything you can
+  open or pick up) are drawn at 50% of their old size, around the same centre. Their name
+  labels stay full size and sit just under the picture. Portals keep their size. One CSS rule in
+  `assets/layout-polish.css` (`scale:.5`, with the label scaled back up). Placement, reach and tap
+  routes are unchanged. Checked with close-ups in four worlds.
+- **Tighter battle screen.** Less padding and smaller gaps between every part: the panel's own
+  padding, your and the enemy's boxes, the debuff strips, the enemy-move boxes, the last moves,
+  the Aether panel, the Turn / energy bar, "Your hand" and the cards. On desktop the screen went
+  from 988px to 901px tall; phones tighten too. Checked in the browser at both widths.
+
+## Round 214: the element line at the top of the battle screen, End turn beside the energy
+
+- The owner asked for "Element: earth · reserve Prismatic Counter" at the very top of the battle
+  screen. In Round 211 it had moved under the Aether panel; it now leads the battle screen
+  (`assets/layout-polish.js`). Everything else keeps the Round 211 order: you and the enemy, the
+  enemy's moves, the last moves, Aether, the Turn / energy / level bar, then your hand. Checked
+  in the browser.
+- **End turn** moved from the battle footer to the right end of the Turn / energy / level bar.
+  On narrow phones the bar wraps, so it sits right-aligned on its own line. Checked in the
+  browser at desktop and phone widths: the button ends the turn, with no page errors.
+
+## Round 213: the Cardsmith asks before it upgrades or binds
+
+- Clicking a card at the Cardsmith used to spend the Shards at once. Both actions now open a
+  confirmation first: the card, the question ("Upgrade Ember Blade to level 1 for ◇ 36?" or
+  "Make … Soulbound for ◇ 500? It will never be lost."), your Shards, and **Upgrade** /
+  **Make Soulbound** or **Cancel**. Cancel goes back to the Cardsmith with nothing changed
+  (`cardsmithConfirm`, `askUpgrade` and `askSoulbind` in `assets/cardsmith.js`).
+- The Cardsmith's upgrade note now says the card keeps its progress toward the next level (Round
+  212), instead of "Its mastery starts fresh".
+- `tests/cardsmith.test.cjs` checks that asking changes nothing, Cancel keeps the card as it was,
+  and Yes upgrades or binds. Checked in the browser too.
+
+## Round 212: items stand on open ground, and paid upgrades keep progress
+
+- **Items no longer sit on buildings in Solaris and the Sky Isles.** Items (points of interest,
+  chests, gear, the merchant, waypoints, the Cardsmith) are placed just off the walkable path,
+  12–28px from it. In these two painted worlds everything off the road or deck is buildings, so
+  many landed on roofs and walls. There, `organicItemSpot` now picks walkable, reachable ground
+  22–40px inside its edge (`ITEM_IN`, `itemsOnGround()` in `assets/organic-paths.js`). The
+  pictures are about 50px wide, so they stay fully on the ground beside the lane, clear of doors
+  and patrols as before. Neon Aftermath keeps its hand-checked spots, and the other worlds keep
+  the off-path rule.
+  - Checked with close-up crops in both worlds. `playtest-walk` for both: every room, door and
+    item route works, and walking past triggers no pop-ups.
+  - `item-placement` and `playtest-walk` now expect on-ground items in these two worlds.
+- **Paid upgrades keep a card's progress.** Raising an Impermanent card a level at the Cardsmith,
+  or with the merchant's upgrade pack, used to reset its progress toward the next automatic
+  upgrade to 0. It is now kept. (It is always below the threshold, or the card would already
+  have levelled.) The Cardsmith's upgrade moved into `cardsmithUpgrade(c)`. Tests in `cardsmith`
+  and `exploration`.
+
+## Round 211: battle page tidy-up and a final-turn recap on the victory screens
+
+Four requests from the owner:
+
+- **Final turn on the victory screens** (new `assets/battle-recap.js`, loaded after
+  `layout-polish.js`). The fight ends as the last card lands, so the finishing move was never
+  seen. The victory screens (loot chest, card choice) now open with a "Final turn" box: each card
+  played on your last turn, what it did (damage dealt, Block gained) and which one finished the
+  enemy. A win by damage over time or a side card names that instead.
+- **The last moves above the Aether panel.** The battle log line (`#combatLog`, the "·"-joined
+  last moves) moved from the bottom of the page to just above the Aether panel, in a small box.
+- **The element line and the Turn / energy / level bar under the Aether panel**, in that order.
+- **No enemy picture on the battle page.** The enemy's name, health, debuffs and moves stay.
+- The moves are in `assets/layout-polish.js`'s battle wrapper, the styles in `layout-polish.css`.
+  Checked in the browser at desktop and phone widths, with no page errors.
+- Tests: new `tests/battle-recap.test.cjs` (cards and what each did, only the final turn, a
+  damage-over-time win, names escaped).
+
+## Round 210: the Prismatic Counter drops in every world
+
+- The owner asked for it everywhere. Since Round 178 it had been in Solaris's reward pool only.
+  (An older pool list also named Vespera and Chronospire, but `world-cards.js` replaced it.)
+  It is now in every world's pool, including Neon Aftermath, Sky Isles and Elaris. It is the
+  one card allowed in more than one pool (`assets/world-cards.js`).
+- No other change: it can still be lost in a defeat like any Impermanent card.
+- `tests/world-cards.test.cjs` lets the counter be shared and checks it is in every pool.
+  `world-cards.js` cache tag is now round210.
+
+## Round 209: smaller enemies on the map
+
+- Asked to make all enemies 20% smaller: every enemy on the map is now drawn at 80% of its old
+  size. That covers Neon Aftermath's monsters, the creature sheets, mini-bosses and bosses. One
+  rule in `assets/layout-polish.css` scales the `.monster-sprite` inside each `.enemy-node`
+  around its feet, so enemies stand in the same spot and their labels stay under them. CSS
+  `scale` stacks with the sprite's left/right facing flip. Positions, collisions and fights are
+  unchanged, and so are battle portraits.
+- Checked in the browser: sprites measure 80% of before (131→105px, 168→134px, 104→83px), with
+  no page errors.
+
+## Round 208: no stale Sky Isles paintings from the browser cache
+
+- The owner saw the map "reverted to an older state". `main` had the Sky City art (checked), but
+  Round 204 repainted the Sky Isles under the same file names (`corner-a.webp` and so on). The
+  game loaded those without a version, so a browser could keep showing the old marble islands.
+- Tile-world paintings now load through `tileWorldArtSrc(id, name)` in `assets/tile-worlds.js`,
+  which adds `?v=TILE_ART_VERSION` (204). The room preloader uses the same URL, so it still
+  shares the painter's cached image. Bump `TILE_ART_VERSION` whenever tile art changes. Checked
+  in the browser: rooms request `sky/cross-a.webp?v=204`.
+
+## Round 207: the concept-lab cards drop one world later
+
+- Neon Aftermath already had plenty of cards, so each pair from Round 206 moved up a world
+  (`MECH_CARDS` in `assets/card-mechanics.js`):
+  - Cinder Capacitor and Dusk Protocol: Neon Aftermath → Solaris.
+  - Crystal Aegis and Tidal Decision: Elaris → Vespera.
+  - Wardbreaker Step and Afterimage Ward: Vespera → Chronospire.
+- Each is still in exactly one world's reward pool (`tests/card-mechanics.test.cjs`). Copies
+  already found stay in your collection.
+- Asked to remove the blank-image Reversal cards: this game has none left. Round 188 removed the
+  four single-element Reversal cards (saves holding one load it as a Prismatic Counter), and a
+  browser pass over the compendium found no broken images and no "Reversal" text. They are
+  still in `achubu/Cardbound`'s copy of the game, which Claude doesn't change.
+
+## Round 206: six cards from the Cardbound concept lab
+
+`achubu/Cardbound` added a review-only "card concept lab" (`assets/concepts/cards.json`): 16
+text-only cards across 8 mechanics borrowed from Magic, Hearthstone and Flesh and Blood. I
+picked the three mechanics that fit this game without new screens and add a real decision:
+
+- **⤳ Follow-through** (Wardbreaker Step, Afterimage Ward; Vespera). A bonus if the card you
+  played just before this one, this turn, was a Defense (or an Attack). It makes the order you
+  play cards matter. Side cards, pitching and Suspend's automatic plays don't count. A card whose
+  bonus is ready glows gold in your hand.
+- **⚡ Amplify** (Cinder Capacitor, Neon Aftermath; Crystal Aegis, Elaris). A second button plays
+  the card for one more energy with a bonus. That competes with banking unspent energy as
+  Aether.
+- **◇ Choose one** (Dusk Protocol, Neon Aftermath; Tidal Decision, Elaris). One button per mode,
+  and only that mode resolves; clicking the card plays the first. Tidal Decision exhausts either
+  way.
+
+Not taken: Cycle, Foresee and Reprise (they need new screens for reordering or playing from the
+discard pile), Prepared (only works with the Retain talent), and Improvise (temporary generated
+cards; the concept notes flag its risks).
+
+- The numbers start from the concept lab's: each mode or base sits just under the dedicated card
+  of its role, and the bonus is what makes the card worth a slot. Each card drops in one world's
+  reward pool only.
+- How it works (`assets/card-mechanics.js`, loaded after `stagger.js`): a `stat` wrapper reads
+  the battle's `amplifyUid`, `modePick` and `chain` (the last card played by hand this turn), so
+  costs, damage and Block resolve through the usual card effects. `playCardWith(i, choice)`
+  plays with Amplify or a mode chosen.
+- Placeholder art for all four levels comes from `tools/generate_world_card_art.py`, until the
+  owner paints them. The compendium shows them (its frame's tag is now round206).
+- Found while testing: a new helper shared its name with `world-mechanics.js`'s `addBonus` and
+  replaced it, breaking Tailwind. It is now `mechAddBonus`, and I checked every new name for
+  clashes.
+- Tests: new `tests/card-mechanics.test.cjs` (pools, rules text, Follow-through after the right
+  and wrong kind, the turn reset, Suspend not counting, Amplify cost, damage and Block, and both
+  modes). `card-variety` counts 58 world cards. Checked in the browser too.
+
+## Round 205: Accelerate's last two paintings from achubu/Cardbound
+
+- Checked `achubu/Cardbound` (head defe3cb, 2026-10-20) for images we don't have. The only new
+  ones are Accelerate levels 2 and 3. Its other differing files are the creature sheets before
+  Round 200's padding, and old PNGs we already replaced or keep in `unused assets/`.
+- `assets/cards/level2/accelerate.webp` and `level3/accelerate.webp` are in, so Accelerate now
+  has all four stages (`refreshedCardArt`). Every refreshed card now has its full set. Cache tag
+  `cards.js?v=round205` in `index.html` and `compendium.html`. `tests/card-art.test.cjs` updated.
+
+## Round 204: the Sky Isles become a floating city
+
+The owner didn't like the island look and asked for a dense, vibrant, futuristic sky city with
+very little empty sky, and seamless connections without clearly marked roads. New prompts asked
+for top-down tiles where you walk on one continuous pale glass deck that flows between packed
+neon buildings and meets each open edge around its middle.
+
+- **The owner's tiles** (2624x1632): corner, cross, straight, T to the right, T downward, and
+  dead-ends from below and to the right. Each shape's openings are consistent (top x 357–442,
+  bottom 324–448, sides y 207–291 on the 800x500 room), so neighbouring rooms line up.
+- **Diagonals.** The generator's one diagonal came out as a top exit plus a bridge to the
+  bottom-right corner, which fits no room. So `tools/prepare_sky_tiles.py` (rewritten for the
+  city) builds the three diagonal pieces. Each is the corner tile with that painted bridge laid
+  from its middle to the corner (a strip of the bridge turned to point at the corner, mirrored
+  past its clean stretch) and the cross tile's fountain plaza pasted over the joint. The source
+  is kept in `src/parts/bridge.jpg`.
+- **Walk masks** are traced from the deck's pale cyan (its grid lines a stronger cyan). On the
+  diagonal pieces the plaza and bridge are added as laid out, because the fountain's colours and
+  the rims would otherwise hole or split the traced deck.
+- **Lighter paintings.** The city art is dense, so the builder's new `max_width` (2000 for the
+  Sky Isles) keeps each painting about 500 KB instead of 800 KB. That's still 2.5× the 800px room.
+- The loading and backdrop colour is now the city's deep purple, and the arrival line mentions
+  glass decks between the towers.
+- The marble island set moved to `unused assets/assets/environment/sky/`.
+- Same map as Round 197: 51 rooms, the same three cut rooms and diagonal links.
+  `node tests/playtest-walk.cjs sky`: 51 rooms, 375 crossings, no problems. `sky-diagonals`,
+  `tile-worlds`, `item-placement`, `walk-past` and `crystals-touch-boss` pass.
+  Cache tags for `sky-data.js`, `tile-worlds.js` and `room-preload.js` are now round204.
+
+## Round 203: Nexus Waypoints in world order
+
+- The waypoint list (Aetherlink and the map) showed worlds in the order they were added to the
+  code: Neon Aftermath, Solaris, Vespera, Chronospire, Sky Isles, Elaris. It now follows the
+  travel order (`WORLD_ORDER`), with each world's start waypoint before its mid-world one
+  (`nexusRegions()` in `assets/exploration.js`).
+- `tests/god-mode.test.cjs` (which unlocks every waypoint) checks the list and the buttons are
+  in world order.
+
+## Round 202: far fewer side cards
+
+The owner found far too many side cards dropping. About 6–7 came per world, around 40 over a
+run: every boss and mini-boss, 5% of other fights, the lore and world-completion rewards, and a
+50% event. Now:
+
+- Final bosses still always drop one (the Sun Pharaoh's 30% Stasis chance is kept).
+- Mini-bosses: 25% (they already give gear). Regular and elite enemies: 2% (was 5%).
+  (`SIDE_DROP_MINI` and `SIDE_DROP_REGULAR` in `assets/aether-deck.js`.)
+- Reading all five lore finds: 25 Shards instead of 15 Shards and a side card.
+- Exploring a world fully: 35 Shards instead of 20 Shards and a side card.
+- The supply-cache event's side card: 25% (was 50%).
+- Unchanged: the merchant's side card (you choose and pay) and the ranger event (costs a potion).
+
+That's about 2 per world. The Deck Workshop note, the map's completion hint and the compendium
+now say so. Tests in `aether-deck` (rates for regulars, elites, mini-bosses and final bosses),
+`exploration`, `round76` and `poi-rewards` were updated.
+
+## Round 201: smooth edges on the creatures
+
+- The creature sprite sheets (Solaris, the Sky Isles, the forest animals and their recoloured
+  copies in Vespera and Chronospire) were drawn with `image-rendering: pixelated`. That suits
+  tiny pixel art drawn bigger, but these sheets are paintings about 2000px wide drawn at
+  90–150px. Nearest-pixel scaling then just drops pixels, which gave jagged outlines. They now
+  scale smoothly (`assets/elaris-wildlife.js` for rooms and battles, `assets/battle-hud.css` for
+  the battle portrait). City enemies already scaled smoothly.
+- Sprite sheet URLs carry `?v=SPRITE_VERSION` (now 200, in `elaris-wildlife.js`; also used by
+  `encounter-depth.js` and `sun-revenant.js`), so browsers fetch Round 200's re-cut sheets rather
+  than cached ones. Bump it when sheets change.
+
+## Round 200: no more line through the Cistern Warden
+
+- **The line was a cutout mistake, not in the owner's art.** In Round 196, `tools/cut_sprite_sheet.py`
+  learnt to erase the thin dark lines some generated sheets draw round and between their frames
+  (any column dark in 85% of its height). The Cistern Warden's dark body made two columns look
+  like such a line, so they were erased right through him in his second frame. A frame line now
+  also needs background just beside it (8px each side, the sheet's edge counting as background).
+  Checked against every source sheet: only the warden's false line is dropped, and every real
+  frame line is still found. The warden was cut again from the owner's image.
+- **A clear gutter between frames.** The game scales sheets down. With smoothing, a pixel or two
+  of the next frame shows at a frame's side, so art touching a frame's edge flickered as a thin
+  line while creatures animated. Most sheets, including the old forest ones, had art within a
+  few pixels of an edge. The new `tools/pad_sprite_frames.py` shrinks each frame of a sheet by
+  the same amount (2–5%) about its bottom-centre, leaving at least 14px clear at the sides and
+  top. Sheet sizes are unchanged, and two sheets that already had room were left alone.
+
+## Round 199: the Gear screen lists only gear you have found
+
+- The Gear collection used to list all 12 pieces, with "Undiscovered …" placeholders for the
+  ones you didn't have. It now shows only the gear you own. With nothing found yet it says
+  "No gear found yet. Each mini-boss guards a piece." The HUD objective still names each world's
+  two pieces and who guards them (`assets/gear.js`).
+- `tests/gear.test.cjs` checks that unfound gear isn't listed and that an empty collection says
+  so. `gear.js` cache tag is now round199.
+
+## Round 198: God Mode
+
+A main-menu option (also on the start screen) for trying the game out, from `assets/god-mode.js`
+(loaded last).
+
+- **Any card wins.** Playing any card, from the hand or the side deck, wins the fight at once,
+  bosses included, with the usual rewards. Cards you couldn't afford can be clicked too. The
+  card's own effect is skipped.
+- **Every Nexus Waypoint** in every world is unlocked, so you can travel anywhere straight away.
+- **Every map is revealed**: each world's rooms all count as visited.
+- **Nothing is saved.** On entering, the journey is saved where it stands. After that, writes to
+  the game's save and material keys are ignored, and export and import are off. Leaving God
+  Mode reloads the page, and reloading rolls back to that save. Started from the start screen,
+  God Mode plays a fresh journey that is never stored. A ⚡ GOD MODE badge shows while it is on.
+- Tests: new `tests/god-mode.test.cjs` (cards don't win without it; any card wins with it, a boss
+  counts; all waypoints and maps are open, including after a waypoint trip to another world;
+  nothing reaches the save; export is off; the save is the pre-God journey). In the browser:
+  storage is byte-for-byte unchanged through a God session, and leaving or reloading resumes
+  the journey from before.
+- Also fixed two tests after Round 197's new Sky Isles map:
+  - `tests/crystals-touch-boss.test.cjs` still expected 54 Sky Isles rooms (51 now).
+  - `tests/walk-past.test.cjs` picks the Sky Isles shrine room, then loops through every world. Its
+    closing redraw ran in Chronospire, where that room (7,1) doesn't exist. It now goes back to
+    the Sky Isles first.
+- All five other worlds' walks (`tests/playtest-walk.cjs`) are clean after Round 197's gear
+  placement change.
+
+## Round 197: the Sky Isles are painted, with diagonal walkways
+
+The Sky Isles now use the owner's top-down tiles instead of stand-ins, and three edge rooms are
+cut so the map is less rectangular (51 rooms, as in Solaris).
+
+- **The owner's tiles** (2624x1632, `assets/environment/sky/src/`): two crosses, the corner,
+  straight, T to the right and T downward, and four dead-ends to the right. They are strictly
+  top-down with every walkway leaving its edge at the exact middle, so they flip both ways.
+- **Made from them** by the new `tools/prepare_sky_tiles.py` (no dead-end-from-below or diagonal
+  tiles came back from the generator):
+  - `dead-bottom-a/b/c`: three of the dead-right paintings turned a quarter turn, cropped round
+    the lookout and scaled back up. Their sources are kept in `src/rotate/`.
+  - `src/diagonal/diag-se/nw/sw`: the corner tile with a third walkway from its bend to that
+    corner of the image. The walkway is a strip of the straight tile turned to point at the
+    corner, so its stones and rim match, and the cross tile's round plaza is laid over the joint.
+  - Walk masks for every tile, traced by colour: the marble and its rim are warm grey, clouds
+    white-blue and islands green. An opening drops island cliffs and props, padded so it does not
+    eat the room edges. Some walkways start at an island's edge rather than the image's (the left
+    arm of the T and cross tiles), so each exit also gets a walkway-wide strip across the grass to
+    its edge.
+- **Corner cuts and diagonals in tile worlds** (`tools/build_tile_world.py`):
+  - A world may list `cut` rooms. As in Solaris, the two rooms beside each cut are joined by a
+    diagonal exit, and each diagonal door (where the painted walkway leaves the room) goes into
+    the data's `diag` table.
+  - The Sky Isles cut 8,0 and 8,5 (two corners) and 2,5 (a notch in the bottom edge). Of all the
+    choices, these need the fewest diagonal paintings (three).
+  - `top_down` worlds may flip diagonal tiles both ways.
+- **Engine.** `assets/solaris.js`'s diagonal doors read the active world's table
+  (`worldDiagTable()`: `SOLARIS_DIAG` in Solaris, `TILE_WORLD_DATA[world].diag` in a tile world).
+  Entering, arriving clear of the door, the ↗ labels and tap routes all work as in Solaris.
+- **Saves.** A save standing in a cut room resumes at Windgate Landing, and cut rooms leave the
+  visited lists (`dropCutRooms` in `assets/tile-worlds.js`). Without this, such a save would have
+  failed to load ("Invalid room").
+- **Gear kept clear of its guard.** In a corner tile the only open ground near the requested spot
+  is beside the bend, where the mini-boss stands. When a relic lands within 60px of a patrol it
+  is placed again, at least 90px (else 70px) away (`assets/neon-world.js`). Relics elsewhere don't
+  move.
+- The corner painting is used in 18 rooms. A second version would cut down the repetition.
+- Tests: new `tests/sky-diagonals.test.cjs` (51 rooms, no stand-ins, three links both ways that
+  arrive on the walkway, the save migration, Solaris keeping its own doors). `tile-worlds` expects
+  51 Sky rooms. `node tests/playtest-walk.cjs sky`: 51 rooms, 375 crossings, no problems.
+  Cache tags for `solaris.js`, `sky-data.js`, `tile-worlds.js` and `neon-world.js` are now round197.
+
+## Round 196: the Sky Isles creatures get their own art
+
+- **Seven new sheets** in `assets/monsters/sky/`, from the owner's prompts: the Sunfeather Drake,
+  Cloud Wisp, Gale Harpy and Thunderhorn Ram, the Stormbell Warden and Featherfall Matriarch
+  mini-bosses, and the Zenith Roc final boss. They replace the forest animals that the Sky
+  Isles drew with a blue hue shift (`SKY_TINT`, now gone).
+- **How they are wired:** `tile-worlds.js` adds art-only keys to `WILDLIFE_ART` (`skyDrakeArt`
+  and so on) with `tint: 'none'`. In `elaris-wildlife.js`, a sheet name with a folder
+  (`sky/zenith-roc`) is read from that folder under `assets/monsters/`. `big: true` draws the
+  Zenith Roc in the larger boss box that the Bloom Tyrant uses.
+- **Cutout tool:** some of these sheets had thin dark lines round and between the frames.
+  `tools/cut_sprite_sheet.py` paints any line that is dark along 85% of a row or column as
+  background, and reads the background colour a few pixels inside the edge. The Solaris magenta
+  sheets were re-cut with this version, so the tool still reproduces every file.
+- `tests/tile-worlds.test.cjs` now checks that all seven Sky Isles enemies use their own
+  untinted sheets of four 3:4 frames, and that the Roc gets the boss box. Cache tags for
+  `elaris-wildlife.js` and `tile-worlds.js` are now round196.
+
+## Round 195: the rest of the Solaris roster gets its own art
+
+Every Solaris enemy now has the owner's own sheet; none borrow forest art any more.
+
+- **New sheets** in `assets/monsters/elaris/`, cut from the owner's magenta-background sheets
+  with `tools/cut_sprite_sheet.py`:
+  - `mirage-ibis.png`: the Mirage Ibis (`drownedHeron`), a Thoth-style ibis with an ankh staff
+    and a heat-haze shimmer.
+  - `dune-scorpion.png`: the Dune Scorpion (`blightAntler`), with a glowing copper stinger.
+  - `cistern-warden.png`: the Cistern Warden mini-boss (`tidewardenElaris`), a brass golem with
+    water sloshing in its tank.
+  - `noon-toller.png`: the Noon Toller mini-boss (`galeSovereign`), a bell-headed knight with a
+    hammer. Its cycle went from .7s (the moth's flutter) to 1.2s, to suit a heavy walk.
+  - `sun-pharaoh.png`: the Sun Pharaoh final boss (`bloomTyrant`), whose sun halo grows across
+    the frames. `encounter-depth.js` now gives it this sheet; `forestTyrant` keeps the old Bloom
+    Tyrant sheet for the Sky Isles, Elaris, Vespera and Chronospire bosses.
+  - `dust-devil.png` was re-cut from the owner's sharper copy of the same sheet.
+- **Tool changes:**
+  - The magenta key reads the background colour from the sheet's border, so purple-magenta
+    backgrounds (the ibis) work too.
+  - Despill only touches magenta-ish pixels (red and blue both above green). Gold, orange glows,
+    the Pharaoh's blue stripes and the golem's water keep their colour.
+  - `--no-floor` removes the painted stone floor tile the golem and the knight stood on: in the
+    bottom sixth of the sheet, cool and magenta pixels go, while brass, dust and sand stay.
+  - Specks under 12 pixels are dropped.
+  - All the magenta sheets were cut with the final version, so the tool reproduces every file.
+- The sheets are 2064x688 (four 516x688 frames) and 170 to 285 KB each.
+- Tests: `elaris-wildlife` checks all thirteen sheets and which species uses each (the forest
+  keys keep the old sheets); `solaris-roster` checks the Pharaoh's sheet; `rebalance` now expects
+  the mini-bosses' own sheets. `ELARIS-ART.md` marks every planned sheet as in. Cache tags for
+  `elaris-wildlife.js` and `encounter-depth.js` are now round195.
+
+## Round 194: the Dust Devil gets its own sprite sheet
+
+- **New art.** The owner's 4-frame Dust Devil sheet (a sand tornado with glowing eyes and
+  orbiting rocks) is now `assets/monsters/elaris/dust-devil.png`, used by `stormMoth` (Dust
+  Devil, Solaris). The Noon Toller and the other worlds keep the moth sheet for now.
+- **Magenta backgrounds.** This sheet was drawn on flat magenta, and saved as a JPEG.
+  `tools/cut_sprite_sheet.py` now chroma-keys magenta sheets. JPEG blur mixes magenta into
+  outlines and the thin dust rings, so red and blue are capped against green to take the pink
+  back out, and soft edge pixels take the colour of the nearest solid pixel.
+- **Frame shape.** The sheet was 2000x496 (square frames). The game draws sprites in 3:4 boxes,
+  so the tool pads short sheets to 3:4 with the creature standing near the bottom, as the other
+  sheets do.
+- Colour under fully transparent pixels is now blanked before the 256-colour palette is made,
+  so the palette goes to the creature. The scarab sheet was re-cut with the updated tool.
+- `tests/elaris-wildlife.test.cjs` checks the Dust Devil sheet, and that the moth sheet stays for
+  the other worlds. `elaris-wildlife.js` cache tag is now round194.
+
+## Round 193: the Solar Scarab gets its own sprite sheet
+
+- **New art.** The owner's 4-frame Solar Scarab sheet (a brass beetle rolling a sun-ball) is now
+  `assets/monsters/elaris/solar-scarab.png`, and `cinderFox` (Solar Scarab, Solaris) uses it in
+  rooms and battles. Vespera and Chronospire still use the fox sheet through `forestFox`.
+- **Cutting the background.** The sheet came on a fake checkerboard with a soft white glow
+  round the creature. Keying out the near-white background left a grey halo, and it punched
+  holes in the bright centre of the sun-ball. `tools/cut_sprite_sheet.py` instead keeps the
+  creature's coloured and dark pixels, fills holes (so the ball stays solid), feathers the edge
+  by about a pixel, and saves a 256-colour PNG (180 KB instead of 1 MB). Use it for the
+  next Solaris sheets.
+- `tests/elaris-wildlife.test.cjs` accepts any sheet of four equal upright frames (the owner's
+  sheets are 2000x667, the forest ones 2172x724), and checks that the scarab has its own sheet
+  and that the fox sheet stays for the other worlds. `elaris-wildlife.js` cache tag is now round193.
+
+## Round 192: Solaris diagonals, no flash of old room art, glowing items
+
+- **Solaris corners cut, with diagonal roads.** The owner asked for a less rectangular map.
+  - Rooms 0,3 Copper Wells, 8,3 Radiant Crossing and 5,0 Halo Court are gone (Solaris now has
+    51 rooms). All three were corner rooms on the outer edge, with nothing in them.
+  - The two rooms beside each cut are joined by a diagonal road: 0,4 ↔ 1,3, 7,3 ↔ 8,4, and
+    4,0 ↔ 5,1.
+  - Those six rooms use the owner's new diagonal paintings in
+    `assets/environment/solaris/src/diagonal/`: `diag-corner-a`, `diag-t-a` (two versions)
+    and `diag-t-b` (two versions). Only side-to-side flips are used.
+  - Room 4,0 takes a mirrored `diag-t-a`, whose extra north road runs off the top of the map as a
+    painted dead end, so no `diag-corner-b` painting was needed.
+- **How the diagonal doors work.**
+  - `tools/build_solaris.py` cuts the rooms (`CUT`), links the neighbours, picks diagonal tiles
+    (`DSHAPES`), and writes each diagonal door, the spot where the painted road leaves the room,
+    to `SOLARIS_DIAG` in `assets/solaris-data.js`.
+  - In `assets/solaris.js`, walking into a diagonal door (within 36px) takes you to the partner
+    room. You arrive a short way along its diagonal road, clear of its door, so you never bounce
+    straight back. It reuses the corner-exit code from `assets/diagonals.js`.
+  - Diagonal exit labels (↗ ↖ ↘ ↙ plus the room name) sit at their doors; tapping one walks you
+    through.
+  - Where a diagonal leaves through the same edge as a straight exit (rooms 1,3 and 7,3), the
+    straight door ignores that stretch (`organicDoorExcluded`, a new hook in
+    `assets/organic-paths.js`).
+  - The map draws the diagonal links on its own.
+  - Enemy levels are re-spread by walking distance, and the Solar Crown stays at 18.
+  - Old saves standing in a removed room resume at Dawnfire Gate (the existing check on Solaris
+    room keys).
+- **No more flash of old art on entering a room** (new `assets/room-preload.js`). A room's ground
+  was first drawn with the old district or forest art, and its own painting replaced it once the
+  image loaded, so on a first visit the old art showed for a moment. Two fixes:
+  - While the painting loads, the room now shows its world's plain ground colour.
+  - The paintings of the rooms next to you start loading as soon as you arrive, so they are
+    usually ready before you walk in.
+  - This covers Solaris, the tile worlds and Neon Aftermath's repainted rooms.
+- **Items glow.** Points of interest (data terminals, shrines, caches and so on), map chests and
+  relic/gear markers now have a white rim and a slow pulsing glow: cyan in Neon Aftermath, warm
+  gold elsewhere. Point-of-interest art is drawn at 52px (was 44). Used ones are greyed at 80%
+  opacity (was 45%), so they stay readable. With reduced motion the glow is steady.
+  (`assets/layout-polish.css`.)
+- **No dotted footpaths.** The footpath lines from the street to each item in Neon Aftermath's
+  painted rooms (Round 101) are no longer drawn. The paths are still walkable in the mask.
+- Tests: new `tests/solaris-diagonals.test.cjs`. `expansion` updated for 51 Solaris rooms.
+  `tests/playtest-walk.cjs` now also walks diagonal doors; for Solaris: 51 rooms, 374
+  crossings, no problems, no page errors.
+
+## Round 191: four new Solaris road paintings
+
+- The owner painted four new Solaris road tiles. They are added to the kit in
+  `assets/environment/solaris/src/`, and `tools/build_solaris.py` now spreads 11 rooms over them:
+
+  | Tile | Shape (exits as painted) | Rooms |
+  |---|---|---|
+  | `t-right-b` | north, east, south: market quarter with striped awnings | 8,1 · 1,4 · 3,4 · 7,4 |
+  | `corner-c` | north, east: brick-paved road through walled courtyards | 2,0 · 6,0 · 3,3 · 6,3 |
+  | `t-bottom-c` | east, south, west, with a short stub north (the cliffs close the top) | 4,4 · 1,5 · 3,5 |
+  | `dead-top-b` | north, ending in a ring plaza | 3,2 |
+
+  Before this, one T-junction painting covered 10 rooms and the two corner paintings 8 each.
+- The images arrived 16:9 (2000x1116 and 2752x1536). Each is cropped to the kit's 16:10 around
+  its vertical road, so the roads still leave at the middle of each edge.
+- `corner-c` is laid in bricks with grout lines, which the colour tracer cannot read (it came out
+  patchy, and the two halves did not meet). Its walk area is drawn by hand in `MANUAL`. The
+  stone rings in the middle of `dead-top-b` and `t-bottom-c` are added to the traced roads in
+  `EXTRA`.
+- Checked:
+  - Solaris, organic-path, item-placement, relic, gear and exploration tests pass.
+  - `tests/playtest-walk.cjs elaris`: all 54 rooms, 386 crossings and 68 item routes, with no
+    problems and no page errors.
+  - Screenshots of the new rooms in the game.
+
+## Round 190: Chronospire card paintings from achubu/Cardbound
+
+- Checked `achubu/Cardbound` again (commit eb48d8d, "Expand Chronospire card illustrations").
+  It added 24 paintings for all seven Chronospire Suspend cards:
+  - Chrono Spike, Clockwork Volley, Delayed Bulwark, Future Sight, Rewind Mend and Temporal
+    Barrage now have paintings at all four levels.
+  - Accelerate has levels 0 and 1; level 1 is reused at levels 2 and 3, as in Cardbound.
+- `refreshedCardArt` now lists 110 paintings. The placeholder PNGs these replace moved to
+  `unused assets/assets/cards/`. `cards.js?v=` tag bumped to round190.
+- Cardbound's other new commit adds a "card concept lab" to its compendium. That is code, not
+  art, so it was not taken (this repo only takes images from Cardbound).
+- `card-art` test: Accelerate is now its example of a card with fewer paintings than levels.
+
+## Round 189: Cinder Lance chains into a daze
+
+- Cinder Lance (1 energy, Fire, drops in Solaris) was a weaker Sunflare. Now play two Cinder Lances
+  in the same turn and the enemy is dazed: its attack that turn deals 50% less damage. It works on
+  every enemy, bosses included, and an enemy can be dazed at most once every 3 turns. The intent
+  bubble shows the lower number. A "✸ Chain" tray in battle shows the count and the recovery
+  turns (new `assets/stagger.js`). The card is now 6/7/9/11 damage with Burn 2 (Burn 3 at level 3);
+  it was 5/7/9/11 with Burn 2.
+- Designs tried in the Difficulty lab first (sim only):
+  - Stun on any 3 attacks in a turn: Chronospire bosses went from 30-49% to 88-100%.
+  - Stun on every 3rd copy played in a fight: one copy was enough, because the same card counts
+    again each time it is reshuffled. It took the Featherfall Matriarch from 47% to 100%.
+  - The owner's version, two copies in one turn, needs more than one copy in hand at once.
+- The daze strength was swept with decks that carry three Cinder Lances. Boss win rates averaged
+  over Solaris to Chronospire: 0% (no daze) 19, 25% 25, 50% 32, 75% 35, against 37 for normal
+  decks. 50% makes the three-Lance build nearly as good as a normal deck. 75% makes the Zenith Roc,
+  the Featherfall Matriarch and the Tempest Colossus too easy with it (55-66%). In Solaris (7-card
+  decks) and Chronospire it stays weaker than a normal deck at any strength: the three slots cost
+  more than the daze gives.
+- Normal decks are unchanged (they hold at most one Cinder Lance, which never chains).
+- Tests: new `tests/stagger.test.cjs`. `talent-matrix` updated for Cinder Lance's new 6 base
+  damage. The compendium's mechanics list explains the chain.
+
+## Round 188: the unused Reversal cards are gone
+
+- The four single-element counters (Fire, Water, Earth and Air Reversal, `counter_<element>`) were
+  left over from before the Prismatic Counter. No drop, reward pool or starting deck used them, but
+  they still showed in the compendium's card gallery. They are removed from `defs`, and their art
+  moved to `unused assets/assets/cards/`. The compendium now lists 90 cards.
+- Old saves that still hold one still load. `validateImport` checks every card id, so it now runs
+  `normalizeElementalCards` first. That turns the Reversals into one Prismatic Counter (keeping the
+  copy in the deck), including cards inside a battle in progress. The "Elemental counters
+  combined" message still shows.
+- Tests: new `tests/retired-cards.test.cjs`. `expansion` and `combat-balance` now use the
+  Prismatic Counter, or a hand-made old card for the migration check.
+- On phones up to 480px wide, the Character screen's talent tree used to run about 76px past
+  the edge and needed a sideways swipe. Its nodes are now smaller, so a five-path branch fits
+  (`assets/layout-polish.css`).
+- Bug hunt, nothing else found:
+  - a random-play battle fuzzer: about 25,000 actions in short fights across all six worlds,
+    plus about 90,000 in long fights with a near-unkillable player;
+  - `tests/playtest-walk.cjs` for all six worlds: every room, about 2,300 crossings, every item
+    reachable, no page errors;
+  - a 390x844 sweep of every menu and battle screen in every world, looking for anything
+    wider than the screen.
+
+## Round 187: playtest fixes for phones, desktop and the Hack gift
+
+From a browser playtest at 1280x800, 390x844 and 360x640 (items 1-6 of the playtest report).
+
+- **The Hack gift (bug from Round 185).** The starting deck is full (6/6), so Packet Sniff and
+  Ghost Protocol go to the collection; the log used to say "now in your deck". The log and the
+  arrival screens now say where the cards went (`giftPlacement`). Neon Aftermath's gift also
+  marked the Hack guide as seen, so it never opened. Now the "New mechanic: Hack" screen opens
+  once you leave the reward screen (`state.pendingMechIntro`, shown by a `finishBattle` wrapper).
+  `mechanicGift` returns `{ placed }`, or false if the world's gift was already given.
+- **Mechanic guides on phones (bug from Round 185).** The "How it works" box now goes below the
+  hand instead of above it, so the cards stay on screen. Only one guide opens by itself at a time.
+  The trays are one compact row on phones.
+- **Phones, the map.** The room now fills the space between the HUD and the controls, at least
+  380 room pixels wide, instead of sitting in the top half with a 300px black band below it. The
+  HUD is shorter and no longer covers the room. On short phones the part of the room that does not
+  fit is clipped instead of drawing under the HUD. New `assets/layout-polish.js` replaces
+  `updateAreaCamera`; it measures the HUD and menu row and re-measures when they change size.
+- **Phones, battles.** The side deck folds into one row above the hand ("Show" / "Hide"). The
+  enemy-move boxes show one line of their affliction (tap a box for the rest). The "Your hand"
+  header is hidden and the card art is a little shorter. At 390x844 the hand now starts at y=400
+  (was 451, with the side column taking a third of the width) and whole cards fit above the
+  footer. The enemy portrait is larger.
+- **Desktop.** The room sits below the top menu row, so the menu no longer covers the north exit
+  label (Saltwind Docks in the start room). "Art credits" moved from the top row into the main menu.
+- **Desktop.** The on-screen arrow pad only shows in touch mode.
+- Styles: new `assets/layout-polish.css`, loaded last. Tap-to-move was re-checked at all three sizes.
+- Tests: new `tests/layout-polish.test.cjs`. Screen placement (guide below the hand, folding
+  side deck, no gap under the room) was checked with Playwright screenshots.
+
+## Round 186: 23 more paintings from achubu/Cardbound
+
+- Checked `achubu/Cardbound` again (commit f3495b8, "Complete tracked card art upgrades").
+  It added 23 card paintings; all are wired in (`refreshedCardArt` in `assets/cards.js`):
+  - Level 1, 2 and 3 paintings for seven cards that had only their level-0 painting: Arc
+    Bulwark, Lunar Edict, Mirrorguard, Phantom Resonance, Prism Lance, Sovereign Gale and
+    Tidebound. Their art now changes as they level up, like the other refreshed cards.
+  - Real art for two Chronospire Suspend cards, Temporal Barrage and Clockwork Volley. Cardbound
+    painted only level 0 and uses it at every level; so does this game. Their placeholder PNGs
+    moved to `unused assets/assets/cards/`.
+- There were no other new images (no new monsters, rooms, items or side cards).
+- The 20 world-mechanic cards from Round 185 have no Cardbound art yet and keep their placeholders.
+- `cards.js?v=` tag bumped to round186. `card-art` test updated (86 refreshed paintings; Temporal
+  Barrage is now its example of a card with one painting).
+- Fixed a flaky `crystals-touch-boss` test caused by Round 185. It fights a random Solaris enemy,
+  and when that was the Solar Scarab, the new Sunstroke affliction cost 2 HP on a charging turn
+  that the test expects to cost nothing. The test is about counters, so it now clears that
+  fight's afflictions.
+
+## Round 185: a card mechanic for every world
+
+Every world now has its own card mechanic, like Chronospire's ⏳ Suspend (new
+`assets/world-mechanics.js`, loaded after `world-cards.js`):
+
+| World | Mechanic | How it works | Cards | Works against it |
+|---|---|---|---|---|
+| Neon Aftermath | ⌁ Hack | Hack cards add Glitch to the enemy. At 5 it crashes and skips its next action; each crash patches it (+2 to the next limit). | Packet Sniff, Logic Bomb, Ghost Protocol, Zero Day | 🛡 Firewall (Crown Observer, Crown Sentinel): wipes Glitch, +1 to the limit |
+| Solaris | ☀ Heat | Heat cards build Heat (max 6, lasts between turns). Your next attack sears for 2 per Heat (Noon Blaze: 3) and spends it. | Sunstoke, Scorching Sands, Heatwave, Noon Blaze | 🥵 Sunstroke (Solar Scarab, Noon Toller): lose your Heat and 1 HP for each; with none, lose 2-4 HP |
+| Sky Isles | 🪶 Tailwind | Every card played adds 1 Tailwind this turn. Tailwind cards get a bonus per card already played (up to 4). | Gust Chain, Slipstream, Wind Wall, Skydive | 🌬 Headwind (Cloud Wisp, Featherfall Matriarch): your first 2 cards next turn add none |
+| Elaris | 🌱 Growth | Growth cards grow each time you play them in a fight (up to 4 times). | Sapling Strike, Barkskin, Bloom Mend, Ancient Oak | 🍂 Blight (Storm Moth, Gale Sovereign): your most-grown card withers; with none, lose HP |
+| Vespera | ⚡ Stormcharge | Stored charge (max 20, lasts between turns) strikes back, ignoring Armor, when an enemy attack lands. Lightning Rod lets it out now. | Static Coil, Capacitor Spark, Thunderhead, Lightning Rod | ⏚ Dampen (Arc Wisp, Resonant Phantom): half the charge drains; with none, −1 Aether |
+| Chronospire | ⏳ Suspend | unchanged (`assets/chronospire.js`) | | ⟲ Rewind |
+
+- The 4 cards of each mechanic join that world's reward pool (`VARIETY_POOLS`, `NEW_CARD_WORLD`).
+- Arriving in a world through its portal gives two of them and opens a "New mechanic" screen with
+  a 3-step guide (`mechanicGift`). In Neon Aftermath, Packet Sniff and Ghost Protocol come with
+  your first win. A save that loads inside a world it has not had the gift for gets it then. The
+  cards go into the deck only when it has room; otherwise they wait in the collection.
+- In battle, a tray above the hand shows the mechanic's count (Glitch, Heat, Tailwind, Growth,
+  Stormcharge) with a "How it works" guide that opens by itself the first time you hold one of its
+  cards. The cards carry a badge (Growth cards show how much they have grown). Tailwind and Growth
+  change the numbers on the card face live.
+- Rules text explains each keyword. Compendium → Mechanics has an entry for each.
+- Placeholder art for the 20 cards (`tools/generate_world_card_art.py`; it now writes only
+  missing files, because painting is not deterministic; `--force` repaints all of them).
+
+Balance (Difficulty lab, gear worn):
+- The lab's decks get the two arrival cards at the end, as the game does (they join only if the
+  deck has room). Putting them first pushed Rootbind and Riposte out of the 7-card Solaris deck and
+  dropped the Cistern Warden from 44% to 0%.
+- The mechanic afflictions replaced one rider on five mini-bosses, and three of them got easier.
+  Re-tuned health: Crown Sentinel ×1.29 → ×1.45 (53% → 43%), Resonant Phantom ×1.25 → ×1.7
+  (60% → about 41%), Noon Toller ×1.22 → ×1.35 (53% → 44%). The Featherfall Matriarch and the
+  Gale Sovereign stayed on target. Every other fight in all six worlds stayed on target too.
+- The Node sim (`tests/talent-sim.cjs`) now loads `sun-revenant.js`. Without it the Sun Pharaoh's
+  Entomb was undefined and the Node report stopped at that fight. The browser lab already loaded it.
+
+Tests: new `tests/world-mechanics.test.cjs`. `expansion` (the first-win gift is marked taken
+before the reward-choice check) and `card-variety` (52 world reward cards) updated.
+
+## Round 184: playtest fixes for pathing and things beside the path
+
+- Owner request: playtest for bad pathing, poor placement of interactable items, and bugs.
+- **New `tests/playtest-walk.cjs`** (Playwright, run on demand):
+  - In every world it walks the hero with the game's own tap-to-move routes
+    (`setTouchDestination` + `move()`) through every door, from every spot where the hero
+    actually arrives.
+  - From each arrival it tap-routes to every item in the room, and checks placement:
+    overlaps, patrols, the portal, and the HUD panel or minimap on a 1280×800 screen.
+  - It opens every menu in every world.
+  - Each run covers 6 × 54 rooms, about 820 arrivals, 2,321 door crossings and about 390 item
+    routes.
+- **Found and fixed:**
+  - **Walking past something stopped a tap route.** A point of interest, the merchant, a
+    Nexus Waypoint or the Cardsmith opens when you come within 40px. Items stand 12-28px off
+    the path, so any tap route along that path opened them and cancelled the route; you had to
+    close the menu and tap again. On a phone this hit about 70 crossings per world.
+    - Now a tap route only opens what was tapped: `touchPassingBy()` and `touchTapped()` in
+      `touch-controls.js`, checked in `exploration.js` and `cardsmith.js`.
+    - Walking with the keys still opens what you walk into.
+  - **Used points of interest popped up every time** you walked past ("You have already used
+    this."). They now show a short note instead; tap one to look again.
+  - **Items under the HUD or the minimap:**
+    - Seen in Neon Aftermath: the start Nexus at 658,383, and lore and campfires at 102-179,
+      117-120.
+    - Seen in Solaris: a cache at 140,166.
+    - Fix: new `screenCovered(x, y)` in `organic-paths.js` (top-left 225×180, bottom-right
+      from 650,350). `organicItemSpot()` avoids those areas when a room has another spot, and
+      Neon Aftermath's painted spots skip them.
+    - In a Neon Aftermath room whose only painted spots are covered, the point of interest goes
+      to another room. The Nexus keeps its place if there is no other spot.
+  - **Two Neon Aftermath chests had a patrol standing on them:** Billboard Steps 5,4 (18px)
+    and Pagoda Court 3,7 (16px), so reaching them started a fight. A painted chest spot is now
+    used only when no patrol stands within 70px; otherwise the chest keeps the patrol-clear spot
+    beside the street.
+- **After the fixes, three runs with different seeds:** every room in every world was visited,
+  every door crossed, every item reached, with no walk-past popups, no placement problems, no
+  page errors and no menu errors.
+- **Not covered by the walk:** patrols move and collide only in the animation loop, which the
+  walker doesn't run, so walking into patrols isn't exercised. Combat is covered by the other
+  suites and the Difficulty lab.
+- New `tests/walk-past.test.cjs`: tap routes, used points of interest, and HUD, minimap and
+  patrol clearance over three seeds in all six worlds.
+- Cache tags bumped to `?v=round184`.
+
+## Round 183: every boss re-tuned with gear worn
+
+- The Round 182 report showed that, with gear worn, every mini-boss and final boss from
+  Solaris on was too easy. It also showed Neon Aftermath's two mini-bosses the wrong way
+  round: the Lunar Enforcer won 8%, the Crown Sentinel 100%.
+- Owner request: Neon Aftermath's three bosses at about **40%**. Everything else keeps the
+  usual targets: mini-bosses about 42%, final bosses about 29%.
+- **How:** each boss's health (`BALANCE.perEnemy`) was bisected in the Difficulty lab: real
+  battles in the browser, gear worn, 16 builds × 2 styles × 6 fights.
+- **Cistern Warden:** its win rate barely moved with health (still 51% at 4.5×), because its
+  base attack (11) is the weakest of any boss at its level. It gets **health 2.4× and +7
+  attack** (538 HP, 37 attack), which wins 44%.
+
+  | Boss | Health | Wins with gear |
+  |---|---|---|
+  | Lunar Enforcer | .73 → .55 | 8% → 40% |
+  | Crown Sentinel | .72 → 1.29 | 100% → 40% |
+  | Thorn Warden | .95 → .75 | 31% → 41% |
+  | Cistern Warden | 1.4 → 2.4, +7 attack | 92% → 44% |
+  | Noon Toller | .82 → 1.22 | 73% → 42% |
+  | Sun Pharaoh | .77 → .96 | 51% → 31% |
+  | Stormbell Warden | .65 → .76 | 52% → 42% |
+  | Featherfall Matriarch | .78 → .94 | 72% → 42% |
+  | Zenith Roc | .42 → .50 | 59% → 31% |
+  | Tidebound Warden | .91 → 1.15 | 87% → 41% |
+  | Gale Sovereign | .65 → .78 | 64% → 43% |
+  | Bloom Tyrant | .58 → .70 | 58% → 29% |
+  | Arc Sentinel | .72 → .90 | 66% → 42% |
+  | Resonant Phantom | .99 → 1.25 | 72% → 42% |
+  | Tempest Colossus | .45 → .63 | 49% → 28% |
+  | Clockwarden | .85 → 1.16 | 84% → 42% |
+  | Paradox Twin | .93 → 1.28 | 83% → 43% |
+  | Chronarch | .47 → .62 | 60% → 29% |
+
+- **Result:** a full lab run puts **all 80 encounters on target**. `DIFFICULTY-REPORT.md` is
+  regenerated from that run.
+- The lab judges the Thorn Warden against 34-50%, through the new `SIM_TARGET_BY_WORLD` in
+  `assets/sim/lab.js`.
+- `tests/balance-sim.cjs` still plays without gear, so it now reads these bosses as hard. Tune
+  bosses with the lab, which wears gear like a player does.
+- Cache tags bumped to `?v=round183`.
+
+## Round 182: the Difficulty lab, and a difficulty report for every enemy
+
+- Owner request: test the whole game and break down the difficulty of every enemy, each
+  fought at the player's own level, with all the items available by then, and with the talent
+  trees used up to that level. Owner request: run it from the compendium whenever wanted.
+- **Compendium → Difficulty lab** (new section and nav link):
+  - Pick a world or all worlds, and how many fights per build and style. Press **Run**.
+  - It plays real battles in the compendium's hidden game frame and fills a table: each
+    enemy's HP and attack at that level, typical win rate, best and worst build, average
+    turns, HP left when won, gear worn, and a verdict against the targets.
+  - **Copy results** gives tab-separated rows for a spreadsheet.
+  - All six worlds at 6 fights take about 100 s.
+  - While it runs, saving, drawing and storage writes in the frame are switched off, and
+    every `aethercede-` key is restored afterwards. A journey in another tab is never
+    touched; a planted save stayed byte-identical in the browser check.
+- **Shared code:**
+  - `assets/sim/bot.js`: the sim's bot, moved out of `tests/talent-sim.cjs`.
+  - `assets/sim/lab.js`: the 16 builds, decks, earlier bosses and side cards, moved out of
+    `tests/balance-sim.cjs`. It also holds `simEncounters()` (every encounter, with the gear
+    available by then) and `simEncounterRun()` (all builds and styles, one step at a time).
+  - The balance sim reads its settings from `lab.js`, and gives identical results (Lunar
+    Enforcer check before and after).
+  - The game itself does not load these files.
+  - `tests/talent-sim.cjs` also loads `gear.js`. Gear does nothing unless a piece is owned.
+- **New `tests/difficulty-report.cjs [fights] [world]`:** the same lab from the command line.
+- **The report:** `DIFFICULTY-REPORT.md` lists all 83 encounters, 15,936 battles at 6 fights
+  per build and style. 17 are off target:
+  - **Neon Aftermath's mini-bosses are swapped in difficulty.** The Lunar Enforcer (Lv 5)
+    wins 8% (too hard) and the Crown Sentinel (Lv 7) 100% (too easy). This was already so
+    before this session (8223aab, Round 170) and does not depend on gear (98% without it).
+  - **With gear worn, every mini-boss and final boss from Solaris on reads too easy:**
+    - Mini-bosses: 52-92%.
+    - Final bosses: the Sun Pharaoh 51%, Zenith Roc 59%, Bloom Tyrant 58%, Tempest Colossus
+      49%, Chronarch 60%.
+    - These were tuned in Rounds 177 and 181 without gear (about 42% and 29%), so the gear
+      boosts roughly double the boss win rates.
+    - Regular fights are all on target.
+- New `tests/difficulty-lab.test.cjs`: every world's encounters and their gear, and one
+  encounter run end to end.
+
+## Round 181: mini-boss balance after the Vespera and Chronospire rebuild
+
+- On the new maps the Arc Sentinel and the Clockwarden stand 2 levels higher than before
+  (41 and 50). In the fair-level sim that made them slightly easy (53% and 55% wins; target
+  34-50%). Chronospire's level 53 regular fights (the Thunder Mauler's zone) read slightly
+  hard at 24%.
+- Measured with `tests/balance-sim.cjs` (12 fights per build and style):
+
+  | Enemy | Health | Wins |
+  |---|---|---|
+  | Arc Sentinel | .69 / .74 / .79 | 53% / 37% / 32% |
+  | Clockwarden | .82 / .88 / .94 | 55% / 34% / 30% |
+  | Thunder Mauler | .88 | level 53 regular fights 38% |
+
+- Set to **Arc Sentinel .72** and **Clockwarden .85**, between the measured points (about
+  42% expected), and **Thunder Mauler .88**.
+
+## Round 180: 46 refreshed paintings from achubu/Cardbound
+
+- Pulled the card art we were missing from `achubu/Cardbound` (its 2026-10-17 art refresh).
+  No other files in its `assets/` were new to us, and its card definitions match ours.
+  - **36 card paintings** (512 × 512 WebP). Complete four-stage sets for Rootbind, Static,
+    Storm Battery, Tempest Surge, Tidecall and Verdant Pact; the missing stages for Static
+    Shield (1), Thornlash (3) and Wildfire (0, 2, 3); and base paintings for Arc Bulwark,
+    Lunar Edict, Mirrorguard, Phantom Resonance, Prism Lance, Sovereign Gale and Tidebound.
+    Stages not painted yet reuse the nearest painted stage, as before.
+  - **All 10 side-deck cards:** `sideArtPath()` (`aether-deck.js`) now points at `.webp`.
+- `refreshedCardArt` (`cards.js`) lists 63 painted stages across 21 cards; 13 cards have all
+  four stages.
+- The 52 replaced card PNGs and 10 side-card PNGs moved to `unused assets/assets/cards/`,
+  under their old paths.
+- `assets/cards/art-refresh.md` and `tools/art-refresh/prompts.json` were synced from
+  Cardbound. Still to come there: levels 1-3 for the seven single-stage cards, and the
+  Chronospire set.
+- Cache tags bumped to `?v=round180` in `index.html` and `compendium.html`.
+- `card-art` checks every painting is wired in and every side card uses its painting.
+
+## Round 179: Vespera and Chronospire are tile worlds too
+
+- Owner request: every world is built like Solaris. Vespera and Chronospire are rebuilt from
+  road tiles with `tools/build_tile_world.py vespera|chronospire`:
+  - **Vespera** uses Neon Aftermath's layout as it is: start 0,1, mini-bosses 5,3 and 8,5,
+    the Tempest Colossus at 8,0.
+  - **Chronospire** uses it turned on its side, a tall 6×9 spire: start 1,0, mini-bosses 3,5
+    and 5,8, the Chronarch at 0,8.
+  - Each has 54 rooms. Rosters, levels (37-45 and 46-54) and gear stay the same.
+  - The builder now handles turned layouts, grids of any size, and a new `straight-h`
+    (east-west) tile shape.
+- **Placeholder tiles:** `tools/paint_placeholder_tiles.py` paints both new styles:
+  - Vespera: wet flagstone causeways over dark storm shallows with glowing crystals and rain.
+  - Chronospire: brass floor plates through clockwork gears.
+  - Each world's own rain and clockwork overlays still play over them.
+- **Rooms swapped in place:** `tile-worlds.js` replaces the room tables (`VESPERA_ROOM_DATA`,
+  `CHRONO_ROOM_DATA`) in place. Quiet rooms, Nexus Waypoints, boss rooms and chests come from
+  the new maps; each chest is in the dead end nearest a mini-boss room.
+- **Old saves:** a save on the old Vespera or Chronospire map resumes at the new start; level,
+  deck, gear and boss kills stay. That world's waypoints, chests, cooldowns and used points of
+  interest are forgotten. The migration runs once, and every save carries the mark
+  (`tileWorlds: 179`).
+- **Retired:** Vespera's three joined districts (Stormglass Reach, Prism Bazaar, Stormforge
+  Foundry) were the last joined districts in the game. Their paintings, along with old Elaris's
+  emerald and sunpetal, moved to `unused assets/assets/environment/areas/`.
+- **Chronospire's mini-bosses get their own cards:**
+  - The Clockwarden drops **Gearward Bulwark** (15 Block, draw 1).
+  - The Paradox Twin drops **Paradox Edge** (16 Pierce damage, draw 1).
+  - Every mini-boss in the game now has a unique card.
+- **Tests:**
+  - `tile-worlds` covers all four tile worlds, the full portal chain and the 6×9 spire.
+  - New `rebuilt-worlds-migrate`.
+  - `organic-paths` now checks every tile world's doors, arrivals and patrols on the engine.
+  - Updated for the new maps: `chronospire`, `crystals-touch-boss`, `pacing`, `rebalance`,
+    `area-art` and `combined-rooms`.
+  - Fix: a Round 175 edit had put a `//` comment in the middle of a line in the `chronospire`
+    test, which disabled its "no talent multiplier" check. It runs again.
+- **Balance check** on the new maps (sim, 8 fights): Vespera's regular fights are 32-96%, the
+  Resonant Phantom 43% and the Tempest Colossus 30%. Chronospire's Paradox Twin is 44% and the
+  Chronarch 31%. The Arc Sentinel (53%) and the Clockwarden (55%) now sit 2 levels higher and
+  read slightly easy, so their adjustment follows in the next round.
+
+## Round 178: every world drops its own cards
+
+- Owner request: each world has its own set of unique card drops. Chest and elite card
+  rewards (choose 1 of 3) come from `VARIETY_POOLS[world]`, and no card is now in two worlds'
+  pools. New `assets/world-cards.js` (after `tile-worlds.js`):
+
+  | World | Reward cards |
+  |---|---|
+  | Neon Aftermath | Cleave, Riposte, Bastion, Mend, Spark, Shatter, Arc Jab, Bulwark Bash, Overclock, Static Shield, Breach Spike |
+  | Solaris | Cinder Lance, Venom Bloom, Gale Cut, Prismatic Counter, **Sunflare**, **Sand Veil**, **Scarab Swarm**, **Oasis Draught**, **Solar Lance** |
+  | Sky Isles | Chain Lightning, Storm Battery, Tempest Surge, **Skyfall**, **Featherguard**, **Updraft**, **Thunderclap**, **Cloudburst** |
+  | Elaris | Thornlash, Wildfire, Rootbind, Tidecall, Verdant Pact (the forest cards, moved from Solaris), **Elder Root**, **Spore Cloud**, **Briar Wall** |
+  | Vespera | Mirrorguard, Prism Lance, **Crystal Shard**, **Crystal Ward**, **Riptide**, **Squall Step** |
+  | Chronospire | its seven Suspend cards |
+
+- The 17 new reward cards use existing effects only:
+  - Sunflare: fire, Burn.
+  - Sand Veil: Block + draw.
+  - Scarab Swarm: 3 hits + Poison.
+  - Oasis Draught: heal + Block.
+  - Solar Lance: fire, Pierce.
+  - Skyfall: air, draw.
+  - Featherguard: Block + a card next turn.
+  - Updraft: draw + Aether.
+  - Thunderclap: lightning, halves the next enemy attack.
+  - Cloudburst: water, 2 hits + heal.
+  - Elder Root: earth, Poison.
+  - Spore Cloud: Poison + draw.
+  - Briar Wall: Block + Bind.
+  - Crystal Shard: lightning, Pierce.
+  - Crystal Ward: Block + halves the next enemy attack.
+  - Riptide: water, draw.
+  - Squall Step: Block + Aether.
+- **Mini-boss cards:**
+  - Elaris's Tidebound Warden and Gale Sovereign drop Tidebound Aegis and Sovereign Gale again.
+  - Solaris's Cistern Warden drops **Cistern Aegis**.
+  - Solaris's Noon Toller drops **Noon Peal**.
+  - The Sky Isles' Stormbell Warden drops **Stormbell Toll**.
+  - The Featherfall Matriarch drops **Featherfall Grace**.
+  - A drop you already received stays received (`miniDrops` keeps the mini-boss ids).
+- **Art:** new `tools/generate_world_card_art.py` paints placeholders for all 21 new cards at
+  all 4 levels, with the existing card pipeline and a motif per card.
+- Compendium and `cards.js` cache tags bumped. `tests/balance-sim.cjs` still uses its Round 177
+  decks for the new worlds (the cards a player carries in), so its numbers are unchanged.
+- New `tests/world-cards.test.cjs` checks:
+  - No card is in two pools, and offers come only from the current world.
+  - Forest cards drop in Elaris, every new mini-boss has its own card, and new cards play as
+    written.
+  - Every new card has art at all four levels.
+- `card-variety` now counts 32 world reward cards.
+
+## Round 177: balance for worlds 3 to 6
+
+- Tuned with `tests/balance-sim.cjs` (16 talent builds × 2 play styles, fair-fight levels).
+  Targets: regular fights about 75% wins on average, mini-bosses about 42%, final bosses
+  about 29%. Each world's health multiplier was bisected first, then each boss's own
+  health.
+
+  | World | `regionHp` | Mini-bosses (hp) | Final boss (hp) | Sim result: regular / minis / boss |
+  |---|---|---|---|---|
+  | Sky Isles | 2.35 → **2.2** | Stormbell Warden .65, Featherfall Matriarch .78 | Zenith Roc .42 | 58-91% / 42%, 41% / 31% |
+  | Elaris | 3.3 → **2.22** | Tidebound Warden .91, Gale Sovereign .65 | Bloom Tyrant .58 | 50-92% / 42%, 48% / 28% |
+  | Vespera | 2.35 → **3.02** | Arc Sentinel .69, Resonant Phantom .99 | Tempest Colossus .45 | 45-92% / 42%, 43% / 30% |
+  | Chronospire | 3.3 → **3.36** | Clockwarden .82, Paradox Twin .93 | Chronarch .47 | 41-100% / 40%, 42% / 31% |
+
+- Why it moved:
+  - At their new levels (+18), Vespera and Chronospire had become too easy: the player has
+    18 more levels of talents by then.
+  - Elaris on Chronospire's old values was too hard, because Chronospire's numbers assumed
+    Suspend cards.
+- The sim does not wear gear yet, so real fights are a little easier than these numbers.
+
+## Round 176: gear, two pieces per world that open its boss room
+
+- Owner request: each world has only two items, and both are needed to unlock its boss room.
+  Each item is worn and gives a small boost (Armor, attack, health, armor piercing,
+  elemental attack, one free cleanse). Items get placeholder graphics and a separate
+  **Gear** screen like the Aetherlink.
+- **The rule, in every world:** each mini-boss guards one gear piece in its room. You can
+  take it once the mini-boss is beaten. Every door into the final boss room is sealed
+  (`requires: 'gate:<world>'`) until you hold both pieces, or once that boss is already
+  beaten, so old saves aren't locked out.
+- **The 12 pieces** (`GEAR` in the new `assets/gear.js`), across 5 slots:
+
+  | World | First mini-boss | Second mini-boss |
+  |---|---|---|
+  | Neon Aftermath | Ember Gloves (gloves): +1 attack | Briarstep Boots (boots): +1 Armor |
+  | Solaris | Sunwoven Shirt (shirt): +5 max HP | Scarab Belt (belt): Pierce 1 |
+  | Sky Isles | Galeweave Pants (pants): +1 elemental | Cloudstep Boots (boots): 1 free cleanse |
+  | Elaris | Thornhide Gloves (gloves): +2 attack | Mossweave Pants (pants): +2 Armor |
+  | Vespera | Stormglass Belt (belt): Pierce 2 | Tempest Gloves (gloves): +2 elemental |
+  | Chronospire | Timeworn Shirt (shirt): +12 max HP | Hourglass Belt (belt): 1 free cleanse |
+
+  - Attack and elemental add to card damage, through the talent damage hook.
+  - Pierce ignores enemy Armor.
+  - Armor stacks with Reactive Plating.
+  - A free cleanse is a **✚ Gear cleanse** button in battle: one Purifying Light per fight.
+- **Gear screen:** a new **Gear** button sits beside Aetherlink. It shows five slots (boots,
+  shirt, pants, belt, gloves), each with a picker, plus the whole collection: undiscovered
+  pieces say which world guards them. A piece goes on when you pick it up if its slot is
+  empty. Gear can't be changed mid-fight.
+- **Art:** new `tools/paint_gear_icons.py` paints a placeholder icon per piece in its world's
+  colours (`assets/items/gear/<id>.png`). On the map a piece shows its icon. Owner art with
+  the same file names replaces them.
+- **Neon Aftermath:**
+  - The relic gates are gone. Only the Warden's Crown is sealed.
+  - The Ember Sigil is now the Ember Gloves, still in the Moon Temple.
+  - The Briarstep Boots moved to the Crown Sentinel's Scrap Fortress.
+  - The Moon Lens is retired.
+  - The hidden Upgrade Crystal (owner request) is now a crystal chest at 4,4, the dead end in
+    the middle of the north edge. A save that already took it finds that chest open.
+  - Gear ids stay in `state.relics`, so old saves keep the Ember Sigil and the Boots as their
+    gear.
+- **Chests moved out of the mini-boss rooms** to nearby rooms, under their old ids, so opened
+  chests stay opened:
+
+  | World | Moves |
+  |---|---|
+  | Neon Aftermath | 8,9 → 5,4 |
+  | Solaris | 5,2 → 3,2, 8,0 → 8,2 |
+  | Vespera | 1,5 → 2,5, 11,2 → 10,2 |
+  | Chronospire | 0,3 → 1,3, 6,6 → 6,5 |
+  | Sky Isles | 5,3 and 0,3 |
+  | Elaris | 5,2 and 0,2 |
+
+- The objective names the missing pieces and their guardians until both are found.
+- **Fixes:**
+  - The exploration map's completion counted every relic you carried from other worlds,
+    and could go past 100%. It now counts only this world's.
+  - The Safe tag on the map uses each world's real start room.
+- **Tests:**
+  - New `tests/gear.test.cjs`.
+  - `relic-quest` now plays the gear chain in all six worlds.
+  - Updated: `neon-world`, `room-art`, `rebalance`, `expansion`, `chronospire` (doors into the
+    boss room are `{to, requires}` objects) and `solaris-roster`.
+
+## Round 175: the Sky Isles and Elaris join the journey (worlds 3 and 4)
+
+- **Six worlds**, in travel order: Neon Aftermath, Solaris, **Sky Isles** (`sky`), **Elaris**
+  (`wilds`), Vespera, Chronospire. Each final boss room's portal leads to the next world's
+  start, and each start leads back. Solaris's Solar Crown now opens to the Sky Isles, and
+  Vespera's start returns to Elaris.
+- **Vespera and Chronospire move up two worlds:** their rooms are 18 levels higher (Vespera
+  37-45, Chronospire 46-54).
+- **New `assets/tile-worlds.js`** (after `chronospire.js`; data in `assets/sky-data.js` and
+  `assets/wilds-data.js` from Round 174) does the following:
+  - Runs Solaris's painted-world engine once per world: walk mask, loose crossings and the
+    flipped tile per room.
+  - Sets up both rosters, rooms, portals, quiet rooms, Nexus Waypoints, lore, events and the
+    objective.
+- **Sky Isles roster** (sprites borrowed and tinted sky-blue until art arrives):
+
+  | Enemy | Element | Affliction |
+  |---|---|---|
+  | Sunfeather Drake | fire | Crush |
+  | Cloud Wisp | water | Static |
+  | Gale Harpy | air | Barrage |
+  | Thunderhorn Ram | earth | Rend |
+  | The Stormbell Warden (mini-boss, Stormbell Tower) | air | Shackle + Static |
+  | The Featherfall Matriarch (mini-boss, Featherfall Roost) | water | Siphon + Fog |
+  | **The Zenith Roc** (final boss, The Eye of the Sky) | air/fire | Empower, Barrage, Enfeeble |
+
+  - Events: Updraft Well, Abandoned Aerie, Singing Chimes, Starwell.
+  - Lore: Wind Chimes.
+- **Elaris roster:** the forest creatures come home under their original names and sprites,
+  untinted:
+  - Cinder Fox, Blight Antler, Drowned Heron, Storm Moth.
+  - The Tidebound Warden (Drowned Weir) and The Gale Sovereign (Stormwing Canopy).
+  - **The Bloom Tyrant** (Elderbloom Sanctuary).
+  - They have their own ids (`elarisFox`, `tideboundWarden`, `elarisTyrant`, ...), so
+    Solaris's renamed desert roster keeps its ids.
+  - Events: the forest set (Moonlit Spring, Wounded Ranger, Glowing Seedpod, Vines).
+  - Lore: Elder Stones.
+- **World registry in `expansion.js`:** `WORLD_ORDER`, `WORLD_NAMES`, `TILE_REGIONS`,
+  `regionStartRoom()`, `regionTierTypes()` and `WORLD_BOSS_ROOMS`. Portals, start rooms,
+  spawns, chests, saves, distances, titles and the exploration map read these instead of
+  per-world `if` chains. `regionIndex()` (`aether-deck.js`) is the world's place in
+  `WORLD_ORDER`. Affliction strength and side-card tiers follow it, and Dispel damage grows
+  4 + 3 per world.
+- **Deck slots:** the Zenith Roc and the Bloom Tyrant each add a deck slot (`WORLD_BOSSES`).
+- **Balance:** this round ships starting values. The Sky Isles take Vespera's old
+  multipliers and Elaris takes Chronospire's. `tests/balance-sim.cjs` now covers all six
+  worlds (`ONLY_REGIONS=sky,wilds`), and the tuned values follow in the next round.
+- **Card rewards** in the new worlds borrow Vespera's and Solaris's pools until Round 177
+  gives every world its own.
+- **Compendium:** lists both new worlds and the new levels.
+- **Tests:**
+  - New `tests/tile-worlds.test.cjs`: world order, 54 rooms each, enemies on paths, bosses,
+    quiet rooms, the tiles ship, levels, the portal chain, rosters and art.
+  - `region-rooms-load` covers all six worlds.
+  - `chronospire` and `crystals-touch-boss` are updated for the new order.
+
+## Round 174: tile kits for worlds 3 and 4 (Sky Isles and Elaris)
+
+- Owner plan: six worlds in order: Neon Aftermath, Solaris, a new sky world, Elaris (the
+  forest, with the old forest creatures), then Vespera and Chronospire. Elaris and every later
+  world are built like Solaris, from road-shaped tiles flipped to fit each room.
+- New `tools/build_tile_world.py sky|wilds`: Solaris's builder generalised. It reuses the
+  tracer and flips from `tools/build_solaris.py`, so Solaris's output does not change. Each
+  world turns Neon Aftermath's 54-room layout a different way, so the three tile worlds have
+  different maps:
+
+  | World | Region id | Map | Start | Mini-bosses | Final boss | Levels |
+  |---|---|---|---|---|---|---|
+  | Solaris | `elaris` | flipped top-to-bottom | 0,0 | 5,2 / 8,0 | 8,5 | 10-18 |
+  | Sky Isles | `sky` | flipped left-to-right | 8,1 | 3,3 / 0,5 | 0,0 | 19-27 |
+  | Elaris | `wilds` | turned half way round | 8,4 | 3,2 / 0,0 | 0,5 | 28-36 |
+
+  The region id `elaris` stays with Solaris so saves carry over; the forest world is `wilds`.
+  The builder writes `assets/<world>-data.js` (`TILE_WORLD_DATA.<world>`: walk mask, tile plan,
+  rooms, the start/boss/mini-boss rooms and the placeholder list) and the room tiles as `.webp`.
+- New `tools/paint_placeholder_tiles.py sky|wilds` paints a stand-in for each of the 7 road
+  shapes the layout needs (cross, corner, t-bottom, t-right, straight, dead-bottom,
+  dead-right): marble walkways on grassy islands over clouds for the sky, and dirt trails
+  under tree canopy for Elaris. It also writes each tile's exact walk area to
+  `src/masks/<name>.png`, so the stand-ins need no colour tracing. Owner paintings
+  (e.g. `src/cross-a.jpg`) replace them; delete the `-ph` tile then.
+- The new data is not loaded by the game yet (next round).
+
+## Round 173: saves in every Chronospire room load
+
+- **Bug:** a save made in 6 of Chronospire's 34 rooms would not load: `9,4`, `9,5`, `9,6`,
+  `6,6` (Paradox Twin), `8,6` and `8,7` (the Chronarch). `validateImport` checked
+  Chronospire rooms against Solaris's room list, so those rooms failed with "Invalid room"
+  and "Continue" reported no save.
+- **Fix:** new `regionRoomKeys(region)` in `expansion.js` returns each world's own room list.
+  The worlds planned next will extend it.
+- New `tests/region-rooms-load.test.cjs` validates a save in every room of every world.
+
+## Round 172: Solaris enemies fit the desert city
+
+- Owner request: rename and rework the Solaris enemies to fit a sun-scorched brass desert
+  city. The owner will send new art later. Ids are unchanged, so saves, boss kills and
+  mid-fight saves carry over.
+
+  | Was | Now | Change |
+  |---|---|---|
+  | Cinder Fox | **Solar Scarab** ☼ | fire, Barrage |
+  | Drowned Heron | **Mirage Ibis** | water, Siphon |
+  | Blight Antler | **Dune Scorpion** | earth, Enfeeble |
+  | Storm Moth | **Dust Devil** | air, Mind Fog |
+  | The Tidebound Warden | **The Cistern Warden** | mini-boss, Scrapwall Stronghold |
+  | The Gale Sovereign | **The Noon Toller** 🔔 | mini-boss, Temple of the Noon Bell |
+  | The Bloom Tyrant | **The Sun Pharaoh** ☉ | final boss, Solar Crown |
+
+- **The Sun Pharaoh** shifts between sun and sand (fire/earth, was earth/air). It now uses
+  Entomb, the Revenant's linen wrap, in place of Lacerate (Entomb, Empower, Rend).
+- Solaris Sun Dial lore, the Solaris objective and the compendium texts use the new names.
+- **Art:** the new enemies still show the old forest sheets for now. `ELARIS-ART.md` lists
+  the planned file for each one (`solar-scarab.png`, `mirage-ibis.png`, `dune-scorpion.png`,
+  `dust-devil.png`, `cistern-warden.png`, `noon-toller.png`, `sun-pharaoh.png`). Vespera
+  and Chronospire used to borrow the Solaris ids for their recolored sprites. They now
+  borrow art-only keys (`forestFox`, `forestHeron`, `forestStag`, `forestMoth`,
+  `forestTyrant`), so new Solaris art won't change them.
+- Unchanged: the mini-boss card drops (Tidebound Aegis, Sovereign Gale) and the Stormglass
+  Covenant keep their names.
+- New `tests/solaris-roster.test.cjs`. Cache tags bumped to `?v=round172`.
+
+## Round 171: resuming a journey keeps your place in Neon Aftermath
+
+- **Bug:** after a refresh, "Continue saved journey" put you back at the
+  Afterlight Refuge with the map wiped back to one room. Level, deck, relics
+  and boss kills stayed.
+- **Cause:** `expansion.js` bound the start button straight to its own
+  `newGame`, so the wrappers added later never ran from the button. One of
+  them, in `neon-world.js`, marks new games with `cityWorld: 1`. Without that
+  mark, every load ran the Round 91 old-city migration, which resets city
+  exploration. The aether-deck and exploration `newGame` wrappers were skipped
+  too; loads filled in what they set up.
+- **Fix:** the start and resume buttons now call the current `newGame` and
+  `load`. `neon-world.js` also adds the mark on every save, because a game in
+  progress is always on the current map. A save that was made without the
+  mark still resets one more time on its next load, then keeps its place.
+- New `tests/resume-progress.test.cjs`. Cache tags bumped to `?v=round171`.
+
+## Round 170: the Revenant walks
+
+- The owner's 4-frame walk loop for the Sunwrapped Revenant (contact, passing, contact, passing) is
+  keyed off magenta into `assets/monsters/elaris/sun-revenant-walk.png`. Each frame is anchored on
+  its legs and set on a shared foot line. Map patrols loop it every 1.1s and flip it when they turn.
+  Battle keeps the pose sheet: stand and sway, club swing and recoil.
+- The walk sheet ships with the game, so it is wired in directly instead of being probed at load.
+- The keyer now also removes magenta specks of 4 pixels or more trapped inside the figure.
+
+## Round 169: the Sunwrapped Revenant, a tech mummy for Solaris
+
+- New Solaris patrol enemy, the **Sunwrapped Revenant** ☥: 50 HP, 9 attack, earth (its charged
+  strike poisons). It joins the Solaris wildlife pool (`assets/sun-revenant.js`, loaded after
+  `battle-hud`), and the compendium lists it.
+- **Entomb**, a new affliction and its signature move: when it lands, the strongest card in your
+  next hand is wrapped in linen and can't be played that turn. The card shows "☥ ENTOMBED".
+  Purifying Light unwraps it, and Null Anchor prevents it.
+- **Art:** the owner's 4-pose sheet, keyed off magenta (`assets/monsters/elaris/sun-revenant.png`).
+  The poses are separate stances, not a loop, so the Revenant stands with a breathing sway, swings
+  its club when it hits you and recoils when you hit it. If `sun-revenant-walk.png` is added, map
+  patrols walk with it instead.
+- Also: the compendium's Solaris blurb now describes the desert city.
+- New `tests/sun-revenant.test.cjs`; `elaris-wildlife` now expects five Solaris species.
+
+## Round 168: one thing per room
+
+- No room holds two things any more. Waypoints, the Cardsmith, the merchant, points of
+  interest (lore, shrines, campfires, caches, sealed vaults, events), relics and hidden chests
+  each get their own room.
+- **The Cardsmith** used to stand beside the middle Nexus Waypoint. It now has its own room about
+  halfway into each world, not in or next to the waypoint's room (`cardsmithRoom` in
+  `assets/cardsmith.js`). Points of interest and the merchant skip that room.
+
+  | World | Cardsmith room |
+  |---|---|
+  | Neon Aftermath | 2,7 Carousel Green |
+  | Solaris | 0,4 Ember Terrace |
+  | Vespera | 6,5 Ion Marsh Shoals |
+  | Chronospire | 6,2 Hourglass Walk |
+
+- **Neon Aftermath's Moon Temple** held both the Ember Sigil and a crystal chest. The chest moved
+  to Pagoda Court (3,7), a dead end in the same district, so it is now an off-path find instead of
+  being locked behind the Lunar Enforcer.
+- Portals are exits, not items, so a start room's waypoint still sits beside the return portal.
+- New `tests/one-per-room.test.cjs` checks every world over 5 seeds and 4 merchant moves.
+  `cardsmith` and `rebalance` tests are updated; the boss-locked chest test now uses the Crown
+  Sentinel's Scrap Fortress.
+
+## Round 167: last Solaris stand-in replaced
+
+- The owner's `sol-dead-top` (road from the top into a turnaround circle) is the dead end for the
+  4 rooms that only open north (2,2 3,2 8,2 6,5), unflipped. New shape `dead-top` in
+  `tools/build_solaris.py`, with a hand-drawn walk area. Its sand alley below the circle stops short
+  of the bottom edge, since no room connects there.
+- Solaris now has no stand-in tiles (`SOLARIS_PLACEHOLDERS` is empty). Still to come: the start
+  camp and the upright corner, T-junction and observatory paintings.
+
+## Round 166: Solaris crossroads and west dead end
+
+- The owner's `sol-cross-a` (sun-dial roundabout) and `sol-cross-b` (mirror towers) replace the
+  crossroads stand-in in 8 rooms, 4 each. `sol-dead-left` (collapsed solar tower) is the room that
+  only opens west (4,5). New shape `dead-left` in `tools/build_solaris.py`; the `cross-ph` and
+  `dead-right-ph` stand-ins are gone.
+- The tracer misses the round plazas, so `EXTRA` adds the roundabout and the dead end's plaza to
+  the traced roads.
+- `sol-start` in this upload is the colonnade avenue again, so it isn't used. The start camp
+  (right and bottom exits) is still to come. The north dead end is the last stand-in.
+
+## Round 165: fewer upside-down Solaris rooms
+
+- `tools/build_solaris.py` now flips a tile top to bottom only when no unflipped or mirrored
+  option fits the room, since that flip turns painted buildings upside down. That takes the
+  T-junction (`t-right-a`) and straight tiles off the flipped list. The corners, the
+  `t-bottom` T-junctions, the north dead end and the observatory still need the flip until
+  upright paintings arrive; prompts for those went to the owner.
+
+## Round 164: Solaris landmark rooms and the colonnade straight
+
+- Six of the owner's landmark paintings are now one-off rooms (`assets/environment/solaris/src/landmarks/`):
+
+  | Room | Painting | Notes |
+  |---|---|---|
+  | 8,5 The Solar Crown | `sol-boss` (arena stronghold) | Bloom Tyrant |
+  | 5,2 Scrapwall Stronghold | `sol-miniboss` | Tidebound Warden; was "Temple of the Noon Bell" |
+  | 8,0 Temple of the Noon Bell | `sol-relic-ember` (sun temple, brazier) | Gale Sovereign; was "Mirror Fortress" |
+  | 0,2 Statue Garden | `sol-relic-boots` | |
+  | 6,2 Shattered Array | `sol-relic-crystal` | mirrored left to right |
+  | 5,5 Brass Observatory | `sol-relic-lens` | flipped top to bottom (this room only opens north) |
+
+  Each painting went to a room whose exits fit it, preferring no top-to-bottom flip, which turns
+  buildings upside down. The two mini-boss room names were swapped to match their new art.
+- The colonnade avenue paintings are the real `straight` tiles (`straight-a`, `straight-b`), so
+  `straight-ph` is gone. The north dead ends are now cut from the real straight.
+- These paintings use textured paving and sand plazas the colour tracer can't follow, so
+  `tools/build_solaris.py` has hand-drawn walk areas (`MANUAL`) for them, and a `LANDMARKS` table
+  that pins each painting to its room and checks the exits fit.
+- Still placeholders: the crossroads (8 rooms), the north dead end (4 rooms) and the west dead end
+  (1 room).
+- New `tests/solaris-landmarks.test.cjs`.
+
+## Round 163: deck size grows with each world conquered
+
+- Max deck size no longer gets a flat +4 outside Neon Aftermath. Instead it grows by +1, for
+  good, each time you beat a world boss that opens the next world: the Thorn Warden (Solaris),
+  the Bloom Tyrant (Vespera) and the Storm Tyrant (Chronospire). With no talents or devices that
+  is 6 in the city, then 7, 8 and 9 (`worldDeckBonus` in `index.html`).
+- A save whose deck is now over the limit is trimmed to fit when it loads (`fitDeckToLimit`); the
+  extra cards stay in the collection. Without this the deck-limit check would block every fight.
+- Talents: removed the unused `talentScale()` and the "boosted" wording around the stepped values.
+  Talents give the same fixed amounts in every world (Plating 1/2/4/6/8 and so on, as in the
+  talent descriptions).
+- New `tests/world-deck.test.cjs`; `expansion` and `chronospire` tests updated.
+
+## Round 162: fewer patrols in Solaris
+
+- Solaris rooms with two or more regular patrols now spawn one fewer than the shared distance
+  formula (`areaPatrolCount`) gives: middle rooms 2→1, far rooms 3→2. Rooms that had a single
+  patrol keep it, so no ordinary room is left empty. Mini-boss and boss rooms (`5,2`, `8,0`,
+  `8,5`) keep their boss. Across the 54 rooms the regular patrols drop from 96 to 58
+  (`roomSpawns` in `assets/expansion.js`). Other worlds are unchanged.
+- New `tests/solaris-patrols.test.cjs` checks the count room by room, the bosses, and that the
+  city still uses the full count.
+
+## Round 161: armed counters are shown like Frozen
+
+- When a Prismatic Counter is armed, the enemy's status strip shows "⛨ Next fire strike
+  countered" (with the element it answers; hover for the effect), the same way Frozen shows
+  (`assets/battle-hud.js`). The enemy-move bubble for that charged strike reads "countered · no
+  damage" instead of its damage (`assets/aether-deck.js`).

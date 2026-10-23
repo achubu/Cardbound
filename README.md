@@ -1,4 +1,4 @@
-# Cardbound — Shattered Wilds
+# Aethercede — Shattered Wilds
 
 ## Current main-adventure build: Elaris / Aetherlink
 
@@ -24,7 +24,7 @@ Exploration is organized as an original connected eleven-room labyrinth:
 - Healing stations have been removed; defeated monsters have a 30% chance to drop a small healing potion.
 - The Sunken Forge contains a discoverable upgrade material.
 
-This structure takes inspiration from the non-linear exploration principles of early ability-gated adventure games while using original Cardbound locations, layouts, visuals, enemies, characters, and mechanics.
+This structure takes inspiration from the non-linear exploration principles of early ability-gated adventure games while using original Aethercede locations, layouts, visuals, enemies, characters, and mechanics.
 
 
 ## Visual direction
@@ -72,7 +72,7 @@ The integrated world uses an original colorful fantasy-steampunk style:
 
 ## Saves
 
-This balance update starts a fresh save. The integrated adventure uses `cardbound-integrated-v2`, the Battle Lab uses `cardbound-battle-lab-v4`, and shared upgrade materials use `cardbound-upgrade-materials-v2`. Saves remain specific to the browser and site origin; there is no cloud synchronization.
+This balance update starts a fresh save. The integrated adventure uses `aethercede-integrated-v2`, the Battle Lab uses `aethercede-battle-lab-v4`, and shared upgrade materials use `aethercede-upgrade-materials-v2`. Saves remain specific to the browser and site origin; there is no cloud synchronization.
 
 ## Verification
 
@@ -95,3 +95,12 @@ A full installed-Chromium visual pass was unavailable in the build workspace, so
 GitHub Pages deploys the repository root from `main`. The live build is available at:
 
 https://achubu.github.io/Cardbound/
+
+## Source synchronization
+
+Imported the latest game from `achubu/claudebound`, through Round 248,
+commit `6dce16c12176b3ae6bc98a03dd7eecccae9fd70b` (2026-10-22).
+Cardbound retains its completed illustrations, art-refresh records, and
+separate concept review catalog. Reversal cards are retired; older saves
+are migrated by the game's existing normalization. The source's custom
+domain and unused-asset archive are not imported.

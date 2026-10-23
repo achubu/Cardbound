@@ -1,11 +1,14 @@
 'use strict';
 // The region boss and new card are registered before a journey is restored.
-enemies.bloomTyrant={name:'The Bloom Tyrant',icon:'❃',hp:150,attack:10,boss:true,element:'earth',shift:['earth','air'],shiftEvery:3};
+// Round 172: the Solaris boss is the Sun Pharaoh, shifting between sun (fire) and sand (earth).
+enemies.bloomTyrant={name:'The Sun Pharaoh',icon:'☉',hp:150,attack:10,boss:true,element:'earth',shift:['fire','earth'],shiftEvery:3};
 addCard('stormglass','Stormglass Covenant',1,'Soulbound Lightning','ϟ',{damage:7,shock:true,element:'lightning',soulbound:true,exhaust:true});
 const depthRules=rules;
 rules=function(c){return depthRules(c)+(stat(c).shock?' Disrupt: halve the next enemy attack.':'')};
 const depthMonsterArt=monsterArt;
-monsterArt=function(id){return id==='bloomTyrant'?'<span class="monster-sprite wildlife-sprite bloom-tyrant" role="img" aria-label="The Bloom Tyrant" style="background-image:url(assets/monsters/elaris/bloom-tyrant.png);--wildlife-cycle:1.8s"></span>':depthMonsterArt(id)};
+// forestTyrant is the old Bloom Tyrant sheet as an art-only key (Vespera and Chronospire bosses
+// borrow it); the Sun Pharaoh has its own sheet since Round 195.
+monsterArt=function(id){return id==='bloomTyrant'||id==='forestTyrant'?'<span class="monster-sprite wildlife-sprite bloom-tyrant" role="img" aria-label="'+(id==='bloomTyrant'?enemies.bloomTyrant.name:'The Bloom Tyrant')+'" style="background-image:url(assets/monsters/elaris/'+(id==='bloomTyrant'?'sun-pharaoh':'bloom-tyrant')+'.png?v='+SPRITE_VERSION+');--wildlife-cycle:1.8s"></span>':depthMonsterArt(id)};
 // Round 22 gave every boss an element (for the telegraphed elemental
 // strike + status effect), but all 4 mini-bosses still shared the exact
 // same 4-turn attack/charge/elemental/guard template, differing only in
@@ -27,13 +30,13 @@ const BOSS_PATTERNS={
  // The Crown Sentinel — a patient marksman: charges early and often,
  // guards to reset rather than trading blows.
  crownSentinel:['charge','elemental','guard','attack','charge','elemental'],
- // The Tidebound Warden — a tank, not an ambusher like its fellow water
+ // The Cistern Warden — a tank, not an ambusher like its fellow water
  // boss: guards on both sides of its burst instead of attacking into it.
  tidewardenElaris:['guard','attack','charge','elemental','guard','attack'],
- // The Gale Sovereign — a storm, not a marksman like its fellow air boss:
+ // The Noon Toller — a storm, not a marksman like its fellow air boss:
  // back-to-back charges with a heavy hit wedged between them.
  galeSovereign:['attack','charge','elemental','heavy','charge','elemental'],
- // The Bloom Tyrant — Elaris's final boss (formerly special-cased inline).
+ // The Sun Pharaoh — Solaris's final boss (formerly special-cased inline).
  bloomTyrant:['guard','charge','elemental','attack','charge','elemental'],
  // Vespera (Round 38). The Arc Sentinel — an armored bulwark that guards
  // first, then follows its charged strike straight into a heavy blow.
@@ -58,7 +61,7 @@ function enemyPlan(b=state.battle,turn=b?.turn){
  // the Round 22 mini-bosses get a real signature move each.
  const shifted=shiftingElement(b.id,turn),isShifter=!!shifted,element=shifted||b.enemy.element;
  const pattern=BOSS_PATTERNS[b.id]||(element?['attack','charge','elemental','guard']:['attack','guard','heavy']);
- const kind=pattern[(turn-1)%pattern.length],enraged=b.enemy.boss&&b.enemy.hp<=b.enemy.maxHp/2;
+ const kind=pattern[(turn-1+(b.patternShift||0))%pattern.length],/* Round 246: a pair's second enemy runs its pattern offset (enemy-pairs.js) */enraged=b.enemy.boss&&b.enemy.hp<=b.enemy.maxHp/2;
  const base=Math.max(1,b.enemy.attack-(b.enemyDebuff||0))+(enraged?2:0);
  // Heavy hits scale from 1.5x near the region's start room up to 2.5x at its
  // farthest edge, so a fully-stacked Block turn that comfortably absorbs an
@@ -75,10 +78,14 @@ cardEffect=function(c,empowered,doubleAttack){
  const b=state.battle,d=stat(c),before=b.enemy.hp;
  // Adaptive counter follows the telegraphed element, including the boss's shifts.
  if(enemies[b.id]&&enemies[b.id].shift)b.enemy.element=enemyPlan(b).element;
+ b._hitTotal=0;
  depthCardEffect(c,empowered,doubleAttack);
- const dealt=before-b.enemy.hp,absorbed=Math.min(b.enemy.guard||0,dealt);
+ // Round 150: when a hit takes the enemy to 0 HP, its Block is subtracted from the whole hit,
+ // not from the HP that happened to be left (a 31 hit on 6 HP behind 5 Block used to leave 1 HP).
+ const lost=before-b.enemy.hp,dealt=b.enemy.hp===0?Math.max(lost,b._hitTotal||0):lost,absorbed=Math.min(b.enemy.guard||0,dealt);
+ b._hitNet=dealt-absorbed; // full net hit, for Frail and Barrier (aether-deck.js)
  if(absorbed){
-  b.enemy.hp+=absorbed;b.enemy.guard-=absorbed;
+  b.enemy.guard-=absorbed;b.enemy.hp=Math.max(0,before-(dealt-absorbed));
   const net=dealt-absorbed,last=b.logs[b.logs.length-1];
   if(last!==undefined)b.logs[b.logs.length-1]=last+' − '+absorbed+' block = '+net+' dealt';
   else b.logs.push('Enemy Block absorbs '+absorbed+' damage.');
@@ -114,7 +121,7 @@ endTurn=function(){
    if(plan.element==='air')b.exposed=2;
   }
  }
- const ailment=(b.playerBurn>0?2:0)+(b.playerPoison||0);if(ailment){state.hp=Math.max(0,state.hp-ailment);b.logs.push('Lingering corruption: '+ailment+' HP.')}if(b.playerBurn>0)b.playerBurn--;
+ const ailment=(b.playerBurn>0?(b.burnPower||2):0)+(b.playerPoison||0);/* Round 237: Scorch burns harder (burnPower) */if(ailment){state.hp=Math.max(0,state.hp-ailment);b.logs.push('Lingering corruption: '+ailment+' HP.')}if(b.playerBurn>0)b.playerBurn--;
  b.block=0;
  const keep=b.hand.filter(c=>c.uid===b.savedUid&&(hasTalent('retainCore')||stat(c).counter)).slice(0,1);
  b.discard.push(...b.hand.filter(c=>!keep.includes(c)));b.hand=keep;b.savedUid=null;

@@ -26,17 +26,15 @@ b = fight({ elite: true }); b.bounty = 'selfReliant'; b.enemy.hp = 0; winBattle(
 b = fight(); b.bounty = 'selfReliant'; aetherInit(b); b.aether = 8; b.sideDraw = [{ uid: 'zz', id: 'aegis' }]; playSideCard('zz'); assert.equal(b.bountySide, 1); b.enemy.hp = 0; winBattle(); assert.equal(b.bountyPaid, 0, 'Self-reliant fails after a side card');
 b = fight(); b.bounty = 'overkill'; b.hand = [make('cleave')]; b.hand[0].level = 3; b.energy = 3; b.enemy.hp = 200; playCard(0); assert(b.bountyBigHit > 0, 'Overkill tracks the biggest hit');
 b = fight(); b.bounty = 'swift'; b.turn = 9; b.enemy.hp = 0; winBattle(); assert.equal(b.bountyPaid, 0, 'Swift fails when too slow');
-// 100% exploration: +20 Shards and a side card, once per world.
+// 100% exploration: +35 Shards (Round 202: no side card), once per world.
 newGame(); configureRegion('city'); state.room = '0,5'; ensureExplore(); state.battle = null;
 state.visited = Object.keys(rooms); state.chests = Object.keys(rooms).map(chestFor).filter(Boolean).map(c => c.id); state.relics = Object.values(rooms).filter(r => r.relic && r.relic[0] !== 'material').map(r => r.relic[0]);
 assert.equal(worldCompletion(), 100); sh = state.shards; const sideN = state.side.pool.length;
-assert(checkWorldCompletion(), 'reward granted at 100%'); assert.equal(state.shards, sh + 20); assert.equal(state.side.pool.length, sideN + 1); assert(!checkWorldCompletion(), 'only once');
+assert(checkWorldCompletion(), 'reward granted at 100%'); assert.equal(state.shards, sh + 35); assert.equal(state.side.pool.length, sideN); assert(!checkWorldCompletion(), 'only once');
 newGame(); configureRegion('city'); assert(worldCompletion() < 100); assert(!checkWorldCompletion());
-// World-scaled talents.
+// Talent scaling (Round 126: a fixed ×1.4 in every world, no longer per world).
 newGame(); state.talents = { plating: 5, jammer: 2, weakenCore: 1, leech: 2 };
-configureRegion('city'); assert.equal(talentScale(), 1); assert.equal(scaledRank('plating'), 5); assert.equal(weakenAmount(), 9);
-configureRegion('elaris'); assert.equal(scaledRank('plating'), 7); assert.equal(weakenAmount(), 12);
-configureRegion('vespera'); assert.equal(scaledRank('plating'), 8); assert.equal(scaledRank('leech'), 3); assert.equal(weakenAmount(), 14);
+for (const r of ['city', 'elaris', 'vespera']) { configureRegion(r); assert.equal(scaledRank('plating'), 8, 'Round 160: rank 5 counts as 8'); assert.equal(scaledRank('leech'), 2); assert.equal(weakenAmount(), 9); }
 configureRegion('city');
 console.log('PASS: elite card choices and 6 Shards, 3 city quiet rooms and all 4 city events, all 4 bounties (pay and miss), 100% exploration reward, world-scaled talents.');
 }`);

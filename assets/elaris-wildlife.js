@@ -1,22 +1,39 @@
 'use strict';
 // Four-frame generated wildlife sheets. Elements are part of each species' identity.
 const ELARIS_WILDLIFE={
- cinderFox:{name:'Cinder Fox',icon:'♨',hp:38,attack:7,element:'fire',sheet:'cinder-fox',cycle:'.95s'},
- drownedHeron:{name:'Drowned Heron',icon:'≈',hp:55,attack:9,element:'water',sheet:'drowned-heron',cycle:'1.4s'},
- blightAntler:{name:'Blight Antler',icon:'◆',hp:44,attack:8,element:'earth',sheet:'blight-antler',cycle:'1.2s'},
- stormMoth:{name:'Storm Moth',icon:'≋',hp:52,attack:9,element:'air',sheet:'storm-moth',cycle:'.7s'},
- // Round 22 mini-bosses: reuse an existing species' sprite sheet under a
- // new id/name/boss-tier stat block — same "new identity, borrowed art"
- // pattern as the city's crownSentinel.
- tidewardenElaris:{name:'The Tidebound Warden',icon:'≈',hp:70,attack:11,armor:3,element:'water',sheet:'drowned-heron',cycle:'1.4s',boss:true,miniBoss:true},
- galeSovereign:{name:'The Gale Sovereign',icon:'≋',hp:66,attack:11,armor:3,element:'air',sheet:'storm-moth',cycle:'.7s',boss:true,miniBoss:true}
+ // Round 172: Solaris is a sun-scorched brass desert city, so its creatures were renamed and
+ // reworked to match. Ids stay the same so saves carry over. Rounds 193-195 gave them the owner's
+ // own sheets (see ELARIS-ART.md).
+ cinderFox:{name:'Solar Scarab',icon:'☼',hp:38,attack:7,element:'fire',sheet:'solar-scarab',cycle:'.95s'},
+ drownedHeron:{name:'Mirage Ibis',icon:'≈',hp:55,attack:9,element:'water',sheet:'mirage-ibis',cycle:'1.4s'},
+ blightAntler:{name:'Dune Scorpion',icon:'◆',hp:44,attack:8,element:'earth',sheet:'dune-scorpion',cycle:'1.2s'},
+ stormMoth:{name:'Dust Devil',icon:'≋',hp:52,attack:9,element:'air',sheet:'dust-devil',cycle:'.7s'},
+ // Round 22 mini-bosses (own sheets since Round 195).
+ tidewardenElaris:{name:'The Cistern Warden',icon:'≈',hp:70,attack:11,armor:3,element:'water',sheet:'cistern-warden',cycle:'1.4s',boss:true,miniBoss:true},
+ galeSovereign:{name:'The Noon Toller',icon:'🔔',hp:66,attack:11,armor:3,element:'air',sheet:'noon-toller',cycle:'1.2s',boss:true,miniBoss:true}
 };
 Object.assign(enemies,ELARIS_WILDLIFE);
+// Round 172: art-only keys for the old forest sheets. Vespera and Chronospire recolor these,
+// so Solaris species can get their own art without changing the other worlds.
+const WILDLIFE_ART={
+ forestFox:{name:'Cinder Fox',sheet:'cinder-fox',cycle:'.95s'},
+ forestHeron:{name:'Drowned Heron',sheet:'drowned-heron',cycle:'1.4s'},
+ forestStag:{name:'Blight Antler',sheet:'blight-antler',cycle:'1.2s'},
+ forestMoth:{name:'Storm Moth',sheet:'storm-moth',cycle:'.7s'},
+ // Round 234: Neon Aftermath's Briar Sentinel is animated: stand, shield up, slash (poses: sun-revenant.js),
+ // and a walk on the map. The Arc Sentinel and the Brass Sentry borrow it.
+ vineguard:{name:'Briar Sentinel',sheet:'city/briar-sentinel',cycle:'1.6s',poses:{attack:2,hurt:1,walk:'city/briar-sentinel-walk'}}
+};
 const cityMonsterArt=monsterArt;
-monsterArt=function(id){const animal=ELARIS_WILDLIFE[id];if(!animal)return cityMonsterArt(id);return '<span class="monster-sprite wildlife-sprite" role="img" aria-label="'+animal.name+'" style="background-image:url(assets/monsters/elaris/'+animal.sheet+'.png);--wildlife-cycle:'+animal.cycle+'"></span>'};
+// Round 196: a sheet name with a folder ('sky/zenith-roc') is read from assets/monsters/<folder>/;
+// big:true draws it in the larger boss box.
+// Round 200: bump SPRITE_VERSION when sheets are re-cut, so browsers fetch the new images.
+const SPRITE_VERSION='234';
+function wildlifeSheetUrl(sheet){return 'assets/monsters/'+(sheet.includes('/')?sheet:'elaris/'+sheet)+'.png?v='+SPRITE_VERSION}
+monsterArt=function(id){const animal=ELARIS_WILDLIFE[id]||WILDLIFE_ART[id];if(!animal)return cityMonsterArt(id);return '<span class="monster-sprite wildlife-sprite'+(animal.big?' bloom-tyrant':'')+'" role="img" aria-label="'+animal.name+'" style="background-image:url('+wildlifeSheetUrl(animal.sheet)+');--wildlife-cycle:'+animal.cycle+'"></span>'};
 const wildlifeStyle=document.createElement('style');
 wildlifeStyle.textContent=`
-.enemy-node .wildlife-sprite,.battle-monster .wildlife-sprite{display:block;background-repeat:no-repeat;background-size:400% 100%;background-position:0 0;image-rendering:pixelated;animation:wildlifeFrames var(--wildlife-cycle,1s) steps(1,end) infinite;transform:scaleX(var(--enemy-facing,1));transform-origin:center;filter:drop-shadow(0 5px 3px #0009)}
+.enemy-node .wildlife-sprite,.battle-monster .wildlife-sprite{display:block;background-repeat:no-repeat;background-size:400% 100%;background-position:0 0;image-rendering:auto;animation:wildlifeFrames var(--wildlife-cycle,1s) steps(1,end) infinite;transform:scaleX(var(--enemy-facing,1));transform-origin:center;filter:drop-shadow(0 5px 3px #0009)}
 .enemy-node .wildlife-sprite{width:88px;height:117.333px;position:absolute;left:50%;top:-28px;margin-left:-44px}
 .enemy-node:has(.wildlife-sprite){animation:none;transform:translate(-50%,-50%)}
 .enemy-node:has(.wildlife-sprite):after{top:98px}

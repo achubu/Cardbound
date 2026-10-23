@@ -42,6 +42,95 @@ function mapRoomTile(key, onReady) {
   if (complete) mapTileCache[ck] = tile;
   return tile;
 }
+// Round 102: Neon Aftermath's map is drawn from its traced streets rather than
+// its paintings (separately painted rooms don't line up as one picture): the
+// walkable ground as rounded neon streets on dark ground. Rooms meet cleanly
+// because the walk mask is one continuous world.
+const MAP_PATH_STYLE = { ground: '#070f18', block: 'rgba(56,214,255,.045)', glow: 'rgba(56,214,255,.16)', edge: '#4fe0ff', street: '#123545' };
+// Round 105: streets are trimmed back from every room edge, and each real exit gets one
+// connector that both rooms draw to the same meeting point, so the map always lines up.
+// Street stubs that reach an edge with no exit (or no partner across it) are cut.
+const MAP_SEAM_DEPTH = 32, MAP_MIN_PATCH = 120; // patches smaller than this (8px cells) are cut from the map
+const mapPatchCache = {};
+function mapPatches(cx, cy) {
+  // Connected street patches of one room's trimmed street cells: label per cell and size per label.
+  const ck = cx + ',' + cy; if (mapPatchCache[ck]) return mapPatchCache[ck];
+  const C = 8, D = MAP_SEAM_DEPTH, cols = 100, rows = 63, lab = new Int32Array(cols * rows), size = [0];
+  const ok = (i, j) => { const x = i * C + 4, y = j * C + 4; return x > D - 4 && x < 800 - D + 4 && y > D - 4 && y < 500 - D + 4 && neonWorldWalk(cx * 800 + x, cy * 500 + y); };
+  for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+    if (lab[j * cols + i] || !ok(i, j)) continue;
+    const id = size.length, q = [[i, j]]; lab[j * cols + i] = id; let n = 0;
+    while (q.length) { const [a, b] = q.pop(); n++; for (const [da, db] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const u = a + da, v = b + db; if (u >= 0 && v >= 0 && u < cols && v < rows && !lab[v * cols + u] && ok(u, v)) { lab[v * cols + u] = id; q.push([u, v]); } } }
+    size.push(n);
+  }
+  return mapPatchCache[ck] = { lab, size, at: (x, y) => { const id = lab[Math.min(rows - 1, Math.floor(y / C)) * cols + Math.min(cols - 1, Math.floor(x / C))]; return id ? size[id] : 0; } };
+}
+function mapEdgeRuns(cx, cy, dir) {
+  // Street runs along a line MAP_SEAM_DEPTH px inside the given edge, as [start, end] along it.
+  const D = MAP_SEAM_DEPTH, horiz = dir === 'e' || dir === 'w', len = horiz ? 500 : 800, runs = [];
+  let st = null;
+  for (let t = 2; t <= len; t += 4) {
+    const lx = horiz ? (dir === 'w' ? D + 4 : 800 - D - 4) : t, ly = horiz ? t : (dir === 'n' ? D + 4 : 500 - D - 4);
+    const open = t < len - 1 && mapPatches(cx, cy).at(lx, ly) >= MAP_MIN_PATCH;
+    if (open && st === null) st = t;
+    if (!open && st !== null) { if (t - st >= 12) runs.push([st, t]); st = null; }
+  }
+  return runs;
+}
+const mapSeamCache = {};
+function mapSeam(key, dir) {
+  // Connectors across one side of a room: [{own, other, meet, width}] in positions along that edge.
+  const r = rooms[key], raw = r && r.exits[dir], to = raw && (typeof raw === 'string' ? raw : raw.to);
+  if (!to || !rooms[to] || !rooms[to].world) return [];
+  const opp = { n: 's', s: 'n', e: 'w', w: 'e' }[dir], first = dir === 'e' || dir === 's';
+  const ck = first ? key + dir : to + opp;
+  if (!(ck in mapSeamCache)) {
+    // Computed once per shared edge, from the west/north room's side, so both rooms agree.
+    const [A, B, dA] = first ? [key, to, dir] : [to, key, opp], [ax, ay] = rooms[A].world, [bx, by] = rooms[B].world;
+    const ra = mapEdgeRuns(ax, ay, dA), rb = mapEdgeRuns(bx, by, { n: 's', s: 'n', e: 'w', w: 'e' }[dA]);
+    const mid = q => (q[0] + q[1]) / 2, pairs = [];
+    for (const p of ra) for (const q of rb) pairs.push([Math.abs(mid(p) - mid(q)), p, q]);
+    pairs.sort((x, y) => x[0] - y[0]);
+    const used = new Set(), out = [];
+    for (const [d, p, q] of pairs) {
+      if (used.has(p) || used.has(q)) continue;
+      if (out.length && d > 70) continue; // further crossings only where the streets really meet
+      used.add(p); used.add(q);
+      out.push({ a: mid(p), b: mid(q), meet: Math.round((mid(p) + mid(q)) / 2), width: Math.max(20, Math.min(56, p[1] - p[0], q[1] - q[0])) });
+    }
+    mapSeamCache[ck] = out;
+  }
+  return mapSeamCache[ck].map(c => ({ own: first ? c.a : c.b, meet: c.meet, width: c.width }));
+}
+function mapPathTile(key) {
+  const r = rooms[key]; if ((activeRegion !== 'city' && activeRegion !== 'elaris' && !TILE_REGIONS[activeRegion]) || !r || !r.world || typeof neonWorldWalk !== 'function') return null;
+  const ck = 'paths:' + activeRegion + ':' + key; if (mapTileCache[ck]) return mapTileCache[ck];
+  const W = 800, H = 500, C = 8, D = MAP_SEAM_DEPTH, [cx, cy] = r.world, tile = document.createElement('canvas'); tile.width = W; tile.height = H;
+  const ctx = tile.getContext('2d'); if (!ctx) return null;
+  ctx.fillStyle = MAP_PATH_STYLE.ground; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = MAP_PATH_STYLE.block; // faint city blocks between the streets
+  for (let y = 0; y < H; y += 40) for (let x = (y / 40) % 2 ? 20 : 0; x < W; x += 40) ctx.fillRect(x + 6, y + 6, 28, 28);
+  const walk = (x, y) => neonWorldWalk(cx * 800 + x, cy * 500 + y);
+  // Street cells, trimmed back from all four edges.
+  const cells = [];
+  const patch = mapPatches(cx, cy);
+  for (let y = C / 2; y < H; y += C) for (let x = C / 2; x < W; x += C) if (patch.at(x, y) >= MAP_MIN_PATCH) cells.push(x, y);
+  const inner = [];
+  for (let i = 0; i < cells.length; i += 2) { const x = cells[i], y = cells[i + 1]; if ([[-C, 0], [C, 0], [0, -C], [0, C], [-C, -C], [C, C], [-C, C], [C, -C]].every(([dx, dy]) => walk(x + dx, y + dy))) inner.push(x, y); }
+  // One connector per crossing, from the trimmed street to the shared meeting point on the edge.
+  const links = [];
+  for (const dir of ['n', 's', 'e', 'w']) for (const c of mapSeam(key, dir)) {
+    const pt = (depth, along) => dir === 'w' ? [depth, along] : dir === 'e' ? [W - depth, along] : dir === 'n' ? [along, depth] : [along, H - depth];
+    links.push({ width: c.width, pts: [pt(D + 4, c.own), pt(D - 6, c.own), pt(10, c.meet), pt(-4, c.meet)] });
+  }
+  const dabs = (style, rad, list) => { ctx.fillStyle = style; ctx.beginPath(); for (let i = 0; i < list.length; i += 2) { ctx.moveTo(list[i] + rad, list[i + 1]); ctx.arc(list[i], list[i + 1], rad, 0, Math.PI * 2); } ctx.fill(); };
+  const strokes = (style, extra) => { ctx.strokeStyle = style; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; for (const l of links) { ctx.lineWidth = Math.max(2, l.width + extra); ctx.beginPath(); ctx.moveTo(...l.pts[0]); for (const p of l.pts.slice(1)) ctx.lineTo(...p); ctx.stroke(); } };
+  // Neon outline: a soft glow, a bright rim, then the dark street surface inset from it.
+  dabs(MAP_PATH_STYLE.glow, C * 1.5, cells); strokes(MAP_PATH_STYLE.glow, 2 * C);
+  dabs(MAP_PATH_STYLE.edge, C * 0.95, cells); strokes(MAP_PATH_STYLE.edge, 0);
+  dabs(MAP_PATH_STYLE.street, C * 0.95, inner); strokes(MAP_PATH_STYLE.street, -2 * C);
+  return mapTileCache[ck] = tile;
+}
 // A joined district's single painting, spanning all of its cells.
 function mapAreaTile(area, onReady) {
   const ck = activeRegion + ':' + area.cells.join('|'); if (mapTileCache[ck]) return mapTileCache[ck];
@@ -77,15 +166,15 @@ function mapCurve(c, pts, move = true) {
 }
 // tileW is the on-screen device-pixel width of one room, so the terrain is
 // drawn 1:1 with the screen (sharp at any zoom) and always at exactly 16:10.
-function drawMapTerrain(canvasEl, tileW) {
-  const { minX, maxX, minY, maxY } = mapBounds(), cols = maxX - minX + 1.8, rows = maxY - minY + 1.8;
+function drawMapTerrain(canvasEl, tileW, bounds) {
+  const { minX, maxX, minY, maxY } = bounds || mapBounds(), cols = maxX - minX + 1.8, rows = maxY - minY + 1.8;
   let TW = Math.round(tileW || MAP_TILE_W * 0.64);
   TW = Math.max(64, Math.min(TW, Math.floor(Math.sqrt(MAP_MAX_PIXELS / (cols * rows * 0.625)))));
   const TH = TW * 0.625, k = TW / 256; // k scales the hand-tuned edge sizes
   const W = Math.round(cols * TW), H = Math.round(rows * TH), theme = MAP_THEME[activeRegion] || MAP_THEME.city;
   canvasEl.width = W; canvasEl.height = H;
   const ctx = canvasEl.getContext('2d'); if (!ctx) return;
-  const redraw = () => { if (canvasEl.isConnected) drawMapTerrain(canvasEl, tileW); };
+  const redraw = () => { if (canvasEl.isConnected) drawMapTerrain(canvasEl, tileW, bounds); };
   const at = (x, y) => [(x - minX + 0.4) * TW, (y - minY + 0.4) * TH];
   const explored = new Set(Object.keys(rooms).filter(k => state.visited.includes(k)));
   const K = (x, y) => x + ',' + y, XY = k => k.split(',').map(Number);
@@ -97,7 +186,7 @@ function drawMapTerrain(canvasEl, tileW) {
     if (area.art && area.cells.length > 1) {
       const tile = mapAreaTile(area, redraw); if (!tile) continue;
       const [kx, ky] = XY(key); source[key] = { img: tile, sx: (kx - area.left) * tile.width / (area.width / 800), sy: (ky - area.top) * tile.height / (area.height / 500), sw: tile.width / (area.width / 800), sh: tile.height / (area.height / 500) };
-    } else { const tile = mapRoomTile(key, redraw); if (tile) source[key] = { img: tile, sx: 0, sy: 0, sw: tile.width, sh: tile.height }; }
+    } else { const tile = mapPathTile(key) || mapRoomTile(key, redraw); if (tile) source[key] = { img: tile, sx: 0, sy: 0, sw: tile.width, sh: tile.height }; }
   }
   // 1) Fog beyond the frontier: dark ground with a faint survey grid.
   ctx.fillStyle = theme.fog; ctx.fillRect(0, 0, W, H);
@@ -209,7 +298,7 @@ function drawMapTerrain(canvasEl, tileW) {
 // (labels stay readable at their normal size) and redraws the terrain at the
 // new on-screen resolution so it stays sharp.
 let mapZoom = 1;
-try { mapZoom = Number(localStorage.getItem('cardbound-map-zoom')) || 1; } catch (e) { mapZoom = 1; }
+try { mapZoom = Number(localStorage.getItem('aethercede-map-zoom')) || 1; } catch (e) { mapZoom = 1; }
 const MAP_ZOOM_MIN = 0.3, MAP_ZOOM_MAX = 3;
 function applyMapZoom(map, scroller, zoom, focus) {
   zoom = Math.max(MAP_ZOOM_MIN, Math.min(MAP_ZOOM_MAX, zoom));
@@ -217,7 +306,7 @@ function applyMapZoom(map, scroller, zoom, focus) {
   // Keep the point under the cursor (or the centre) where it is.
   const fx = focus ? focus.x : scroller.clientWidth / 2, fy = focus ? focus.y : scroller.clientHeight / 2;
   const relX = (scroller.scrollLeft + fx) / (map.offsetWidth || 1), relY = (scroller.scrollTop + fy) / (map.offsetHeight || 1);
-  mapZoom = zoom; try { localStorage.setItem('cardbound-map-zoom', String(zoom)); } catch (e) { /* private mode */ }
+  mapZoom = zoom; try { localStorage.setItem('aethercede-map-zoom', String(zoom)); } catch (e) { /* private mode */ }
   map.style.width = Math.round(baseW * zoom) + 'px'; map.style.height = Math.round(baseH * zoom) + 'px';
   scroller.scrollLeft = relX * map.offsetWidth - fx; scroller.scrollTop = relY * map.offsetHeight - fy;
   const label = document.querySelector('.map-zoom-level'); if (label) label.textContent = Math.round(zoom * 100) + '%';
@@ -273,9 +362,36 @@ showMap = function () {
   drawMapTerrain(terrain, mapTileScreenWidth(map));
   const here = map.querySelector('.current-room'); if (here && here.scrollIntoView) here.scrollIntoView({ block: 'center', inline: 'center' });
 };
+// Round 124: the minimap draws the same terrain as the large map (street art,
+// fog, ragged frontier, gold frame on your room), framed on the rooms around you.
+// It is redrawn only when the room or the explored set changes.
+let minimapTerrain = null, minimapTerrainKey = '';
+function minimapBounds() {
+  const keys = Object.keys(rooms), X = k => Number(k.split(',')[0]), Y = k => Number(k.split(',')[1]), [cx, cy] = state.room.split(',').map(Number);
+  const lo = (v, all) => Math.max(v - 1, Math.min(...all)), hi = (v, all) => Math.min(v + 1, Math.max(...all));
+  return { minX: lo(cx, keys.map(X)), maxX: hi(cx, keys.map(X)), minY: lo(cy, keys.map(Y)), maxY: hi(cy, keys.map(Y)) };
+}
+if (typeof renderMinimap === 'function') {
+  const renderMinimapBeforeTerrain = renderMinimap;
+  renderMinimap = function () {
+    renderMinimapBeforeTerrain();
+    const box = typeof $ === 'function' && $('minimap'), grid = box && box.querySelector && box.querySelector('.minimap-grid');
+    if (!grid || !grid.replaceWith || !state || !rooms[state.room]) return;
+    const b = minimapBounds(), key = [activeRegion, state.room, state.visited.length, b.minX, b.maxX, b.minY, b.maxY].join('|');
+    if (!minimapTerrain || minimapTerrainKey !== key) {
+      const c = document.createElement('canvas'); c.className = 'minimap-terrain'; c.setAttribute('aria-hidden', 'true');
+      const dpr = (typeof devicePixelRatio === 'number' && devicePixelRatio) || 1;
+      try { drawMapTerrain(c, 190 / (b.maxX - b.minX + 1.8) * dpr * 1.5, b); } catch (e) { return; }
+      minimapTerrain = c; minimapTerrainKey = key;
+    }
+    grid.replaceWith(minimapTerrain);
+    const legend = box.querySelector('.mini-legend'); if (legend) legend.textContent = 'Gold frame: you are here';
+  };
+}
 const mapTerrainStyles = document.createElement('style');
 mapTerrainStyles.textContent = '.map-canvas.map-city{background:#070b10;min-width:0;flex:none}'
   + '.map-zoom{display:flex;align-items:center;gap:6px;margin:0 0 6px}.map-zoom button{min-width:32px;padding:3px 10px}.map-zoom .map-zoom-level{min-width:46px;text-align:center;font:12px system-ui;color:#bfe6ff}.map-zoom small{opacity:.6;margin-left:6px}'
+  + '.minimap-terrain{display:block;width:190px;height:auto;border-radius:4px}@media(max-width:720px){.minimap-terrain{width:140px}}'
   + '.map-terrain{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;image-rendering:auto}'
   + '.map-city .map-links{z-index:1}'
   + '.map-city .panel{z-index:2;width:auto!important;height:auto!important;min-width:0;min-height:0;padding:5px 9px 4px;text-align:center;background:rgba(7,13,20,.4);border-color:#5d86a066;border-radius:8px;box-shadow:0 2px 10px #000a;backdrop-filter:blur(2px)}'

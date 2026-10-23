@@ -51,7 +51,7 @@ renderBattle = function () {
   const youDebuffs = [
     b.bleed && ['🩸', 'Bleed ' + b.bleed, 'Lose ' + b.bleed + ' HP at the end of your turn; falls by 1 each turn.'],
     b.playerPoison && ['☣', 'Poison ' + b.playerPoison, 'Lose ' + b.playerPoison + ' HP at the end of each turn.'],
-    b.playerBurn > 0 && ['🔥', 'Burn · ' + t(b.playerBurn), 'Lose 2 HP at the end of each turn for ' + t(b.playerBurn) + '.'],
+    b.playerBurn > 0 && ['🔥', 'Burn ' + (b.burnPower || 2) + ' · ' + t(b.playerBurn), 'Lose ' + (b.burnPower || 2) + ' HP at the end of each turn for ' + t(b.playerBurn) + '.'],
     b.frail && ['⤓', 'Frail ' + b.frail, 'Your cards deal 25% less damage.'],
     b.shackledNow && ['⛓', 'Shackled', '1 less energy this turn.'],
     b.drained && ['💧', 'Drained', '1 less energy next turn.'],
@@ -64,6 +64,8 @@ renderBattle = function () {
     b.enemyDebuff && ['▼', 'Weakened −' + b.enemyDebuff, 'Its next attack deals ' + b.enemyDebuff + ' less damage.'],
     b.bind && ['🌿', 'Rootbind −' + b.bind, 'Its next attack deals ' + b.bind + ' less damage.'],
     b.freeze > 0 && ['❄', 'Frozen · ' + t(b.freeze), 'Skips its next ' + (b.freeze === 1 ? 'action' : b.freeze + ' actions') + '.'],
+    // Round 161: an armed counter shows on the enemy, the same way Frozen does.
+    b.counter && ((el) => ['⛨', 'Next ' + el + ' strike countered', 'Prismatic Counter is armed: its next charged ' + el + ' strike deals no damage, and it takes 6.'])(Object.keys(COUNTERS).find(e => COUNTERS[e] === b.counter) || 'elemental'),
     b.silenceTurn === b.turn && ['🔇', 'Silenced', 'Its next action is cancelled.']
   ].filter(Boolean);
   const strip = (side, list, dot) => {
@@ -75,7 +77,7 @@ renderBattle = function () {
       + (total ? '<b class="dot-hud ' + side + '" title="' + dot.filter(p => p[1]).map(p => p[0] + ' ' + p[1]).join(' + ') + ' = ' + total + ' damage at the end of each turn"><span class="dot-drop">☠</span><span class="dot-num">−' + total + '</span><span class="dot-cap">HP / turn</span></b>' : '');
     host.after(el);
   };
-  strip('you', youDebuffs, [['Bleed', b.bleed || 0], ['Burn', b.playerBurn > 0 ? 2 : 0], ['Poison', b.playerPoison || 0]]);
+  strip('you', youDebuffs, [['Bleed', b.bleed || 0], ['Burn', b.playerBurn > 0 ? (b.burnPower || 2) : 0], ['Poison', b.playerPoison || 0]]);
   strip('enemy', foeDebuffs, [['Poison', b.poison || 0], ['Burn', b.burnTurns > 0 ? (b.burn || 0) : 0]]);
   // Armor: a steel shield; Block: a glowing crystal.
   m.querySelectorAll('.compact-tags .armor-tag').forEach(t => { const n = hudNumber(t); t.classList.add('hud-stat', 'armor'); t.innerHTML = hudShield(n, t.title || ''); });
