@@ -20,7 +20,8 @@
 // shown one turn ahead, so you can pitch now and answer it next turn.
 // =====================================================================
 const STATIC_CLEANSE_COST = 2, AETHER_START = 2, AETHER_MAX = 8, SIDE_DRAW_COST = 4, SIDE_HAND_MAX = 2, SIDE_DECK_MAX = 6, SIDE_COPIES = 2, MIN_CYCLE = 4;
-const regionIndex = () => ({ city: 0, elaris: 1, vespera: 2, chronospire: 3 })[typeof activeRegion === 'string' ? activeRegion : 'city'] || 0;
+// Round 175: the world's place in WORLD_ORDER (city 0, Solaris 1, Sky Isles 2, Elaris 3, Vespera 4, Chronospire 5).
+const regionIndex = () => Math.max(0, WORLD_ORDER.indexOf(typeof activeRegion === 'string' ? activeRegion : 'city'));
 
 // ---------------------------------------------------------------------
 // Enemy afflictions
@@ -46,7 +47,7 @@ const ENEMY_AFFLICTIONS = {
   emberling: ['bleed'], thornling: ['frail'], vineguard: ['barrier'], burrower: ['rend'], shade: ['fog'], cryptWisp: ['static'], forgeBeast: ['crush'], crownEye: ['fog'],
   moonKnight: ['rend', 'shackle'], crownSentinel: ['static', 'empower'], thornWarden: ['barrier', 'bleed', 'crush'],
   cinderFox: ['barrage'], drownedHeron: ['siphon'], blightAntler: ['frail'], stormMoth: ['fog'],
-  tidewardenElaris: ['siphon', 'barrier'], galeSovereign: ['barrage', 'shackle'], bloomTyrant: ['bleed', 'empower', 'rend'],
+  tidewardenElaris: ['siphon', 'barrier'], galeSovereign: ['barrage', 'shackle'], bloomTyrant: ['entomb', 'empower', 'rend'],
   vespFox: ['crush'], vespThorn: ['static'], vespMoth: ['barrage'], vespHeron: ['siphon'], vespShade: ['shackle'], vespStag: ['barrier'], vespWisp: ['fog'], vespMauler: ['rend'],
   arcSentinel: ['barrier', 'shackle'], resonantPhantom: ['static', 'siphon'], stormTyrant: ['empower', 'barrage', 'frail']
 };
@@ -135,12 +136,8 @@ const SIDE_STARTER = ['purify', 'aegis', 'dispel'];
 // (SIDE_DECK_MAX) over the game: +1 for each of these bosses.
 const SIDE_START_SLOTS = 2, SIDE_GROWTH_BOSSES = ['crownSentinel', 'galeSovereign', 'bloomTyrant', 'resonantPhantom'];
 function sideDeckMax(s = state) { const beaten = (s && Array.isArray(s.bosses)) ? s.bosses : []; return Math.min(SIDE_DECK_MAX, SIDE_START_SLOTS + SIDE_GROWTH_BOSSES.filter(id => beaten.includes(id)).length); }
-function fillSideDeck(s = state) { // equip unequipped side cards into newly opened slots
-  for (const c of s.side.pool) { if (s.side.deck.length >= sideDeckMax(s)) break; if (!s.side.deck.includes(c.uid) && s.side.deck.map(u => s.side.pool.find(x => x.uid === u)).filter(x => x && x.id === c.id).length < SIDE_COPIES) s.side.deck.push(c.uid); }
-}
 function sidePoolFor(region = regionIndex()) { return Object.keys(SIDE_CARDS).filter(id => SIDE_CARDS[id].tier <= region); }
-const refreshedSideArt=["purify", "dispel", "aegis", "anchor", "restore", "ground", "mirror", "phase", "overflow", "stasis"];
-function sideArtPath(id) { return 'assets/cards/side/' + id + (refreshedSideArt.includes(id) ? '.webp' : '.png'); }
+function sideArtPath(id) { return 'assets/cards/side/' + id + '.webp'; } // Round 180: refreshed side-deck paintings
 
 function ensureSide(s = state) {
   if (!s) return;
@@ -153,9 +150,17 @@ function ensureSide(s = state) {
 }
 const sideCopies = id => state.side.deck.map(u => state.side.pool.find(c => c.uid === u)).filter(c => c && c.id === id).length;
 function addSideCard(id) {
-  ensureSide(); const card = { uid: 's' + state.side.next++, id }; state.side.pool.push(card);
-  if (state.side.deck.length < sideDeckMax() && sideCopies(id) < SIDE_COPIES) state.side.deck.push(card.uid);
+  ensureSide(); const card = { uid: 's' + state.side.next++, id }; state.side.pool.push(card); // Round 233: the player equips it from Deck
   return card;
+}
+// Round 159: destroying a side card (a spare copy first) gives 5 Shards.
+const SIDE_DESTROY_SHARDS = 5;
+function destroySideCard(uid) {
+  ensureSide(); const card = state.side.pool.find(c => c.uid === uid); if (!card) return false;
+  state.side.pool = state.side.pool.filter(c => c.uid !== uid); state.side.deck = state.side.deck.filter(u => u !== uid);
+  state.shards = (state.shards || 0) + SIDE_DESTROY_SHARDS; save();
+  toast(SIDE_CARDS[card.id].name + ' destroyed: +' + SIDE_DESTROY_SHARDS + ' Shards (' + state.shards + ' total).');
+  return true;
 }
 function toggleSideCard(uid) {
   const card = state.side.pool.find(c => c.uid === uid); if (!card) return;
@@ -301,10 +306,15 @@ function sideEffect(b, id) {
 const cardEffectBeforeAether = cardEffect;
 cardEffect = function (c, empowered, doubleAttack) {
   const b = state.battle, before = b.enemy.hp;
+  b._hitNet = 0;
   cardEffectBeforeAether(c, empowered, doubleAttack);
-  let dealt = before - b.enemy.hp; if (dealt <= 0) return;
-  if (b.frail > 0) { const cut = Math.round(dealt * .25); if (cut) { b.enemy.hp += cut; dealt -= cut; b.logs.push('Frail: −' + cut + ' damage.'); } }
-  if (b.enemy.barrier > 0 && dealt > 0 && !stat(c).pierceBarrier) { const soak = Math.min(b.enemy.barrier, dealt); b.enemy.hp += soak; b.enemy.barrier -= soak; b.logs.push('Barrier absorbs ' + soak + (b.enemy.barrier ? ' (' + b.enemy.barrier + ' left).' : ' and breaks.')); }
+  // Round 150: on a killing blow, cut from the whole hit, not from the HP that was left.
+  const lost = before - b.enemy.hp;
+  let dealt = b.enemy.hp === 0 ? Math.max(lost, b._hitNet || 0) : lost; if (dealt <= 0) return;
+  const start = dealt;
+  if (b.frail > 0) { const cut = Math.round(dealt * .25); if (cut) { dealt -= cut; b.logs.push('Frail: −' + cut + ' damage.'); } }
+  if (b.enemy.barrier > 0 && dealt > 0 && !stat(c).pierceBarrier) { const soak = Math.min(b.enemy.barrier, dealt); dealt -= soak; b.enemy.barrier -= soak; b.logs.push('Barrier absorbs ' + soak + (b.enemy.barrier ? ' (' + b.enemy.barrier + ' left).' : ' and breaks.')); }
+  if (dealt !== start) b.enemy.hp = Math.max(0, before - dealt);
 };
 const playCardBeforeAether = playCard;
 playCard = function (i) {
@@ -376,9 +386,12 @@ startBattle = function (spawnId) {
 // ---------------------------------------------------------------------
 // Side card rewards
 // ---------------------------------------------------------------------
+const SIDE_DROP_MINI = .25, SIDE_DROP_REGULAR = .02;
 function rollSideDrop(b, roll = Math.random()) {
   const final = b.enemy.boss && !(enemies[b.id] || {}).miniBoss;
-  const chance = b.enemy.boss ? 1 : .05; // Round 53: 5% from regular and elite enemies; bosses always
+  // Round 202: far fewer side cards. Final bosses always drop one; mini-bosses (who already give
+  // gear) 25%; regular and elite enemies 2% (was every boss and 5%).
+  const chance = final ? 1 : b.enemy.boss ? SIDE_DROP_MINI : SIDE_DROP_REGULAR;
   if (roll >= chance) return null;
   ensureSide();
   const owned = id => state.side.pool.filter(c => c.id === id).length;
@@ -434,8 +447,9 @@ function afflictionLine(plan, label) {
   return '<p class="affliction ' + a.type + '">' + a.icon + ' ' + body + ' <span class="answer">Answer: ' + answerNames(plan.rider) + '.</span></p>';
 }
 function intentBubble(plan, cls, label, frozen) {
-  const dmg = frozen ? 'frozen · skips its action' : plan.kind === 'silenced' ? 'silenced · no action' : plan.veiled ? 'negated by Phase Veil' : plan.damage > 0 ? (plan.hits > 1 ? plan.hits + ' × ' + plan.damage + ' damage' : plan.damage + ' damage') : 'no attack';
-  return '<div class="intent-bubble ' + cls + '"><span class="when">' + label + '</span><b class="what">' + plan.name + '</b><span class="dmg">' + dmg + (plan.kind === 'elemental' && !frozen ? ' · <em>counter window</em>' : '') + '</span>'
+  const bt = state && state.battle, countered = !frozen && plan.kind === 'elemental' && bt && bt.counter && COUNTERS[plan.element] === bt.counter; // Round 161
+  const dmg = frozen ? 'frozen · skips its action' : countered ? 'countered · no damage' : plan.kind === 'silenced' ? 'silenced · no action' : plan.veiled ? 'negated by Phase Veil' : plan.damage > 0 ? (plan.hits > 1 ? plan.hits + ' × ' + plan.damage + ' damage' : plan.damage + ' damage') : 'no attack';
+  return '<div class="intent-bubble ' + cls + '"><span class="when">' + label + '</span><b class="what">' + plan.name + '</b><span class="dmg">' + dmg + (plan.kind === 'elemental' && !frozen && !countered ? ' · <em>counter window</em>' : '') + '</span>'
     + afflictionLine(plan, '')
     + (plan.mirrored ? '<p class="affliction anchored">◐ Mirror Sigil: you take half, the enemy takes ' + plan.mirrored + '.</p>' : '') + '</div>';
 }
@@ -491,8 +505,8 @@ renderBattle = function () {
   panel.innerHTML = '<div class="aether-row"><b>✦ Aether ' + b.aether + '/' + AETHER_MAX + '</b><span class="aether-pips" aria-hidden="true">' + pips + '</span>' + (pend ? '<small>+' + Math.min(pend, AETHER_MAX - b.aether) + ' at end of turn' + (energyBonus ? ' (incl. +' + energyBonus + ' from unspent energy)' : '') + '</small>' : '<small>Pitch cards or end the turn with energy left to gain Aether</small>') + '</div>';
   const handTitle = m.querySelector('.hand-title');
   if (handTitle && handTitle.before) handTitle.before(panel); else m.append(panel);
-  // Round 72: the side deck is its own column beside your hand — one card per
-  // row, scrolling up and down.
+  // Round 72: the side deck is its own column beside your hand (left of it since Round 134),
+  // one card per row, scrolling up and down.
   const hand = $('hand');
   if (!hand || !hand.parentNode || !hand.before) return;
   const row = document.createElement('div'); row.className = 'hand-row';
@@ -500,7 +514,7 @@ renderBattle = function () {
   const col = document.createElement('aside'); col.className = 'side-column'; col.setAttribute('aria-label', 'Side deck');
   const ready = avail.filter(c => b.aether >= sideAetherCost(c.id) && sideUsable(b, c.id)).length;
   col.innerHTML = '<div class="side-col-head"><b>✦ Side deck</b><small>' + (avail.length ? avail.length + ' left · ' + ready + ' playable' : 'used up this fight') + '</small></div><div class="side-col-list" id="sideHand"></div>';
-  row.append(col);
+  row.prepend(col); // Round 134: the side deck sits on the left of your hand
   const host = $('sideHand');
   if (host && host.append) avail.forEach(card => {
     const off = b.aether < sideAetherCost(card.id) || !sideUsable(b, card.id);
@@ -516,23 +530,34 @@ showDeck = function () {
   showDeckBeforeAether(); ensureSide();
   const host = document.querySelector('#menuModal .workshop'); if (!host) return;
   const panel = document.createElement('div'); panel.className = 'panel side-workshop';
-  panel.innerHTML = '<div class="eyebrow">SIDE DECK · AETHER</div><b>Side deck ' + state.side.deck.length + '/' + sideDeckMax() + '</b><p class="muted">Room for ' + sideDeckMax() + ' of ' + SIDE_DECK_MAX + ' cards. ' + (sideDeckMax() < SIDE_DECK_MAX ? 'Next slot: beat ' + SIDE_GROWTH_BOSSES.filter(id => !state.bosses.includes(id)).map(id => enemies[id] ? enemies[id].name : id)[0] + '. ' : 'Fully expanded. ') + '</p><p class="muted">In battle, pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1. Your whole side deck is open in every fight: play any side card once per encounter for Aether (4 minimum, shown on the card). Unspent energy turns into Aether 1 for 1. Up to ' + SIDE_COPIES + ' copies of each. Side cards drop from 5% of regular and elite enemies and from every boss; the merchant always sells one.</p><div class="cards" id="sidePoolCards"></div>';
+  panel.innerHTML = '<div class="eyebrow">SIDE DECK · AETHER</div><b>Side deck ' + state.side.deck.length + '/' + sideDeckMax() + '</b><p class="muted">Room for ' + sideDeckMax() + ' of ' + SIDE_DECK_MAX + ' cards. ' + (sideDeckMax() < SIDE_DECK_MAX ? 'Next slot: beat ' + SIDE_GROWTH_BOSSES.filter(id => !state.bosses.includes(id)).map(id => enemies[id] ? enemies[id].name : id)[0] + '. ' : 'Fully expanded. ') + '</p><p class="muted">In battle, pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1. Your whole side deck is open in every fight: play any side card once per encounter for Aether (4 minimum, shown on the card). Unspent energy turns into Aether 1 for 1. Up to ' + SIDE_COPIES + ' copies of each. Side cards are rare: every final boss drops one, mini-bosses sometimes do, other enemies seldom; the merchant always sells one.</p><div class="cards" id="sidePoolCards"></div>';
   host.append(panel);
   const list = $('sidePoolCards');
-  [...state.side.pool].sort((a, c) => SIDE_CARDS[a.id].tier - SIDE_CARDS[c.id].tier || a.id.localeCompare(c.id)).forEach(card => {
-    const wrap = sideCardElement(card, () => {}), inDeck = state.side.deck.includes(card.uid);
-    wrap.firstChild.classList.toggle('active', inDeck);
-    const btn = document.createElement('button'); btn.textContent = inDeck ? '− Remove from side deck' : '+ Add to side deck';
-    btn.onclick = () => { toggleSideCard(card.uid); showDeck(); };
-    const actions = document.createElement('div'); actions.className = 'actions'; actions.append(btn); wrap.append(actions); list.append(wrap);
+  // Round 159: copies of the same side card stack into one tile with a ×N count, like the main
+  // deck; each stack can add or remove a copy, and a spare copy can be destroyed for Shards.
+  const groups = {};
+  for (const card of state.side.pool) (groups[card.id] = groups[card.id] || []).push(card);
+  Object.keys(groups).sort((a, c) => SIDE_CARDS[a].tier - SIDE_CARDS[c].tier || a.localeCompare(c)).forEach(id => {
+    const cards = groups[id], inDeck = cards.filter(c => state.side.deck.includes(c.uid)), out = cards.filter(c => !state.side.deck.includes(c.uid)), n = cards.length;
+    const wrap = sideCardElement(cards[0], () => {});
+    wrap.firstChild.classList.toggle('active', inDeck.length > 0);
+    if (n > 1) { const badge = document.createElement('span'); badge.className = 'stack-count-badge'; badge.textContent = '×' + n; badge.title = n + ' copies · ' + inDeck.length + ' in your side deck'; wrap.append(badge); }
+    const info = document.createElement('p'); info.className = 'stack-info'; info.textContent = n > 1 ? inDeck.length + ' of ' + n + ' copies in side deck' : (inDeck.length ? 'In your side deck' : 'Not in your side deck'); wrap.append(info);
+    const add = document.createElement('button'); add.textContent = n > 1 ? '+ Add a copy to side deck' : '+ Add to side deck'; add.disabled = !out.length;
+    add.onclick = () => { if (out.length) { toggleSideCard(out[0].uid); showDeck(); } };
+    const rem = document.createElement('button'); rem.textContent = n > 1 ? '− Remove a copy' : '− Remove from side deck'; rem.disabled = !inDeck.length;
+    rem.onclick = () => { if (inDeck.length) { toggleSideCard(inDeck[inDeck.length - 1].uid); showDeck(); } };
+    const destroy = document.createElement('button'); destroy.className = 'danger'; destroy.textContent = (n > 1 ? 'Destroy a copy' : 'Destroy card') + ' · +◇ ' + SIDE_DESTROY_SHARDS;
+    destroy.onclick = () => { if (destroySideCard((out[0] || inDeck[inDeck.length - 1]).uid)) showDeck(); };
+    const actions = document.createElement('div'); actions.className = 'actions'; actions.append(add, rem, destroy); wrap.append(actions); list.append(wrap);
   });
 };
 
-// Round 71: beating a growth boss opens a side deck slot (and fills it).
+// Round 71: beating a growth boss opens a side deck slot (Round 233: left for the player to fill).
 const winBattleBeforeSideGrowth = winBattle;
 winBattle = function () {
   const b = state.battle, before = sideDeckMax();
   winBattleBeforeSideGrowth();
   const after = sideDeckMax();
-  if (after > before && state.side) { fillSideDeck(); if (b && Array.isArray(b.special)) b.special.push('✦ Side deck expanded: room for ' + after + ' of ' + SIDE_DECK_MAX + ' side cards.'); save(); }
+  if (after > before && state.side) { if (b && Array.isArray(b.special)) b.special.push('✦ Side deck expanded: room for ' + after + ' of ' + SIDE_DECK_MAX + ' side cards.'); save(); }
 };

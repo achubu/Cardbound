@@ -1,0 +1,13 @@
+{
+  "source_repository": "achubu/claudebound",
+  "source_commit": "6dce16c12176b3ae6bc98a03dd7eecccae9fd70b",
+  "source_round": 248,
+  "target_repository": "achubu/Cardbound",
+  "date": "2026-10-23",
+  "active_card_designs": 98,
+  "preserved_completed_illustrations": 119,
+  "retired_cards": ["counter_fire", "counter_water", "counter_earth", "counter_air"],
+  "save_compatibility": "Keep upstream normalization on load, restore and import, including active battles.",
+  "preserved": ["completed illustration files", "art-refresh prompts and records", "concept review catalog", "GitHub Pages hosting"],
+  "excluded": ["CNAME", "CLAUDE.md", ".DS_Store", "unused assets archive"]
+}

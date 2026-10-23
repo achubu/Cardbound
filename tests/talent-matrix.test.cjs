@@ -17,10 +17,10 @@ function setup(talents, hand, opts = {}) {
 const dealt = (b, i = 0) => { const before = b.enemy.hp; playCard(i); return before - b.enemy.hp; };
 
 // ---------------- SURGE ----------------
-let b = setup({ attunement: 3 }, ['cinder']); assert.equal(dealt(b), 5 + 9, 'Elemental Attunement +3 per rank on elemental cards');
+let b = setup({ attunement: 3 }, ['cinder']); assert.equal(dealt(b), 6 + 9, 'Elemental Attunement +3 per rank on elemental cards'); // Cinder Lance is 6 since Round 189
 b = setup({ attunement: 3 }, ['strike']); assert.equal(dealt(b), 6, 'Attunement does not touch non-elemental cards');
 b = setup({ attunement: 2, kindle: 2 }, ['cinder']); playCard(0); assert.equal(b.burn, 2 + 4, 'Kindling Matrix +2 Burn per rank');
-b = setup({ attunement: 2, kindle: 1, weakpoint: 2 }, ['cinder'], { enemy: { element: 'earth' } }); assert.equal(dealt(b), Math.round((5 + 6) * 2.1), 'Exploit Weakness: +50% weakness becomes +110% at rank 2');
+b = setup({ attunement: 2, kindle: 1, weakpoint: 2 }, ['cinder'], { enemy: { element: 'earth' } }); assert.equal(dealt(b), Math.round((6 + 6) * 2.1), 'Exploit Weakness: +50% weakness becomes +110% at rank 2');
 b = setup({ attunement: 2, kindle: 1, weakpoint: 2, stormcaller: 1 }, ['cinder', 'cinder']);
 assert.equal(stat(b.hand[0]).cost, 0, 'Stormcaller: first elemental card shows cost 0'); playCard(0); assert.equal(b.energy, 3, 'Stormcaller card was free');
 assert.equal(stat(b.hand[0]).cost, 1, 'Stormcaller only discounts the first elemental card each turn'); playCard(0); assert.equal(b.energy, 2);
@@ -47,7 +47,7 @@ assert.equal(enemyPlan(b, 1).damage, enemyPlan(setup({}, []), 1).damage, 'Suppre
 b = setup({ weakenCore: 1, jammer: 3, suppression: 3, silence: 1 }, []); b.silenceUsed = true; b.silenceTurn = 1; let hp0 = state.hp;
 assert.equal(enemyPlan(b).kind, 'silenced'); endTurn(); assert.equal(state.hp, hp0, 'Static Silence cancels the next action'); assert.equal(b.turn, 2);
 // Jammer Reserve: extra Weaken charges, one active at a time.
-b = setup({ weakenCore: 1 }, []); assert.equal(weakenCharges(), 1); useWeaken(); assert.equal(b.enemyDebuff, 3); assert(b.debuffUsed, 'one charge without Jammer Reserve');
+b = setup({ weakenCore: 1 }, []); assert.equal(weakenCharges(), 1); useWeaken(); assert.equal(b.enemyDebuff, 3, 'Weaken 3 with no Deep Interference'); assert(b.debuffUsed, 'one charge without Jammer Reserve');
 b = setup({ weakenCore: 1, jammer: 3, reserve: 2 }, [], { turn: 1 }); assert.equal(weakenCharges(), 3, 'Jammer Reserve: +1 charge per rank');
 useWeaken(); assert.equal(b.enemyDebuff, weakenAmount()); assert(!b.debuffUsed); useWeaken(); assert.equal(b.weakenUses, 1, 'only one Weaken at a time');
 b.block = 999; endTurn(); assert.equal(b.enemyDebuff, 0, 'it wears off after the attack'); useWeaken(); assert.equal(b.weakenUses, 2); b.enemyDebuff = 0; useWeaken(); assert.equal(b.weakenUses, 3); assert(b.debuffUsed, 'all 3 charges spent');
@@ -58,18 +58,18 @@ b = setup({ weakenCore: 1, capacitor: 1, battery: 1 }, [], { energy: 2 }); endTu
 // Counter mastery: turn 3 of an elemental enemy's cycle is its charged strike.
 b = setup({ counterWeave: 3, resonance: 1, reflux: 2 }, [], { turn: 3, enemy: { element: 'fire' } }); b.counter = COUNTERS.fire; state.hp = 20; const ehp = b.enemy.hp;
 assert.equal(enemyPlan(b).kind, 'elemental'); endTurn();
-assert.equal(ehp - b.enemy.hp, 6 + 6, 'Counter Weave: +2 per rank on a successful counter'); assert.equal(b.energy, maxEnergy() + 1, 'Resonant Rebound +1 energy'); assert.equal(state.hp, 20 + 4, 'Reflux +2 HP per rank');
+assert.equal(ehp - b.enemy.hp, 6 + 8, 'Counter Weave rank 3: +8 on a successful counter (steps 1/2/4)'); assert.equal(b.energy, maxEnergy() + 1, 'Resonant Rebound +1 energy'); assert.equal(state.hp, 20 + 4, 'Reflux rank 2 heals 4');
 b = setup({ counterWeave: 1, nullField: 1 }, [], { turn: 3, enemy: { element: 'fire' } }); endTurn(); assert.equal(b.playerBurn || 0, 0, 'Null Field: charged strikes cannot burn you');
 b = setup({}, [], { turn: 3, enemy: { element: 'fire' } }); endTurn(); assert(b.playerBurn > 0, 'without Null Field the same strike burns');
 
 // ---------------- RESOLVE ----------------
-b = setup({ bulwark: 3 }, ['guard']); playCard(0); assert.equal(b.block, 5 + 3, 'Bulwark Doctrine +1 Block per rank on Defense cards');
+b = setup({ bulwark: 3 }, ['guard']); playCard(0); assert.equal(b.block, 5 + 4, 'Bulwark Doctrine rank 3: +4 Block on Defense cards');
 b = setup({ bulwark: 3 }, ['riposte']); playCard(0); assert.equal(b.block, 3, 'Bulwark does not apply to attack cards that also block');
-b = setup({ bulwark: 2, thorns: 2 }, []); b.block = 30; const e1 = b.enemy.hp; endTurn(); assert.equal(e1 - b.enemy.hp, 2, 'Retaliation Coil returns 1 per rank when Block absorbs a hit');
+b = setup({ bulwark: 2, thorns: 2 }, []); b.block = 30; const e1 = b.enemy.hp; endTurn(); assert.equal(e1 - b.enemy.hp, 2, 'Retaliation Coil rank 2 returns 2 when Block absorbs a hit');
 b = setup({ bulwark: 2, thorns: 1, fortress: 1 }, []); b.block = 30; const hit = enemyPlan(b).damage; endTurn(); assert.equal(b.block, Math.min(6, Math.floor((30 - hit) / 2)), 'Fortress keeps half of the unused Block, up to 6');
 b = setup({ bulwark: 2, thorns: 1, fortress: 1, unbreakable: 1 }, []); newGame(); state.talents = { bulwark: 2, thorns: 1, fortress: 1, unbreakable: 1, retainCore: 1, preparation: 1, recall: 1, steadyMind: 1 }; state.playerLevel = 30; state.room = '1,5'; state.cooldowns = {};
 startBattle(roomSpawns('1,5').find(s => !s.boss).uid); assert.equal(state.battle.block, 6 + crystalOpeningBlock(), 'Unbreakable: 6 Block at the start'); assert.equal(state.battle.energy, maxEnergy() + 1, 'Steady Mind: +1 energy on turn 1');
-b = setup({ retainCore: 1, plating: 3, vitality: 1, leech: 2 }, ['strike', 'strike']); state.hp = 10; playCard(0); assert.equal(state.hp, 12, 'Siphon Edge heals 1 per rank'); playCard(0); assert.equal(state.hp, 12, 'only the first attack each turn');
+b = setup({ retainCore: 1, plating: 3, vitality: 1, leech: 2 }, ['strike', 'strike']); state.hp = 10; playCard(0); assert.equal(state.hp, 12, 'Siphon Edge rank 2 heals 2'); playCard(0); assert.equal(state.hp, 12, 'only the first attack each turn');
 b = setup({ retainCore: 1, plating: 3, vitality: 1, leech: 2, secondWind: 1 }, ['strike']); state.hp = 10; const sw = state.hp; playCard(0); assert.equal(state.hp, sw + 2 + 6, 'Second Wind heals 6 once below half health');
 b = setup({ retainCore: 1, plating: 3, vitality: 1, leech: 2, secondWind: 1, undying: 1 }, []); state.hp = 1; b.secondWindUsed = true; b.enemy.attack = 99; endTurn();
 assert.equal(state.hp, 1, 'Undying Core: survive at 1 HP'); assert.equal(b.phase, 'fight'); assert.equal(b.turn, 2, 'the fight continues to the next turn');
@@ -80,3 +80,6 @@ assert.equal(stat(kept).cost, 1, 'Preparation no longer changes cost'); const id
 Math.random = realRandom;
 console.log('PASS: all 32 new talents verified (Surge 11, Disruption 11 incl. Jammer Reserve charges, Resolve 10) with exact numbers through the real engine.');
 }`);
+// Round 218: Edge Calibration adds +1 damage per rank.
+run(`{ newGame(); const got = [1, 2, 3, 4, 5].map(r => { state.talents.edge = r; return attackBonus(); }); assert.deepEqual(got, [1, 2, 3, 4, 5], 'Edge Calibration: +1 per rank');
+  const node = Object.values(TALENT_BRANCHES).flatMap(b => b.nodes).find(n => n.id === 'edge'); assert(node.desc.includes('+1 damage per rank')); console.log('PASS: Edge Calibration adds +1 damage per rank, as its description says.'); }`);

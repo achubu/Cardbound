@@ -12,7 +12,7 @@ for (const region of ['city', 'elaris', 'vespera']) {
   for (const t of ['shrine', 'campfire', 'cache']) assert(pois.some(p => p.type === t), region + ' has a ' + t);
   for (const p of pois) {
     assert(!isStartRoom(p.key) && !roomSpawns(p.key).some(s => s.boss) && !chestFor(p.key), 'never in start, boss or chest rooms');
-    assert(walkable(p.key, p.x, p.y, 30), 'reachable spot');
+    assert(organicDef(p.key) ? organicBesideStreet(p.key, p) : walkable(p.key, p.x, p.y, 30), 'reachable spot (beside the path in organic rooms)');
     assert(roomSpawns(p.key).every(s => Math.hypot(s.x - p.x, s.y - p.y) > 150), 'clear of patrols');
   }
   const shop = merchantRoom(); assert(shop, region + ' has a merchant'); assert(!worldPOIs()[shop.key], 'merchant is not on a point of interest');
@@ -26,7 +26,7 @@ const a = JSON.stringify(worldPOIs()); for (const k in poiCache) delete poiCache
 const pois = Object.values(worldPOIs()), of = t => pois.find(p => p.type === t);
 
 // Cache
-let p = of('cache'), s0 = state.shards; openPOI(p); click('poiOpen'); assert(state.shards >= s0 + 3 && state.shards <= s0 + 6, 'cache gives 3-6 Shards'); assert(poiUsed(p));
+let p = of('cache'), s0 = state.shards; openPOI(p); click('poiOpen'); assert.equal(state.shards, s0 + 15, 'cache gives 15 Shards (Round 158)'); assert(poiUsed(p));
 const s1 = state.shards; openPOI(p); assert.equal(state.shards, s1, 'a used cache gives nothing');
 // Shrine + blessing in battle
 p = of('shrine'); openPOI(p); click('bless0'); assert(state.blessing, 'shrine grants a blessing'); assert(poiUsed(p));
@@ -44,19 +44,27 @@ const card = active()[0], u0 = card.uses || 0; trainCard(card); assert.equal(own
 // Lore: all five pay out once
 const sideBefore = state.side.pool.length, sh = state.shards;
 for (const lp of pois.filter(x => x.type === 'lore')) { openPOI(lp); click('poiRead'); }
-assert.equal(state.shards, sh + 5 * 2 + 15, 'lore: +2 each, +15 for all five'); assert.equal(state.side.pool.length, sideBefore + 1, 'and a side card'); assert(state.poi.loreRewards.includes('city'));
+assert.equal(state.shards, sh + 5 * 15 + 25, 'lore: +15 each (Round 157), +25 for all five (Round 202)'); assert.equal(state.side.pool.length, sideBefore, 'no side card (Round 202)'); assert(state.poi.loreRewards.includes('city'));
 // Sealed cache: risk
 p = of('sealed') || { ...of('cache'), type: 'sealed', id: 'city:test-sealed' };
-Math.random = () => .1; let sh2 = state.shards; openPOI(p); click('poiPry'); assert.equal(state.shards, sh2 + 9, 'lucky: +9 Shards');
+Math.random = () => .1; let sh2 = state.shards; openPOI(p); click('poiPry'); assert.equal(state.shards, sh2 + 25, 'lucky: +25 Shards (Round 158)');
 const p2 = { ...p, id: 'city:test-sealed-2' }; Math.random = () => .9; state.hp = 3; openPOI(p2); click('poiPry'); assert.equal(state.hp, 1, 'unlucky: lose HP, never below 1'); Math.random = realRandom;
 // Merchant
-const shop = merchantRoom(), stock = merchantStock(); assert.equal(stock.length, 4); assert(stock.includes('side') && stock.includes('potion') && stock.includes('upgradePack'), 'always stocks a side card, potions and card upgrades');
+const shop = merchantRoom(), stock = merchantStock(); assert.equal(stock.length, 3); assert(stock.includes('side') && stock.includes('potion') && !stock.includes('upgradePack'), 'always stocks a side card and potions; card upgrades are at the Cardsmith (Round 227)');
 state.shards = 0; openMerchant(shop); assert.equal($('buy0').disabled === undefined ? true : true, true);
-state.shards = 100; const sideN = state.side.pool.length; buyItem(shop, 'side'); assert.equal(state.shards, 100 - MERCHANT_ITEMS.side.cost); assert.equal(state.side.pool.length, sideN + 1);
-buyItem(shop, 'side'); assert.equal(state.side.pool.length, sideN + 1, 'each item sells once');
-const pots = state.potions, shp = state.shards; for (let k = 0; k < 5; k++) buyItem(shop, 'potion'); assert.equal(state.potions, pots + 5, 'potions never sell out'); assert.equal(state.shards, shp - 5 * MERCHANT_ITEMS.potion.cost); assert.equal(MERCHANT_ITEMS.potion.cost, 4);
+// Round 144: side cards cost 100 and you choose which one.
+assert.equal(MERCHANT_ITEMS.side.cost, 100);
+state.shards = 150; const sideN = state.side.pool.length; buyItem(shop, 'side'); assert.equal(state.shards, 150, 'opening the side card picker costs nothing'); assert.equal(state.side.pool.length, sideN);
+const pickId = sidePoolFor().filter(x => x !== 'stasis')[0]; const bought1 = buySideCard(shop, pickId); assert(bought1 && bought1.id === pickId, 'you get the side card you chose'); assert.equal(state.shards, 50); assert.equal(state.side.pool.length, sideN + 1);
+state.shards = 200; assert.equal(buySideCard(shop, pickId), null, 'each item sells once'); assert.equal(state.side.pool.length, sideN + 1);
+{ const shop2 = { ...shop, id: 'pricecheck' }; state.shards = 99; assert.equal(buySideCard(shop2, pickId), null, 'needs 100 Shards'); }
+const pots = state.potions, shp = state.shards; for (let k = 0; k < 5; k++) buyItem(shop, 'potion'); assert.equal(state.potions, pots + 5, 'potions never sell out'); assert.equal(state.shards, shp - 5 * MERCHANT_ITEMS.potion.cost); assert.equal(MERCHANT_ITEMS.potion.cost, 15);
+// Round 227: the merchant buys potions back for 10 Shards (less than it sells them for).
+{ const p0 = state.potions, s0 = state.shards; sellPotion(shop); assert.equal(state.potions, p0 - 1); assert.equal(state.shards, s0 + 10); closeMenu();
+  state.potions = 0; const s1 = state.shards; sellPotion(shop); assert.equal(state.shards, s1, 'nothing to sell, nothing paid'); closeMenu(); state.potions = p0 - 1;
+  assert(POTION_SELL_PRICE < MERCHANT_ITEMS.potion.cost, 'buying to sell back loses Shards'); }
 const mats = materials();
-for (let m = 0; m < 40; m++) { state.poi.merchantMoves = m; const st = merchantStock(); assert(st.includes('side') && st.includes('potion') && st.includes('upgradePack'), 'always a side card, potions and card upgrades'); assert(!st.includes('crystal'), 'never Upgrade Crystals'); }
+for (let m = 0; m < 40; m++) { state.poi.merchantMoves = m; const st = merchantStock(); assert(st.includes('side') && st.includes('potion') && !st.includes('upgradePack'), 'always a side card and potions'); assert(!st.includes('crystal'), 'never Upgrade Crystals'); }
 state.poi.merchantMoves = 0; assert(!('crystal' in MERCHANT_ITEMS), 'no crystal ware exists');
 // Upgraded cards: three Impermanent cards at level 1 (city).
 state.shards = 50; buyItem(shop, 'upgraded'); const ups = [...document.querySelectorAll('#bundleCards .card')]; assert.equal(materials(), mats, 'no crystals sold');
@@ -64,12 +72,11 @@ const offered = cardOffers().map(c => { c.soulbound = false; c.level = upgradedL
 // Upgrade pack: raises an Impermanent card, never a Soulbound one.
 const imp = make('cleave', 0, false), soul = make('strike', 0, true); state.pool.push(imp, soul);
 assert(upgradeTargets().includes(imp) && !upgradeTargets().includes(soul), 'only Impermanent cards can be upgraded by a pack');
-applyUpgradePack(imp); assert.equal(imp.level, 1); assert.equal(imp.uses, 0); applyUpgradePack(soul); assert.equal(soul.level, 0, 'Soulbound cards are refused');
-// Unlimited upgrades, priced by the level reached: 12 / 20 / 30.
-{ const c2 = make('strike', 0, false); state.pool.push(c2); state.shards = 61; buyUpgrade(c2); assert.equal(c2.level, 1); assert.equal(state.shards, 49);
-  buyUpgrade(c2); assert.equal(c2.level, 2); assert.equal(state.shards, 29); buyUpgrade(c2); assert.equal(c2.level, 2, 'level 3 costs 30'); state.shards = 30; buyUpgrade(c2); assert.equal(c2.level, 3); assert.equal(state.shards, 0);
-  state.shards = 100; const sh1 = state.shards; buyItem(shop, 'upgradePack'); assert.equal(state.shards, sh1, 'opening the upgrade menu costs nothing'); closeMenu(); }
-const keep = state.pool; state.pool = [soul]; const sh0 = state.shards; buyItem({ ...shop, id: 'nopack' }, 'upgradePack'); assert.equal(state.shards, sh0, 'no pack sale without an Impermanent card to upgrade'); state.pool = keep;
+imp.uses = 37; applyUpgradePack(imp); assert.equal(imp.level, 1); assert.equal(imp.uses, 37, 'Round 212: progress toward the next level is kept'); applyUpgradePack(soul); assert.equal(soul.level, 0, 'Soulbound cards are refused');
+// Unlimited upgrades, priced by the level reached: 36 / 60 / 90 (Round 123: tripled).
+{ const c2 = make('strike', 0, false); state.pool.push(c2); state.shards = 183; buyUpgrade(c2); assert.equal(c2.level, 1); assert.equal(state.shards, 147);
+  buyUpgrade(c2); assert.equal(c2.level, 2); assert.equal(state.shards, 87); buyUpgrade(c2); assert.equal(c2.level, 2, 'level 3 costs 90'); state.shards = 90; buyUpgrade(c2); assert.equal(c2.level, 3); assert.equal(state.shards, 0); }
+assert.deepEqual([...UPGRADE_PRICES], [36, 60, 90], 'card upgrades (at the Cardsmith) cost triple the old 12/20/30'); assert(!MERCHANT_ITEMS.upgradePack, 'the merchant no longer sells upgrades');
 state.shards = 1; buyItem({ ...shop, id: 'x' }, 'potion'); assert.equal(state.shards, 1, 'cannot buy without Shards');
 // Shards from fights
 state.room = '1,5'; state.cooldowns = {}; startBattle(roomSpawns('1,5').find(x => !x.boss).uid); state.battle.bounty = null; let before = state.shards; state.battle.enemy.hp = 0; winBattle(); assert([1, 2].includes(state.shards - before), 'regular: 1-2 Shards');

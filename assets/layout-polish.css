@@ -1,0 +1,137 @@
+/* Round 187: layout fixes from the playtest (see assets/layout-polish.js). */
+/* Art credits live in the main menu now. */
+#nav .art-credits{display:none}
+.menu-credits{margin:10px 0 0;font:12px system-ui}.menu-credits a{color:#9fd3e6}
+/* The on-screen arrow pad is for touch play only. */
+body:not(.touch-mode) #touch{display:none}
+/* The side deck only folds on phones. */
+.side-fold{display:none}
+
+@media(max-width:720px){
+  /* A shorter HUD, so the room can start higher and fill the screen. */
+  #hud{padding:7px 8px}
+  #hud .room-title{font-size:15px;line-height:1.15;margin:0 0 3px}
+  #hud .hud-row{font-size:11px;line-height:1.3}
+  #hud .meter{height:5px;margin:2px 0 3px}
+  #hud #usePotion{min-height:0;padding:3px 8px;margin-top:3px;font-size:11px}
+  #hud .explore-row{font-size:11px;margin-top:2px}
+
+  /* Battle: the side deck folds into one row above the hand. */
+  #battleModal .hand-row{flex-direction:column;gap:6px}
+  #battleModal .hand-row>#hand{width:100%}
+  #battleModal .side-column.foldable{flex:0 0 auto;width:100%;box-sizing:border-box}
+  #battleModal .side-column.foldable .side-col-head{display:flex!important;flex-direction:row!important;align-items:center;justify-content:flex-start;gap:8px;cursor:pointer;padding:5px 10px;text-align:left}
+  #battleModal .side-column.foldable .side-col-head small{flex:1}
+  #battleModal .side-fold{display:inline-block;font:700 11px system-ui;color:#d9ccff;border:1px solid #8b74e0;border-radius:999px;padding:2px 10px}
+  #battleModal .side-column.foldable:not(.open) .side-col-list{display:none}
+  #battleModal .side-column.foldable.open .side-col-list{display:flex;flex-direction:row;overflow-x:auto;gap:8px;padding:0 6px 8px;max-height:none}
+  #battleModal .side-column.foldable.open .side-col-list .card-wrap{flex:0 0 120px;width:120px}
+  /* Shorter enemy-move boxes: the affliction text shows two lines; tap the box for the rest. */
+  #battleModal .intent-bubble{cursor:pointer}
+  #battleModal .intent-bubble{padding:6px 8px}
+  #battleModal .intent-bubble:not(.expanded) .affliction{margin:3px 0 0;font-size:11px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  #battleModal .intent-bubble:not(.expanded) .affliction small,#battleModal .intent-bubble:not(.expanded) .affliction .answer{display:none}
+  /* The hand header and the card art take less height, so a whole card fits above the footer. */
+  #battleModal .hand-title{display:none}
+  .touch-mode #battleModal #hand .card .art{aspect-ratio:5/4}
+  .touch-mode #battleModal #hand .card{min-height:0}
+  /* A bigger enemy portrait, and the Aether row on one line. */
+  #battleModal .compact-monster{width:3.6em;height:3.6em}
+  #battleModal .aether-panel small{display:none}
+  /* The mechanic tray: one compact row. */
+  #battleModal .mech-tray{padding:6px 8px;margin:6px 0}
+  #battleModal .mt-count{min-width:36px;height:28px;font-size:14px}
+  #battleModal .mt-text small{display:none}
+  #battleModal .mt-help{font-size:10px;padding:4px 7px;min-height:0}
+}
+/* Round 188: on narrow phones the talent tree fits the screen instead of scrolling sideways. */
+@media(max-width:480px){
+  .talent-layout{min-width:calc(var(--paths,3) * 61px);row-gap:28px;grid-auto-rows:98px}
+  .talent-node{width:58px;flex-basis:58px;height:98px;padding:3px}
+  .talent-node .talent-icon{height:48px}
+  .talent-node b,.talent-node .talent-name,.talent-node span:not(.talent-icon){font-size:9px;line-height:1.15}
+}
+/* Round 192: things you can open or pick up stand out from the painting: a white rim and a
+   slow pulsing glow (cyan in Neon Aftermath, warm gold in the other worlds). Used ones stay
+   readable: dimmed and greyed, not see-through. */
+#world{--item-glow:#ffe9a0}
+#world[data-environment="neon"]{--item-glow:#8ff7ff}
+.poi-node.poi-art{width:52px!important;height:52px!important}
+.poi-node.poi-art:not(.used):not(.poi-merchant),.map-chest,#world .relic{animation:itemGlow 2.4s ease-in-out infinite!important}
+.poi-node.used{opacity:.8!important}
+.poi-node.poi-art.used{filter:grayscale(.65) brightness(.85) drop-shadow(0 0 1.5px #000c)!important;animation:none!important}
+@keyframes itemGlow{
+  0%,100%{filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 5px var(--item-glow)) drop-shadow(0 0 1px #000)}
+  50%{filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 12px var(--item-glow)) drop-shadow(0 0 22px var(--item-glow))}}
+@media(prefers-reduced-motion:reduce){
+  .poi-node.poi-art:not(.used):not(.poi-merchant),.map-chest,#world .relic{animation:none!important;filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 9px var(--item-glow))!important}}
+/* Round 209: enemies on the map are drawn at 80% of their old size, shrunk around their feet so
+   they keep standing in the same spot. (CSS `scale` stacks with the left/right facing flip.)
+   Battle portraits are unchanged. */
+#world .enemy-node > .monster-sprite{scale:.88;transform-origin:50% 100%} /* Round 229: 10% larger (was .8) */
+/* Round 211: no enemy picture on the battle page (its name, health and moves stay). */
+#battleModal .compact-monster,#battleModal .battle-monster{display:none!important}
+#battleModal #combatLog{margin:6px 0;padding:6px 10px;border:1px solid #2e5566;border-radius:8px;background:#0b1a26aa;font:12px/1.4 system-ui;color:#cfe6ef}
+/* Round 214: End turn at the right end of the Turn / energy bar. */
+#battleModal .compact-bar{display:flex;align-items:center;flex-wrap:wrap}
+#battleModal .compact-bar #endTurn.end-turn-inline{margin-left:auto}
+/* Round 215: things you can open or pick up are drawn at half their old size, around their centre
+   (they stay where they were placed). Their name labels stay full size, just under the picture. */
+#world .poi-node,#world .map-chest,#world .relic{scale:.5}
+#world .poi-node::after{scale:2;transform-origin:50% 0;top:calc(100% + 3px)!important}
+/* Round 215: a tighter battle screen: less padding and smaller gaps between every part. */
+#battleModal{padding:12px 14px!important}
+#battleModal>*{margin-top:0!important;margin-bottom:0!important}
+#battleModal>*+*{margin-top:6px!important}
+#battleModal .battle-compact{display:grid;gap:6px}
+#battleModal .compact-combatants{gap:6px!important}
+#battleModal .compact-side{padding:6px 10px!important}
+#battleModal .debuff-strip{margin-top:3px!important;padding:3px 7px!important;min-height:0!important}
+#battleModal .intent-bubbles{gap:6px!important}
+#battleModal .intent-bubble{padding:6px 10px!important}
+#battleModal .intent-bubble .affliction{margin-top:3px!important}
+#battleModal #combatLog{padding:4px 10px!important}
+#battleModal .aether-panel{padding:5px 10px!important}
+#battleModal .compact-bar{gap:6px!important}
+#battleModal .combat-tools{padding:4px 10px!important}
+#battleModal .hand-title{line-height:1.1}
+#battleModal .hand-title h2,#battleModal .hand-title h3{margin:0!important}
+#battleModal .hand-row,#battleModal .hand-row .cards{gap:8px!important}
+/* Round 216: you/enemy boxes at about half their height. Name, Block/Armor and debuffs share the
+   top row; a slimmer health bar runs along the bottom. */
+#battleModal .compact-side,#battleModal .compact-enemy-info{display:flex!important;flex-wrap:wrap;align-items:center;gap:4px 8px!important}
+#battleModal .compact-side{padding:5px 8px!important}
+#battleModal .compact-side.enemy{display:block!important}
+#battleModal .compact-enemy-info{width:100%}
+#battleModal .compact-head{order:1;margin:0!important;line-height:1.1}
+#battleModal .compact-head b{font-size:14px!important}
+#battleModal .compact-tags{order:2;display:flex;gap:6px;min-height:0!important;margin:0!important}
+#battleModal .compact-tags:empty{display:none}
+#battleModal .debuff-strip{order:3;flex:1 1 auto;margin:0!important;padding:0!important;border:0!important;background:none!important;min-height:0!important;font-size:11px!important;justify-content:flex-end}
+#battleModal .debuff-strip .ds-cap{font-size:9px!important}
+#battleModal .hp-row{order:4;flex:1 0 100%;margin:0!important;gap:5px!important}
+#battleModal .hp-row .hp-icon,#battleModal .hp-row .hp-icon svg{width:16px!important;height:16px!important}
+#battleModal .hp-row .meter{height:16px!important;margin:0!important}
+#battleModal .hp-row .meter-label{font-size:11px!important;line-height:16px!important}
+#battleModal .hud-stat{gap:4px!important;padding:0!important}
+#battleModal .hud-crystal,#battleModal .hud-crystal .gem,#battleModal .hud-shield{width:20px!important;height:20px!important;min-width:0!important}
+#battleModal .hud-crystal b,#battleModal .hud-shield b,#battleModal .hud-crystal .gem b{font-size:11px!important;line-height:20px!important}
+#battleModal .hud-cap{font-size:10px!important}
+#battleModal .compact-side,#battleModal .compact-enemy-info{justify-content:flex-start!important;text-align:left!important}
+#battleModal .hp-row{display:flex!important;align-items:center;width:100%}
+#battleModal .hp-row .meter{flex:1 1 auto!important;width:auto!important;min-width:0}
+#battleModal .debuff-strip{display:flex!important;flex-wrap:wrap;align-items:center;gap:4px!important;margin-left:auto!important}
+#battleModal .debuff-strip .ds-item,#battleModal .debuff-strip .dot-hud{font-size:10px!important;padding:1px 6px!important}
+#battleModal .compact-side,#battleModal .compact-enemy-info{flex-direction:row!important}
+#battleModal .compact-side.enemy{display:block!important}
+#battleModal .hud-shield{width:auto!important;height:auto!important;font-size:10px!important}
+/* Round 219: the last-moves line and the Aether panel, smaller and slimmer. */
+#battleModal #combatLog{padding:2px 8px!important;font-size:11px!important;line-height:1.3!important;border-radius:6px!important}
+#battleModal .aether-panel{padding:2px 8px!important;font-size:11px!important;gap:6px!important;border-radius:6px!important;min-height:0!important}
+#battleModal .aether-panel b,#battleModal .aether-panel strong,#battleModal .aether-panel .aether-count{font-size:12px!important}
+#battleModal .aether-panel small{font-size:10px!important}
+#battleModal .aether-panel .aether-pip,#battleModal .aether-panel i{width:9px!important;height:9px!important}
+/* Round 225: the encounter and the element share the top line */
+#battleModal .combat-tools.with-encounter{display:block}#battleModal .combat-tools .encounter-line + p{display:inline;margin:0!important}
+/* Round 239: a gap before the talent buttons (Overdrive, Echo, Overload) on the encounter line */
+#battleModal .combat-tools > button.ability{margin-left:8px}

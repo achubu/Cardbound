@@ -98,7 +98,7 @@ b = setup('drownedHeron', [], { turn: 2, enemy: { element: 'water', hp: 200 } })
 assert.equal(enemyPlanBeforeAether(b, 4).kind, 'guard'); assert.equal(riderAt(b, 5), 'siphon', 'Siphon carries from the guard turn onto the next attack');
 b.turn = 5; const sip = enemyPlan(b).damage; e = b.enemy.hp; hp = state.hp; endTurn(); assert.equal(hp - state.hp, sip, 'the siphoning strike lands in full'); assert.equal(b.enemy.hp - e, sip, 'Siphon heals the enemy by the damage dealt');
 // Barrage: three hits, Block and Armor on each.
-b = setup('cinderFox', [], { turn: 5, enemy: { element: 'fire' } }); const per = enemyPlan(b).damage; assert.equal(enemyPlan(b).hits, 3);
+b = setup('vespMoth', [], { turn: 5, enemy: { element: 'fire' } }); const per = enemyPlan(b).damage; assert.equal(enemyPlan(b).hits, 3); // Round 237: Elaris's fox now Bleeds; Vespera's moth keeps Barrage
 assert.equal(per, Math.max(1, Math.round(enemyPlanBeforeAether(b, 5).damage * .45)));
 state.talents = { plating: 1 }; b.block = 5; hp = state.hp; endTurn();
 const net = per - 1; let blk = 5, taken = 0; for (let k = 0; k < 3; k++) { const s = Math.min(blk, net); blk -= s; taken += net - s; }
@@ -131,10 +131,12 @@ b = setup('thornling', []); b.energy = 0; give(b, 'anchor'); b.aether = 4; playS
 
 // ---------- Rewards, workshop rules, saves ----------
 newGame(); b = setup('thornling', []); b.phase = 'reward'; b.special = [];
-const n0 = state.side.pool.length; assert.equal(rollSideDrop(b, .05), null, 'regular: 5% chance'); assert(rollSideDrop(b, .04), 'regular drop under 5%'); b.enemy.elite = true; assert.equal(rollSideDrop(b, .05), null, 'elites: 5% too'); b.enemy.elite = false; assert.equal(state.side.pool.length, n0 + 1);
-b.enemy.boss = true; assert(rollSideDrop(b, .999), 'bosses always drop one');
+const n0 = state.side.pool.length; assert.equal(rollSideDrop(b, .02), null, 'regular: 2% chance (Round 202)'); assert(rollSideDrop(b, .019), 'regular drop under 2%'); b.enemy.elite = true; assert.equal(rollSideDrop(b, .02), null, 'elites: 2% too'); b.enemy.elite = false; assert.equal(state.side.pool.length, n0 + 1);
+b.enemy.boss = true; const id0 = b.id; b.id = 'bloomTyrant'; assert(rollSideDrop(b, .999), 'final bosses always drop one');
+b.id = 'galeSovereign'; assert.equal(rollSideDrop(b, .25), null, 'mini-bosses: 25% (Round 202)'); assert(rollSideDrop(b, .24), 'mini-boss drop under 25%'); b.id = id0;
 assert(sidePoolFor(0).every(id => SIDE_CARDS[id].tier === 0), 'city drops city-tier side cards'); assert(sidePoolFor(2).includes('phase'));
-newGame(); state.bosses.push('crownSentinel', 'galeSovereign', 'bloomTyrant', 'resonantPhantom'); for (let k = 0; k < 6; k++) addSideCard('purify');
+newGame(); state.bosses.push('crownSentinel', 'galeSovereign', 'bloomTyrant', 'resonantPhantom'); const sideBefore = state.side.deck.length; const purifies = []; for (let k = 0; k < 6; k++) purifies.push(addSideCard('purify'));
+assert.equal(state.side.deck.length, sideBefore, 'Round 233: a new side card waits in the collection'); for (const c of purifies) toggleSideCard(c.uid);
 assert(state.side.deck.length <= SIDE_DECK_MAX); assert.equal(sideCopies('purify'), SIDE_COPIES, 'at most 2 copies per side card');
 const saved = JSON.parse(JSON.stringify(state)); validateImport(saved);
 const bad = JSON.parse(JSON.stringify(state)); bad.side.pool.push({ uid: 'x9', id: 'purify' }); assert.throws(() => validateImport(bad), /side/);
@@ -146,7 +148,18 @@ newGame(); assert.equal(sideDeckMax(), 2); state.side.pool.push({ uid: 's90', id
 toggleSideCard('s90'); assert.equal(state.side.deck.length, 2, 'cannot exceed the current capacity');
 const grow = ['crownSentinel', 'galeSovereign', 'bloomTyrant', 'resonantPhantom'];
 grow.forEach((id, i) => { state.bosses.push(id); assert.equal(sideDeckMax(), 3 + i); }); state.bosses.push('stormTyrant'); assert.equal(sideDeckMax(), 6, 'never above 6');
-state.bosses = state.bosses.filter(id => id !== 'crownSentinel'); state.room = '8,9'; const sp = roomSpawns(state.room).find(s => s.type === 'crownSentinel'); if (sp) { state.side.deck = state.side.deck.slice(0, 5); startBattle(sp.uid); state.battle.enemy.hp = 0; winBattle(); assert.equal(sideDeckMax(), 6); assert.equal(state.side.deck.length, 6, 'a new slot is filled automatically'); assert(state.battle.special.some(t => /Side deck expanded/.test(t))); }
+state.bosses = state.bosses.filter(id => id !== 'crownSentinel'); state.room = '8,9'; const sp = roomSpawns(state.room).find(s => s.type === 'crownSentinel'); if (sp) { state.side.deck = state.side.deck.slice(0, 5); const sideLen = state.side.deck.length; startBattle(sp.uid); state.battle.enemy.hp = 0; winBattle(); assert.equal(sideDeckMax(), 6); assert.equal(state.side.deck.length, sideLen, 'Round 233: a new slot is left for the player to fill'); assert(state.battle.special.some(t => /Side deck expanded/.test(t))); }
 newGame(); state.side.deck = state.side.pool.map(c => c.uid); ensureSide(); assert.equal(state.side.deck.length, 2, 'over-capacity side decks are trimmed');
 console.log('PASS: pitching, Aether, side-deck draws, all 11 enemy afflictions, schedules, all 10 side cards, drops, deck rules and save migration.');
 }`);
+// Round 134: the side deck column sits on the left of the hand.
+{ const src = require('node:fs').readFileSync(require('node:path').join(__dirname, '../assets/aether-deck.js'), 'utf8');
+  require('node:assert')(/row\.prepend\(col\)/.test(src) && !/row\.append\(col\)/.test(src), 'side deck column is on the left of the hand');
+  console.log('PASS: the side deck column sits on the left of the hand.'); }
+// Round 159: duplicate side cards stack, and a spare copy can be destroyed for 5 Shards.
+{ const { run: r3 } = require('./expansion.test.cjs'), assert = require('node:assert');
+  const o = JSON.parse(r3(`(()=>{newGame();ensureSide();ensureExplore();const a=addSideCard('aegis'),b=addSideCard('aegis');state.shards=0;const n0=state.side.pool.length;const ok=destroySideCard(b.uid);return JSON.stringify({ok,removed:n0-state.side.pool.length,shards:state.shards,stillThere:state.side.pool.some(c=>c.uid===a.uid),gone:!state.side.deck.includes(b.uid)})})()`));
+  assert.deepEqual(o, { ok: true, removed: 1, shards: 5, stillThere: true, gone: true }, 'destroying a side card copy gives 5 Shards');
+  const src = require('node:fs').readFileSync(require('node:path').join(__dirname, '../assets/aether-deck.js'), 'utf8');
+  assert(/badge\.className = 'stack-count-badge'; badge\.textContent = '×' \+ n/.test(src), 'side card copies stack with a count');
+  console.log('PASS: duplicate side cards stack with a count; destroying a copy gives 5 Shards.'); }
