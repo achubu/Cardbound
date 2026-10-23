@@ -11,7 +11,7 @@
 // =====================================================================
 const POI_SHARE = 0.36, LORE_PER_WORLD = 5;
 const POI_SPOTS = [[400, 130], [400, 385], [330, 180], [470, 320], [330, 320], [470, 180], [205, 140], [600, 360], [205, 360], [600, 140], [400, 250]];
-const LORE_NAMES = { city: ['⌨', 'Data Terminal'], elaris: ['◈', 'Whispering Stone'], vespera: ['ϟ', 'Storm Glyph'] };
+const LORE_NAMES = { city: ['⌨', 'Data Terminal'], elaris: ['☀', 'Sun Dial'], vespera: ['ϟ', 'Storm Glyph'] };
 const POI_INFO = {
   shrine: { icon: '⛩', name: 'Aether Shrine' },
   campfire: { icon: '🔥', name: 'Campfire' },
@@ -28,11 +28,11 @@ const LORE = {
     'LOG 05 — The portal beneath the Warden\'s throne hums at the frequency of growing things. Something green is waiting on the other side.'
   ],
   elaris: [
-    'The stone is warm. Words rise in your mind: "Before the Tyrant bloomed, Elaris sang in four voices: flame, tide, root and wind."',
-    '"The Tidebound Warden was a guardian once. It guards the river still, but it no longer remembers from what."',
-    '"Burn and rot are siblings here. What fire leaves, the poison finishes. Do not fight them both at once."',
-    '"The Gale Sovereign crowned itself on the highest branch and called the storm its court."',
-    '"The Bloom Tyrant drinks the land\'s four voices. Silence it, and the stormglass road will open to the east."'
+    'The stone is warm. Words rise in your mind: "Before the Pharaoh took the Solar Crown, Solaris kept four fires: sun, well, sand and wind."',
+    '"The Cistern Warden was built to share the water. It guards the Scrapwall cistern still, but it no longer lets anyone drink."',
+    '"Scarab and scorpion hunt together here. What the sun-fire leaves, the venom finishes. Do not fight them both at once."',
+    '"At noon the great bell rings and the Toller walks. Those who hear it too closely forget how to move."',
+    '"The Sun Pharaoh wraps the city in light and linen. Unseat it, and the stormglass road will open to the east."'
   ],
   vespera: [
     'The glyph crackles: "Vespera was a city of glass that caught lightning and turned it into light."',
@@ -50,11 +50,10 @@ const BLESSINGS = {
   vigil:  { name: 'Vigil', text: () => 'After you win your next fight, heal 30% of your maximum HP.' }
 };
 const MERCHANT_ITEMS = {
-  side:    { name: 'Side deck card', cost: 10, text: 'A random side card from this world.' },
-  potion:  { name: 'Healing potion', cost: 4, repeatable: true, text: 'One small healing potion. Always in stock.' },
+  side:    { name: 'Side deck card', cost: 100, text: 'Choose any side card from this world.' }, // Round 144: pick it yourself, 100 Shards
+  potion:  { name: 'Healing potion', cost: 15, repeatable: true, text: 'One small healing potion. Always in stock.' }, // Round 227: was 4; above the sell price
   pick:    { name: 'Card bundle', cost: 8, text: 'Choose one of three Impermanent cards from this world.' },
   upgraded:{ name: 'Upgraded card', cost: 12, text: 'Choose one of three Impermanent cards from this world, already upgraded.' },
-  upgradePack: { name: 'Card upgrade', cost: 12, repeatable: true, text: 'Raise one of your Impermanent cards by one level: ◇ 12 to level 1, ◇ 20 to level 2, ◇ 30 to level 3. Always available.' },
   bless:   { name: 'Bottled blessing', cost: 4, text: 'A random shrine blessing for your next fight.' }
 };
 
@@ -74,7 +73,7 @@ function ensureExplore(s = state) {
 
 // --- Placement (deterministic per journey seed) ---
 const poiCache = {};
-function isStartRoom(key) { return activeRegion === 'city' ? key === '0,5' : key === '0,0'; }
+function isStartRoom(key) { return key === regionStartRoom(); }
 function poiEligible(key) {
   const r = rooms[key]; if (!r || isStartRoom(key) || r.relic || chestFor(key)) return false;
   return !roomSpawns(key).some(s => s.boss);
@@ -123,11 +122,11 @@ function findMerchantRoom() {
 }
 function merchantStock() {
   const rand = seeded(hashSeed(state.seed + activeRegion + 'stock' + state.poi.merchantMoves));
-  // Always a side card and a card upgrade (an upgraded card or an upgrade pack), plus one other ware.
-  // The merchant never sells Soulbound cards or Upgrade Crystals.
-  // Round 69: potions and card upgrades are always in stock and never sell out.
+  // Always a side card and potions (which never sell out), plus one other ware.
+  // The merchant never sells Soulbound cards or Upgrade Crystals. Round 227: card upgrades moved to
+  // the Cardsmith only.
   const others = ['upgraded', 'pick', 'bless'];
-  return ['side', 'potion', 'upgradePack', others[Math.floor(rand() * others.length)]];
+  return ['side', 'potion', others[Math.floor(rand() * others.length)]];
 }
 function poiDisplay(p) {
   if (p.type === 'lore') { const [icon, name] = LORE_NAMES[activeRegion] || LORE_NAMES.city; return { icon, name }; }
@@ -197,7 +196,12 @@ checkWorldInteractions = function () {
   const near = here.find(p => Math.hypot(state.pos.x - p.x, state.pos.y - p.y) < 40);
   if (!near) { poiArmed = null; return; }
   if (poiArmed === near.id) return; // already opened; step away to re-open
+  // Round 184: walking past on a tap route to somewhere else doesn't stop you here.
+  if (typeof touchPassingBy === 'function' && touchPassingBy(near)) return;
   poiArmed = near.id;
+  // Something already used doesn't pop up again when you walk by; tap it to look again.
+  const tapped = typeof touchTapped === 'function' && touchTapped(near);
+  if (near.type !== 'merchant' && near.type !== 'nexus' && poiUsed(near) && !tapped) { const d = poiDisplay(near); toast(d.icon + ' ' + d.name + ': already used. Tap it to look again.'); return; }
   openPOI(near);
 };
 function poiMenu(title, body, buttons) {
@@ -226,40 +230,52 @@ function openPOI(p) {
   if (p.type === 'lore') {
     const d2 = poiDisplay(p);
     return poiMenu(d2.icon + ' ' + d2.name, '<blockquote class="lore">' + LORE[activeRegion][p.loreIndex] + '</blockquote><p class="muted">' + (state.poi.lore.filter(id => id.startsWith(activeRegion + ':')).length + 1) + ' of ' + LORE_PER_WORLD + ' in this world. Reading all five reveals a reward.</p>',
-      [{ id: 'poiRead', label: 'Take it in · +2 Shards', primary: true, onclick: () => readLore(p) }]);
+      [{ id: 'poiRead', label: 'Take it in · +' + LORE_SHARDS + ' Shards', primary: true, onclick: () => readLore(p) }]);
   }
   if (p.type === 'cache') {
-    const rand = seeded(hashSeed(p.id + state.seed + 'cache')), shards = 3 + Math.floor(rand() * 4), potion = rand() < .25;
+    const rand = seeded(hashSeed(p.id + state.seed + 'cache')), shards = CACHE_SHARDS, potion = rand() < .25;
     return poiMenu('⬙ Supply Cache', '<p>A cache left by earlier travellers.</p>', [{ id: 'poiOpen', label: 'Open it', primary: true, onclick: () => { state.shards += shards; if (potion) state.potions++; finishPOI(p, 'Cache: +' + shards + ' Shards' + (potion ? ' and a healing potion' : '') + '.'); } }]);
   }
   if (p.type === 'sealed') {
     const hurt = Math.ceil(state.maxHp * .15);
-    return poiMenu('⚠ Sealed Cache', '<p>The seal hums with stored charge. Prying it open might pay well — or discharge into you.</p><p class="poi-option">50%: <b>+9 Shards</b>. 50%: lose <b>' + hurt + ' HP</b> (never below 1) and the cache is ruined.</p>',
-      [{ id: 'poiPry', label: 'Pry it open', primary: true, onclick: () => { if (Math.random() < .5) { state.shards += 9; finishPOI(p, 'The seal gives: +9 Shards.'); } else { state.hp = Math.max(1, state.hp - hurt); finishPOI(p, 'The seal discharges: −' + hurt + ' HP.'); } } }, { id: 'poiLeave', label: 'Leave it', onclick: closeMenu }]);
+    return poiMenu('⚠ Sealed Cache', '<p>The seal hums with stored charge. Prying it open might pay well — or discharge into you.</p><p class="poi-option">50%: <b>+' + SEALED_SHARDS + ' Shards</b>. 50%: lose <b>' + hurt + ' HP</b> (never below 1) and the cache is ruined.</p>',
+      [{ id: 'poiPry', label: 'Pry it open', primary: true, onclick: () => { if (Math.random() < .5) { state.shards += SEALED_SHARDS; finishPOI(p, 'The seal gives: +' + SEALED_SHARDS + ' Shards.'); } else { state.hp = Math.max(1, state.hp - hurt); finishPOI(p, 'The seal discharges: −' + hurt + ' HP.'); } } }, { id: 'poiLeave', label: 'Leave it', onclick: closeMenu }]);
   }
 }
 function trainCard(c) { const o = owned(c.uid) || c; for (let k = 0; k < 15; k++) recordCardUse(o); }
+// Round 157: each lore point (Data Terminal, Sun Dial, Storm Glyph...) holds 15 Shards (was 2).
+const LORE_SHARDS = 15;
+// Round 158: a supply cache holds 15 Shards (was 3-6); a sealed cache, which can shock you, 25 (was 9).
+const CACHE_SHARDS = 15, SEALED_SHARDS = 25, LORE_SET_SHARDS = 25;
 function readLore(p) {
-  state.shards += 2; state.poi.lore.push(p.id);
+  state.shards += LORE_SHARDS; state.poi.lore.push(p.id);
   const read = state.poi.lore.filter(id => id.startsWith(activeRegion + ':')).length;
-  let msg = 'Lore recorded: +2 Shards.';
+  let msg = 'Lore recorded: +' + LORE_SHARDS + ' Shards.';
   if (read >= LORE_PER_WORLD && !state.poi.loreRewards.includes(activeRegion)) {
-    state.poi.loreRewards.push(activeRegion); state.shards += 15;
-    const pool = typeof sidePoolFor === 'function' ? sidePoolFor().filter(id => id !== 'stasis') : [];
-    const card = pool.length && typeof addSideCard === 'function' ? addSideCard(pool[Math.floor(Math.random() * pool.length)]) : null;
-    msg = 'All five read! +15 Shards' + (card ? ' and the side card ' + SIDE_CARDS[card.id].name : '') + '.';
+    // Round 202: Shards only (side cards are rarer now).
+    state.poi.loreRewards.push(activeRegion); state.shards += LORE_SET_SHARDS;
+    msg = 'All five read! +' + LORE_SET_SHARDS + ' Shards.';
   }
   finishPOI(p, msg);
 }
+// Round 227: the merchant buys healing potions back.
+const POTION_SELL_PRICE = 10;
+function sellPotion(p) {
+  if (!(state.potions > 0)) return;
+  state.potions--; state.shards += POTION_SELL_PRICE; save();
+  toast('Sold a healing potion for ◇ ' + POTION_SELL_PRICE + '.'); openMerchant(p);
+}
 function openMerchant(p) {
   const stock = merchantStock(), bought = id => !MERCHANT_ITEMS[id].repeatable && state.poi.bought.includes(p.id + ':' + id);
-  poiMenu('🛒 Wandering Merchant', '<p>"Shards for wares, traveller. I move on when you do."</p><p>You have <b>◇ ' + state.shards + ' Shards</b>.</p>' + stock.map(id => '<p class="poi-option"><b>' + MERCHANT_ITEMS[id].name + '</b> · ◇ ' + (id === 'upgradePack' ? '12–30' : MERCHANT_ITEMS[id].cost) + ' — ' + MERCHANT_ITEMS[id].text + (bought(id) ? ' <i>(sold)</i>' : '') + '</p>').join(''),
-    stock.map((id, i) => ({ id: 'buy' + i, label: (bought(id) ? 'Sold · ' : id === 'upgradePack' ? 'Choose a card to upgrade · ◇ ' + cheapestUpgrade() : 'Buy ') + (id === 'upgradePack' ? '' : MERCHANT_ITEMS[id].name + ' · ◇ ' + MERCHANT_ITEMS[id].cost), disabled: bought(id) || state.shards < (id === 'upgradePack' ? cheapestUpgrade() : MERCHANT_ITEMS[id].cost) || (id === 'upgradePack' && !upgradeTargets().length), onclick: () => buyItem(p, id) })).concat([{ id: 'poiLeave', label: 'Leave', primary: true, onclick: closeMenu }]));
+  poiMenu('🛒 Wandering Merchant', '<p>"Shards for wares, traveller. I move on when you do."</p><p>You have <b>◇ ' + state.shards + ' Shards</b> and <b>⚗ ' + state.potions + ' potion' + (state.potions === 1 ? '' : 's') + '</b>.</p>' + stock.map(id => '<p class="poi-option"><b>' + MERCHANT_ITEMS[id].name + '</b> · ◇ ' + MERCHANT_ITEMS[id].cost + ' — ' + MERCHANT_ITEMS[id].text + (bought(id) ? ' <i>(sold)</i>' : '') + '</p>').join('')
+    + '<p class="poi-option"><b>Sell a healing potion</b> · +◇ ' + POTION_SELL_PRICE + ' — the merchant buys potions back.</p>',
+    stock.map((id, i) => ({ id: 'buy' + i, label: (bought(id) ? 'Sold · ' : 'Buy ') + MERCHANT_ITEMS[id].name + ' · ◇ ' + MERCHANT_ITEMS[id].cost, disabled: bought(id) || state.shards < MERCHANT_ITEMS[id].cost, onclick: () => buyItem(p, id) }))
+      .concat([{ id: 'sellPotion', label: 'Sell a potion · +◇ ' + POTION_SELL_PRICE, disabled: !(state.potions > 0), onclick: () => sellPotion(p) }, { id: 'poiLeave', label: 'Leave', primary: true, onclick: closeMenu }]));
 }
 function buyItem(p, id) {
   const item = MERCHANT_ITEMS[id], tag = p.id + ':' + id;
-  if (id === 'upgradePack') { if (upgradeTargets().length && state.shards >= cheapestUpgrade()) openUpgradePack(p); return; } // paid per card
   if ((!item.repeatable && state.poi.bought.includes(tag)) || state.shards < item.cost) return;
+  if (id === 'side') return openSidePicker(p); // Round 144: choose the card; paid when you pick
   state.shards -= item.cost; if (!item.repeatable) state.poi.bought.push(tag);
   let msg = 'Bought ' + item.name + '.';
   if (id === 'side') { const pool = sidePoolFor().filter(x => x !== 'stasis'), card = addSideCard(pool[Math.floor(Math.random() * pool.length)]); msg = 'Bought the side card ' + SIDE_CARDS[card.id].name + (state.side.deck.includes(card.uid) ? ' (added to your side deck).' : '. Add it in the Deck Workshop.'); }
@@ -268,41 +284,48 @@ function buyItem(p, id) {
   save();
   if (id === 'pick') return openBundle(0);
   if (id === 'upgraded') return openBundle(upgradedLevel());
-  if (id === 'upgradePack') return openUpgradePack(p);
   toast(msg); openMerchant(p);
 }
-function upgradedLevel() { return activeRegion === 'vespera' || activeRegion === 'chronospire' ? 2 : 1; }
+// Round 144: the merchant lets you pick which side card to buy.
+function buySideCard(p, cardId) {
+  const item = MERCHANT_ITEMS.side, tag = p.id + ':side';
+  if (state.poi.bought.includes(tag) || state.shards < item.cost || !sidePoolFor().includes(cardId)) return null;
+  state.shards -= item.cost; state.poi.bought.push(tag);
+  const card = addSideCard(cardId); save();
+  toast('Bought the side card ' + SIDE_CARDS[card.id].name + (state.side.deck.includes(card.uid) ? ' (added to your side deck).' : '. Add it in the Deck Workshop.'));
+  openMerchant(p); return card;
+}
+function openSidePicker(p) {
+  poiMenu('Side deck card', '<p>Choose one side card for ◇ ' + MERCHANT_ITEMS.side.cost + '. You have <b>◇ ' + state.shards + ' Shards</b>.</p><div class="cards" id="sidePick"></div>', [{ id: 'sideBack', label: 'Back to the merchant', primary: true, onclick: () => openMerchant(p) }]);
+  const host = $('sidePick'); if (!host || !host.append) return;
+  const owned = id => state.side.pool.filter(c => c.id === id).length;
+  sidePoolFor().filter(x => x !== 'stasis').sort((a, b) => SIDE_CARDS[a].tier - SIDE_CARDS[b].tier || SIDE_CARDS[a].name.localeCompare(SIDE_CARDS[b].name)).forEach(id => {
+    const el = sideCardElement({ uid: 'shop-' + id, id }, () => buySideCard(p, id), state.shards < MERCHANT_ITEMS.side.cost);
+    const tag = document.createElement('div'); tag.className = 'actions'; tag.textContent = '◇ ' + MERCHANT_ITEMS.side.cost + (owned(id) ? ' · you own ' + owned(id) : ''); el.append(tag); host.append(el);
+  });
+}
+function upgradedLevel() { return WORLD_ORDER.indexOf(activeRegion) >= 2 ? 2 : 1; } // Round 175: from world 3 on
 function upgradeTargets() { return state.pool.filter(c => !c.soulbound && !(defs[c.id] && defs[c.id].soulbound) && c.level < 3); }
 // Round 69: upgrades are unlimited and priced by the level they reach.
 // The playthrough averaged ~1.5 Shards per regular fight and 150-180 per
 // world, with hundreds left unspent; 12/20/30 makes a full 0→3 upgrade
 // (62 Shards) roughly a third of a world's income.
-const UPGRADE_PRICES = [12, 20, 30];
+const UPGRADE_PRICES = [36, 60, 90];
 function upgradePrice(c) { return UPGRADE_PRICES[Math.min(2, c.level || 0)]; }
-function cheapestUpgrade() { const t = upgradeTargets(); return t.length ? Math.min(...t.map(upgradePrice)) : UPGRADE_PRICES[0]; }
-function openUpgradePack(p) {
-  poiMenu('Card upgrade', '<p>Choose one Impermanent card to raise by one level. Its mastery progress starts fresh at the new level.</p><p>You have <b>◇ ' + state.shards + ' Shards</b>. Level 1 costs ◇ 12, level 2 ◇ 20, level 3 ◇ 30.</p><div class="cards" id="packCards"></div>', [{ id: 'packBack', label: 'Back to the merchant', primary: true, onclick: () => p ? openMerchant(p) : closeMenu() }]);
-  const host = $('packCards');
-  if (host && host.append) upgradeTargets().sort((a, b) => upgradePrice(a) - upgradePrice(b)).forEach(c => {
-    const el = cardElement(c, () => buyUpgrade(c, p), state.shards < upgradePrice(c));
-    const tag = document.createElement('div'); tag.className = 'actions'; tag.textContent = '◇ ' + upgradePrice(c) + ' → level ' + (c.level + 1); el.append(tag); host.append(el);
-  });
-}
 function buyUpgrade(c, p) {
   const card = owned(c.uid) || c, price = upgradePrice(card);
   if (card.soulbound || card.level >= 3 || state.shards < price) return;
   state.shards -= price; applyUpgradePack(card);
-  if (p && upgradeTargets().length && state.shards >= cheapestUpgrade()) openUpgradePack(p);
 }
 function applyUpgradePack(c) {
   const card = owned(c.uid) || c; if (card.soulbound || card.level >= 3) return;
-  card.level++; card.uses = 0; save(); toast(stat(card).name + ' upgraded to level ' + card.level + '.'); closeMenu();
+  card.level++; save(); toast(stat(card).name + ' upgraded to level ' + card.level + '.'); closeMenu(); // Round 212: progress toward the next level is kept
 }
 function openBundle(level = 0) {
   // Store cards are always Impermanent, never Soulbound.
   const offers = cardOffers().map(c => { c.soulbound = false; c.level = level; return c; });
   poiMenu(level ? 'Upgraded cards' : 'Card bundle', '<p>Choose one card.</p><div class="cards" id="bundleCards"></div>', [{ id: 'poiLeave', label: 'Leave them', onclick: closeMenu }]);
-  offers.forEach(c => $('bundleCards').append(cardElement(c, () => { state.pool.push(c); if (state.deck.length < maxDeckSize() && copiesInDeck(c.id) < maxCopies()) state.deck.push(c.uid); save(); toast(stat(c).name + ' added to your collection.'); closeMenu(); })));
+  offers.forEach(c => $('bundleCards').append(cardElement(c, () => { state.pool.push(c); save(); toast(stat(c).name + ' added to your collection. Open Deck to add it.'); closeMenu(); })));
 }
 
 // --- Shards from fights, blessings in fights, merchant moving on ---
@@ -369,13 +392,13 @@ document.head.append(exploreStyles);
 // =====================================================================
 const QUIET_ROOMS = {
   city: ['1,6', '3,8', '7,9'], // Round 91: Fountain Row, Koi Garden, South Lot
-  elaris: ['2,2', '5,6', '10,7'],
+  elaris: ['2,1', '6,3', '3,5'], // Round 149: Solaris rooms
   vespera: ['2,4', '6,4', '10,5']
 };
 // Round 73: Nexus Waypoints at the start and middle of every world (see below).
 const NEXUS_POINTS = {
   city: { start: '0,5', mid: '4,5' }, // Round 91: Neon Square
-  elaris: { start: '0,0', mid: '7,6' },
+  elaris: { start: '0,0', mid: '4,2' },
   vespera: { start: '0,0', mid: '8,2' }
 };
 const pct = f => Math.max(1, Math.ceil(state.maxHp * f));
@@ -393,7 +416,7 @@ const EVENTS = {
                     { label: 'Pay ◇ 3 · +1 potion', disabled: state.shards < 3, run: () => { state.shards -= 3; state.potions++; return '+1 healing potion.'; } }] },
   courier: { icon: '✉', name: 'Lost Courier', text: () => 'A sealed parcel lies next to a dropped delivery drone.',
     choices: () => [{ label: 'Return it · Ward of Glass blessing, +4 Shards', run: () => { state.blessing = 'ward'; state.shards += 4; return 'The drone chirps thanks: +4 Shards and Ward of Glass for your next fight.'; } },
-                    { label: 'Open it · 50%: a side card', run: () => { if (Math.random() < .5) { const pool = sidePoolFor().filter(x => x !== 'stasis'), c = addSideCard(pool[Math.floor(Math.random() * pool.length)]); return 'Inside: ' + SIDE_CARDS[c.id].name + ' (side deck).'; } return 'Empty packing foam. Someone got here first.'; } }] },
+                    { label: 'Open it · 25%: a side card', run: () => { if (Math.random() < .25) { const pool = sidePoolFor().filter(x => x !== 'stasis'), c = addSideCard(pool[Math.floor(Math.random() * pool.length)]); return 'Inside: ' + SIDE_CARDS[c.id].name + ' (side deck).'; } return 'Empty packing foam. Someone got here first.'; } }] },
   // Elaris
   spring: { icon: '❦', name: 'Moonlit Spring', text: () => 'Cold, clear water pools between the roots. Nothing here wants to fight you.',
     choices: () => [{ label: 'Rest and drink · heal ' + pct(.5) + ' HP', run: () => { state.hp = Math.min(state.maxHp, state.hp + pct(.5)); return 'You rest by the spring: +' + pct(.5) + ' HP.'; } },
@@ -484,20 +507,26 @@ openPOI = function (p) {
 // by stepping on a waypoint.
 // =====================================================================
 function nexusId(region, key) { return region + ':' + key; }
+// Round 203: worlds in the order you travel them (WORLD_ORDER), not the order they were added.
+function nexusRegions() {
+  const order = typeof WORLD_ORDER !== 'undefined' ? WORLD_ORDER : [];
+  return Object.keys(NEXUS_POINTS).sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99));
+}
 function nexusList() {
   ensureExplore();
   const out = [];
-  for (const [region, nx] of Object.entries(NEXUS_POINTS)) for (const which of ['start', 'mid']) {
+  for (const region of nexusRegions()) for (const which of ['start', 'mid']) {
+    const nx = NEXUS_POINTS[region];
     const key = nx[which], id = nexusId(region, key);
     if (state.poi.nexus.includes(id)) out.push({ region, key, which, id });
   }
   return out;
 }
-const NEXUS_WORLD_NAMES = { city: 'Neon Aftermath', elaris: 'Elaris', vespera: 'Vespera' };
+const NEXUS_WORLD_NAMES = { city: 'Neon Aftermath', elaris: 'Solaris', vespera: 'Vespera' };
 function nexusRoomName(region, key) {
   if (region === activeRegion) return rooms[key] ? rooms[key].name : key;
-  const src = region === 'city' ? (typeof CITY_ROOMS !== 'undefined' ? CITY_ROOMS : null) : region === 'vespera' ? (typeof VESPERA_ROOM_DATA !== 'undefined' ? VESPERA_ROOM_DATA : null) : region === 'chronospire' ? (typeof CHRONO_ROOM_DATA !== 'undefined' ? CHRONO_ROOM_DATA : null) : null;
-  return (src && src[key] && src[key].name) || ({ elaris: { '0,0': 'Dawnroot Landing', '7,6': 'Mistbound Thicket' } }[region] || {})[key] || key;
+  const src = region === 'city' ? (typeof CITY_ROOMS !== 'undefined' ? CITY_ROOMS : null) : region === 'vespera' ? (typeof VESPERA_ROOM_DATA !== 'undefined' ? VESPERA_ROOM_DATA : null) : region === 'chronospire' ? (typeof CHRONO_ROOM_DATA !== 'undefined' ? CHRONO_ROOM_DATA : null) : TILE_REGIONS[region] ? TILE_REGIONS[region].rooms : null;
+  return (src && src[key] && src[key].name) || (region === 'elaris' && typeof SOLARIS_LAYOUT === 'object' && SOLARIS_LAYOUT[key] ? SOLARIS_LAYOUT[key].name : null) || key; // Round 229: any Solaris room
 }
 function discoverNexus() {
   if (!state) return false; ensureExplore();
@@ -529,7 +558,7 @@ function nexusTravel(region, key) {
 function nexusButtonsHTML() {
   const list = nexusList();
   if (!list.length) return '<p class="muted">No Nexus Waypoints discovered yet.</p>';
-  return Object.keys(NEXUS_POINTS).filter(r => list.some(n => n.region === r)).map(r => '<div class="nexus-world"><b>' + NEXUS_WORLD_NAMES[r] + '</b><div class="nexus-buttons">' +
+  return nexusRegions().filter(r => list.some(n => n.region === r)).map(r => '<div class="nexus-world"><b>' + NEXUS_WORLD_NAMES[r] + '</b><div class="nexus-buttons">' +
     list.filter(n => n.region === r).map(n => { const here = n.region === activeRegion && n.key === state.room; return '<button class="nexus-go' + (here ? ' here' : '') + '" data-region="' + n.region + '" data-key="' + n.key + '"' + (here ? ' disabled' : '') + '>⟟ ' + nexusRoomName(n.region, n.key) + ' <small>' + (n.which === 'start' ? 'start' : 'mid-world') + (here ? ' · you are here' : '') + '</small></button>'; }).join('') + '</div></div>').join('');
 }
 function wireNexusButtons(root) {
@@ -640,14 +669,13 @@ function worldCompletion() {
   const parts = [discovered / keys.length]; if (chests.length) parts.push(chestsFound / chests.length); if (relics.length) parts.push(relicsFound / relics.length);
   return Math.round(parts.reduce((x, y) => x + y, 0) / parts.length * 100);
 }
-const COMPLETION_SHARDS = 20;
+const COMPLETION_SHARDS = 35; // Round 202: Shards only, no side card
 function checkWorldCompletion() {
   if (!state || state.battle) return false; ensureExplore(); state.poi.completed ||= [];
   if (state.poi.completed.includes(activeRegion) || worldCompletion() < 100) return false;
   state.poi.completed.push(activeRegion); state.shards += COMPLETION_SHARDS;
-  const pool = sidePoolFor().filter(x => x !== 'stasis'), card = addSideCard(pool[Math.floor(Math.random() * pool.length)]);
   save();
-  poiMenu('🗺 World fully explored', '<p>You have explored every corner of <b>' + NEXUS_WORLD_NAMES[activeRegion] + '</b>.</p><p class="notice">Reward: <b>+' + COMPLETION_SHARDS + ' Shards</b> and the side card <b>' + SIDE_CARDS[card.id].name + '</b>' + (state.side.deck.includes(card.uid) ? ' (added to your side deck).' : ' (add it in the Deck Workshop).') + '</p>', [{ id: 'poiLeave', label: 'Continue', primary: true, onclick: closeMenu }]);
+  poiMenu('🗺 World fully explored', '<p>You have explored every corner of <b>' + NEXUS_WORLD_NAMES[activeRegion] + '</b>.</p><p class="notice">Reward: <b>+' + COMPLETION_SHARDS + ' Shards</b>.</p>', [{ id: 'poiLeave', label: 'Continue', primary: true, onclick: closeMenu }]);
   return true;
 }
 const renderWorldBeforeCompletion = renderWorld;
@@ -657,7 +685,7 @@ showMap = function () {
   showMapBeforeCompletion(); if (!state) return;
   const done = (state.poi.completed || []).includes(activeRegion), p = document.createElement('p'); p.className = 'map-completion-note';
   const goals = ['room'].concat(Object.keys(rooms).some(chestFor) ? ['hidden chest'] : [], Object.values(rooms).some(r => r.relic && r.relic[0] !== 'material') ? ['relic'] : []);
-  p.textContent = done ? '🗺 Fully explored — reward claimed.' : '🗺 Find every ' + (goals.length > 1 ? goals.slice(0, -1).join(', ') + ' and ' + goals.at(-1) : goals[0]) + ' in this world for +' + COMPLETION_SHARDS + ' Shards and a side card.';
+  p.textContent = done ? '🗺 Fully explored — reward claimed.' : '🗺 Find every ' + (goals.length > 1 ? goals.slice(0, -1).join(', ') + ' and ' + goals.at(-1) : goals[0]) + ' in this world for +' + COMPLETION_SHARDS + ' Shards.';
   const ret = $('mapReturn'); if (ret && ret.before) ret.before(p);
 };
 const bountyStyles = document.createElement('style');

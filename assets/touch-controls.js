@@ -2,15 +2,16 @@
 // Screen taps are converted through the same camera transform as rendering.
 let touchRoute=null,touchFacing=null,selectedTouchCard=null;
 const touchGridCache=new Map();
-function touchMode(){const saved=localStorage.getItem('cardbound-touch-mode');return saved?saved==='on':innerWidth<=720||(typeof matchMedia==='function'&&matchMedia('(pointer: coarse)').matches)}
+function touchMode(){const saved=localStorage.getItem('aethercede-touch-mode');return saved?saved==='on':innerWidth<=720||(typeof matchMedia==='function'&&matchMedia('(pointer: coarse)').matches)}
 function syncTouchMode(){document.body.classList.toggle('touch-mode',touchMode());const hint=document.querySelector('.hint');if(hint)hint.textContent=touchMode()?'Tap a path to move · Tap an enemy to approach':'Click a path to move · WASD / arrows · M: map'}
 function cancelTouchRoute(){touchRoute=null;touchFacing=null;document.querySelector('.move-marker')?.remove()}
 function touchWorldPoint(){const area=joinedArea(),offset=cellOffset(state.room,area);return{x:offset.x+state.pos.x,y:offset.y+state.pos.y}}
 function touchGrid(area){
  const cacheKey=activeRegion+':'+area.cells.join('|');if(touchGridCache.has(cacheKey))return touchGridCache.get(cacheKey);
- const step=20,cols=area.width/step,rows=area.height/step,valid=new Uint8Array(cols*rows);
+ // Painted/organic rooms have narrow winding streets, so they get a finer 10px grid (Round 92).
+ const step=typeof organicDef==='function'&&area.cells.some(c=>organicDef(c))?8:20,cols=area.width/step,rows=area.height/step,valid=new Uint8Array(cols*rows);
  for(let iy=0;iy<rows;iy++)for(let ix=0;ix<cols;ix++){
-  const x=ix*step+10,y=iy*step+10,cx=Math.floor(x/800),cy=Math.floor(y/500),key=(area.left+cx)+','+(area.top+cy);
+  const x=ix*step+step/2,y=iy*step+step/2,cx=Math.floor(x/800),cy=Math.floor(y/500),key=(area.left+cx)+','+(area.top+cy);
   valid[iy*cols+ix]=area.cells.includes(key)&&walkable(key,x-cx*800,y-cy*500,8)?1:0;
  }
  const grid={step,cols,rows,valid};touchGridCache.set(cacheKey,grid);return grid;
@@ -19,13 +20,13 @@ function touchGrid(area){
 // step is only allowed when the ground between the two cell centres is open.
 function touchEdgeOpen(area,step,cols,a,b){
  for(const f of [.25,.5,.75]){
-  const x=((a%cols)+((b%cols)-(a%cols))*f)*step+10,y=(Math.floor(a/cols)+(Math.floor(b/cols)-Math.floor(a/cols))*f)*step+10,cx=Math.floor(x/800),cy=Math.floor(y/500),key=(area.left+cx)+','+(area.top+cy);
+  const x=((a%cols)+((b%cols)-(a%cols))*f)*step+step/2,y=(Math.floor(a/cols)+(Math.floor(b/cols)-Math.floor(a/cols))*f)*step+step/2,cx=Math.floor(x/800),cy=Math.floor(y/500),key=(area.left+cx)+','+(area.top+cy);
   if(area.cells.includes(key)&&!walkable(key,x-cx*800,y-cy*500,0))return false;
  }
  return true;
 }
 function findTouchPath(area,start,target){
- const {step,cols,rows,valid}=touchGrid(area),point=i=>({x:Math.max(12,Math.min(area.width-12,(i%cols)*step+10)),y:Math.max(12,Math.min(area.height-12,Math.floor(i/cols)*step+10))});
+ const {step,cols,rows,valid}=touchGrid(area),point=i=>({x:Math.max(12,Math.min(area.width-12,(i%cols)*step+step/2)),y:Math.max(12,Math.min(area.height-12,Math.floor(i/cols)*step+step/2))});
  function nearest(p){let best=-1,distance=Infinity;for(let i=0;i<valid.length;i++)if(valid[i]){const q=point(i),d=(q.x-p.x)**2+(q.y-p.y)**2;if(d<distance){best=i;distance=d}}return{index:best,distance}}
  const source=nearest(start),goal=nearest(target);if(source.index<0||goal.distance>90*90)return null;
  const previous=new Int32Array(valid.length);previous.fill(-2);previous[source.index]=-1;
@@ -33,14 +34,22 @@ function findTouchPath(area,start,target){
   const at=queue[head],x=at%cols,y=Math.floor(at/cols);
   for(const next of [x>0?at-1:-1,x<cols-1?at+1:-1,y>0?at-cols:-1,y<rows-1?at+cols:-1])if(next>=0&&valid[next]&&previous[next]===-2&&touchEdgeOpen(area,step,cols,at,next)){previous[next]=at;queue.push(next)}
  }
- if(previous[goal.index]===-2)return null;
- const result=[];for(let at=goal.index;at!==-1;at=previous[at])result.push(point(at));return result.reverse();
+ // Round 104: if the exact spot can't be reached, go to the reachable spot closest to it (within 90px)
+ // instead of refusing the tap.
+ let end=goal.index;
+ if(previous[end]===-2){end=-1;let bd=90*90;for(const i of queue){const q=point(i),d=(q.x-target.x)**2+(q.y-target.y)**2;if(d<bd){bd=d;end=i}}if(end<0)return null}
+ const result=[];for(let at=end;at!==-1;at=previous[at])result.push(point(at));return result.reverse();
 }
+// Round 184: on a tap route only what was tapped opens. touchPassingBy(p): following a route to
+// somewhere else; touchTapped(p): the last tap in this room was on (or right next to) p.
+let lastTouchTap=null;
+function touchPassingBy(p){const r=touchRoute;if(!r||!r.target||!state)return false;const o=cellOffset(state.room,joinedArea());return Math.hypot(r.target.x-o.x-p.x,r.target.y-o.y-p.y)>50}
+function touchTapped(p){return !!(lastTouchTap&&state&&lastTouchTap.room===state.room&&Math.hypot(lastTouchTap.x-p.x,lastTouchTap.y-p.y)<=50)}
 function setTouchDestination(target,exit=null){
  if(!state||state.battle||!$('menuOverlay').classList.contains('hidden')||!$('startOverlay').classList.contains('hidden'))return false;
  const area=joinedArea(),points=findTouchPath(area,touchWorldPoint(),target);
  if(!points){cancelTouchRoute();toast('Tap an open path nearby.');return false}
- touchRoute={points,area:activeRegion+':'+area.cells.join('|'),exit,target:points.at(-1)};drawMoveMarker();return true;
+ touchRoute={points,area:activeRegion+':'+area.cells.join('|'),exit,target:points.at(-1)};{const o=cellOffset(state.room,area);lastTouchTap={room:state.room,x:target.x-o.x,y:target.y-o.y}}drawMoveMarker();return true;
 }
 function drawMoveMarker(){
  if(!touchRoute)return;let marker=document.querySelector('.move-marker');
@@ -55,7 +64,9 @@ function drawMoveMarker(){
 // of the visible screen on that side (as long as the exit is reasonably
 // close). Corner taps pick whichever side the tap is proportionally nearer.
 const EXIT_DOOR={n:{x:400,y:15},s:{x:400,y:485},e:{x:785,y:250},w:{x:15,y:250}};
-const EXIT_BAND={x:170,y:110},SCREEN_BAND=.2,SCREEN_REACH={x:560,y:360};
+// Round 104: only a tap right at a room's edge (or on its exit sign) means "leave this way";
+// anywhere else, a tap walks you to that spot, so roads near the edges stay usable.
+const EXIT_BAND={x:44,y:34},SCREEN_BAND=.05,SCREEN_REACH={x:90,y:70};
 function externalExit(key,dir,area){const raw=rooms[key]?.exits?.[dir];if(!raw)return null;if(typeof raw==='string'&&area.cells.includes(raw))return null;return raw}
 function edgeExitFor(t,clientX,clientY,area,bounds,scale){
  const cx=Math.floor(t.x/800),cy=Math.floor(t.y/500),key=(area.left+cx)+','+(area.top+cy);
@@ -76,7 +87,9 @@ function edgeExitFor(t,clientX,clientY,area,bounds,scale){
   if(!best||score<best.score)best={dir,key,score};
  }
  if(!best)return null;
- return{dir:best.dir,key:best.key,point:{x:o.x+EXIT_DOOR[best.dir].x,y:o.y+EXIT_DOOR[best.dir].y}};
+ // Painted/organic rooms: head for the street that actually leaves on that side (Round 104).
+ const door=typeof organicDef==='function'&&organicDef(best.key)&&organicDoor(best.key,best.dir),dp=door&&door.inPocket!==false?{x:door.edge.x,y:door.edge.y-22}:EXIT_DOOR[best.dir];
+ return{dir:best.dir,key:best.key,point:{x:o.x+dp.x,y:o.y+dp.y}};
 }
 $('world').onclick=e=>{
  if(e.target.closest('button,a,input,select'))return;
@@ -85,7 +98,8 @@ $('world').onclick=e=>{
  if(exit){
   if(exit.classList.contains('closed'))return toast('This path is closed.');
   const dir=['n','s','e','w'].find(d=>exit.classList.contains(d)),key=exit.closest('.area-cell')?.dataset.room||state.room,offset=cellOffset(key,area);
-  const local={n:{x:400,y:15},s:{x:400,y:485},e:{x:785,y:250},w:{x:15,y:250}}[dir];
+  const door=typeof organicDef==='function'&&organicDef(key)&&organicDoor(key,dir);
+  const local=door&&door.inPocket!==false?{x:door.edge.x,y:door.edge.y-22}:{n:{x:400,y:15},s:{x:400,y:485},e:{x:785,y:250},w:{x:15,y:250}}[dir];
   if(local)setTouchDestination({x:offset.x+local.x,y:offset.y+local.y},{dir,key});return;
  }
  const enemy=e.target.closest('.enemy-node');
@@ -108,6 +122,8 @@ move=function(dt){
  if(Math.abs(dx)<1&&Math.abs(dy)<1){touchRoute.points.shift();return}
  const horizontal=Math.abs(dx)>=1,delta=horizontal?dx:dy,key=horizontal?(dx>0?'ArrowRight':'ArrowLeft'):(dy>0?'ArrowDown':'ArrowUp');
  touchFacing=key;const original=keys;keys={[key]:true};keyboardMove(Math.min(dt,Math.abs(delta)/175));keys=original;
+ // Round 92: on narrow painted streets one axis can be blocked by a kerb corner; try the other before giving up.
+ {const moved=touchWorldPoint();if(Math.hypot(moved.x-pos.x,moved.y-pos.y)<.001){const alt=horizontal?dy:dx;if(Math.abs(alt)>=1){const k2=horizontal?(dy>0?'ArrowDown':'ArrowUp'):(dx>0?'ArrowRight':'ArrowLeft');keys={[k2]:true};keyboardMove(Math.min(dt,Math.abs(alt)/175));keys=original}else{touchRoute.points.shift();if(touchRoute.points.length)return}}}
  if(state.battle){cancelTouchRoute();return}
  const now=touchWorldPoint();if(Math.hypot(now.x-pos.x,now.y-pos.y)<.001){cancelTouchRoute();toast('Path blocked. Tap a different spot.');return}
  drawMoveMarker();
@@ -118,7 +134,7 @@ addEventListener('blur',cancelTouchRoute);addEventListener('pagehide',cancelTouc
 addEventListener('keydown',e=>{if(['ArrowRight','ArrowLeft','ArrowUp','ArrowDown','w','a','s','d'].includes(e.key))cancelTouchRoute()});
 document.querySelectorAll('#touch button').forEach(button=>{const down=button.onpointerdown;button.onpointerdown=e=>{cancelTouchRoute();down(e)}});
 const touchMenu=showMainMenu;
-showMainMenu=function(){cancelTouchRoute();touchMenu();const toggle=document.createElement('button');toggle.textContent='Touch controls: '+(touchMode()?'On':'Off');toggle.onclick=()=>{localStorage.setItem('cardbound-touch-mode',touchMode()?'off':'on');syncTouchMode();showMainMenu()};$('menuModal').append(toggle)};
+showMainMenu=function(){cancelTouchRoute();touchMenu();const toggle=document.createElement('button');toggle.textContent='Touch controls: '+(touchMode()?'On':'Off');toggle.onclick=()=>{localStorage.setItem('aethercede-touch-mode',touchMode()?'off':'on');syncTouchMode();showMainMenu()};$('menuModal').append(toggle)};
 navMenu.onclick=showMainMenu;
 const touchBattle=renderBattle;
 renderBattle=function(){
@@ -138,3 +154,6 @@ renderBattle=function(){
  action.append(summary,play);$('battleModal').querySelector('.battle-footer')?.prepend(action);if($('hand'))$('hand').scrollLeft=handScroll;
 };
 addEventListener('resize',syncTouchMode);syncTouchMode();
+
+// Round 92: lets other modules ask whether a tap-to-move route is in progress.
+function activeTouchRoute(){return touchRoute}

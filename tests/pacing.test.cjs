@@ -30,17 +30,18 @@ for (const id of Object.keys(EVENTS)) {
 }
 newGame(); state.region = 'elaris'; configureRegion('elaris'); state.room = '0,0'; state.visited = ['0,0']; ensureExplore(); const p = poiAt(QUIET_ROOMS.elaris[0]); openPOI(p); document.getElementById('event1').onclick(); assert(poiUsed(p), 'an event is used once chosen');
 // Round 73: Nexus Waypoints — discover by arriving, teleport from the map, across worlds.
-newGame(); renderWorld(); assert.deepEqual(nexusList().map(n => n.id), ['city:0,5'], 'the city start waypoint is discovered at once');
-nexusTravel('city', '4,5'); assert.equal(state.room, '0,5', 'cannot teleport to an undiscovered waypoint');
+newGame(); renderWorld(); assert.deepEqual(nexusList().map(n => n.id), [], 'Round 229: the arrival room has no waypoint');
+state.room = '1,7'; renderWorld(); assert.deepEqual(nexusList().map(n => n.id), ['city:1,7'], 'walking into Blossom Grove discovers the first waypoint');
+nexusTravel('city', '4,5'); assert.equal(state.room, '1,7', 'cannot teleport to an undiscovered waypoint');
 state.room = '4,5'; renderWorld(); assert(nexusList().some(n => n.id === 'city:4,5'), 'arriving discovers the mid-world waypoint');
-nexusTravel('city', '0,5'); assert.equal(state.room, '0,5'); nexusTravel('city', '4,5'); assert.equal(state.room, '4,5', 'teleport both ways');
+nexusTravel('city', '1,7'); assert.equal(state.room, '1,7'); nexusTravel('city', '4,5'); assert.equal(state.room, '4,5', 'teleport both ways');
 showMap(); assert(document.querySelectorAll('.nexus-go').length >= 0);
-state.poi.nexus.push('elaris:7,6'); nexusTravel('elaris', '7,6'); assert.equal(activeRegion, 'elaris'); assert.equal(state.room, '7,6'); assert(state.visited.includes('7,6'), 'teleport into another world');
-nexusTravel('city', '0,5'); assert.equal(activeRegion, 'city'); assert.equal(state.room, '0,5'); assert(state.regionVisits.elaris.includes('7,6'), 'that world remembers where you have been');
+state.poi.nexus.push('elaris:4,2'); nexusTravel('elaris', '4,2'); assert.equal(activeRegion, 'elaris'); assert.equal(state.room, '4,2'); assert(state.visited.includes('4,2'), 'teleport into another world');
+nexusTravel('city', '1,7'); assert.equal(activeRegion, 'city'); assert.equal(state.room, '1,7'); assert(state.regionVisits.elaris.includes('4,2'), 'that world remembers where you have been');
 for (const [r, nx] of Object.entries(NEXUS_POINTS)) { configureRegion(r); assert(rooms[nx.start] && rooms[nx.mid], r + ' waypoint rooms exist'); assert(!roomSpawns(nx.mid).some(s => s.boss), 'never in a boss room'); }
 configureRegion('city');
 // Older saves: an attuned waystone becomes both of that world's waypoints.
-newGame(); state.poi.waystones = ['vespera']; migrateWaystones(); assert(state.poi.nexus.includes('vespera:0,0') && state.poi.nexus.includes('vespera:8,2'));
-state.battle = { phase: 'fight' }; const r0 = state.room; nexusTravel('vespera', '0,0'); assert.equal(state.room, r0, 'no teleporting mid-fight'); state.battle = null;
+newGame(); state.poi.waystones = ['vespera']; migrateWaystones(); assert(state.poi.nexus.includes(nexusId('vespera', NEXUS_POINTS.vespera.start)) && state.poi.nexus.includes(nexusId('vespera', NEXUS_POINTS.vespera.mid))); // Round 179: Vespera's new map
+state.battle = { phase: 'fight' }; const r0 = state.room; nexusTravel('vespera', NEXUS_POINTS.vespera.start); assert.equal(state.room, r0, 'no teleporting mid-fight'); state.battle = null;
 console.log('PASS: XP by level gap, quiet rooms with 3 events per world (all 8 events, both choices), Nexus Waypoints (discovery, map teleport, cross-world, save migration).');
 }`);

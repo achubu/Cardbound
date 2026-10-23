@@ -15,9 +15,9 @@ function setup(hand, opts = {}) {
 }
 const dealt = (b, i = 0) => { const e = b.enemy.hp; playCard(i); return e - b.enemy.hp; };
 const ids = Object.keys(NEW_CARD_WORLD);
-assert.equal(ids.length, 15, '15 new cards');
+assert.equal(ids.length, 59, '59 world reward cards beyond the basics (Round 178; Round 185 adds 20 mechanic cards, Round 206 six concept-lab cards, Round 236 Sift)');
 for (const id of ids) for (let l = 0; l < 4; l++) { assert(defs[id].tiers[l], id + ' has 4 levels'); assert(rules({ id, level: l }).length > 8, id + ' has rules text'); }
-for (const w of ['city', 'elaris', 'vespera']) assert(ids.filter(id => NEW_CARD_WORLD[id] === w).every(id => VARIETY_POOLS[w].includes(id)), w + ' offers its five new cards');
+for (const w of ['city', 'elaris', 'sky', 'wilds', 'vespera']) assert(ids.filter(id => NEW_CARD_WORLD[id] === w).every(id => VARIETY_POOLS[w].includes(id)), w + ' offers its own new cards');
 
 // City
 let b = setup(['arcJab']); assert.equal(dealt(b), 3); assert.equal(b.aether, 1, 'Arc Jab: +1 Aether'); assert.equal(b.energy, 3, 'costs 0');
@@ -63,10 +63,21 @@ assert.equal(enemyStats('bloomTyrant', { region: 'elaris', level: 10, boss: true
   assert.equal(g.find(x => x.key === 'cleave|0|0').cards.length, 2, 'two identical Impermanent copies form one ×2 stack');
   assert.equal(g.find(x => x.key === 'cleave|0|0').cards[0].uses, 40, 'the most-used copy represents the stack'); }
 // Signal Amplifier and Deep Interference: +1 per rank.
-for (let r = 0; r <= 5; r++) { state.talents = { amplifier: r, jammer: r }; assert.equal(boostAmount(), 1 + r, 'Boost +1 per Signal Amplifier rank'); assert.equal(weakenAmount(), 3 * (1 + r), 'Weaken is tripled: 3 per Deep Interference rank'); }
+for (let r = 0; r <= 5; r++) { state.talents = { amplifier: r, jammer: r }; assert.equal(boostAmount(), 1 + r, 'Boost +1 per Signal Amplifier rank'); assert.equal(weakenAmount(), 3 * (1 + [0, 1, 2, 4, 6, 8][r]), 'Weaken 3 + 3 per Deep Interference step (1/2/4/6/8)'); }
 state.talents = {};
 // City regulars eased.
 assert.equal(balanceFor('normalHp', 'city'), .95); assert.equal(balanceFor('normalHp', 'elaris'), 1.1);
 Math.random = realRandom;
 console.log('PASS: all 15 new cards with exact numbers, world reward pools, choose-1-of-3 card rewards (and leaving them), and city regular health.');
 }`);
+// Round 150: enemy Block comes off the whole hit, even on a killing blow.
+{ const {run:r2}=require('./expansion.test.cjs');
+  const out=JSON.parse(r2(`(()=>{newGame();state.room='3,6';state.cooldowns={};startBattle(roomSpawns(state.room)[0].uid);const b=state.battle;
+   const t=(hp,guard,blk,frail=0,bar=0)=>{b.enemy.hp=hp;b.enemy.guard=guard;b.block=blk;b.frail=frail;b.enemy.barrier=bar;b.phase='fight';b.hand=[make('bulwarkBash')];b.energy=3;b.enemy.armor=0;playCard(0);return [b.enemy.hp,b.enemy.guard]};
+   return JSON.stringify([t(6,5,31),t(100,5,31),t(100,40,10),t(11,5,30,2),t(100,5,30,2),t(20,0,30,2,10),t(100,0,30,2,10)])})()`));
+  require('node:assert').deepEqual(out,[[0,0],[74,0],[100,30],[0,0],[81,0],[8,0],[88,0]],'Block, Frail and Barrier all come off the full hit, so killing blows land');
+  console.log('PASS: enemy Block is subtracted from the full hit, so killing blows through Block land.'); }
+// Round 161: an armed counter is shown on the enemy and on the strike it will cancel.
+{ const src = require('node:fs').readFileSync(require('node:path').join(__dirname, '../assets/battle-hud.js'), 'utf8'), ad = require('node:fs').readFileSync(require('node:path').join(__dirname, '../assets/aether-deck.js'), 'utf8');
+  require('node:assert')(/'Next ' \+ el \+ ' strike countered'/.test(src) && /countered · no damage/.test(ad), 'armed counters are shown like Frozen');
+  console.log('PASS: an armed counter is shown on the enemy and its countered strike.'); }
