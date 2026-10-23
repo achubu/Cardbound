@@ -1,0 +1,681 @@
+{
+  "cell": [
+    448,
+    448
+  ],
+  "grid": [
+    3,
+    3
+  ],
+  "baseline": 416,
+  "idle_frame": 0,
+  "walk_frames": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "aetherlink_arm": "anatomical left",
+  "sheets": [
+    {
+      "direction": "down",
+      "source": "assets/characters/hero-v2/source/down.png",
+      "output": "assets/characters/protagonist-down-v2.webp",
+      "source_frame": [
+        418,
+        418
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "source_crop": [
+            0,
+            0,
+            418,
+            418
+          ],
+          "source_anchor": [
+            244,
+            408
+          ],
+          "translation": [
+            -20,
+            8
+          ]
+        },
+        {
+          "index": 1,
+          "source_crop": [
+            418,
+            0,
+            418,
+            418
+          ],
+          "source_anchor": [
+            209,
+            408
+          ],
+          "translation": [
+            15,
+            8
+          ]
+        },
+        {
+          "index": 2,
+          "source_crop": [
+            836,
+            0,
+            418,
+            418
+          ],
+          "source_anchor": [
+            175,
+            410
+          ],
+          "translation": [
+            49,
+            6
+          ]
+        },
+        {
+          "index": 3,
+          "source_crop": [
+            0,
+            418,
+            418,
+            410
+          ],
+          "source_anchor": [
+            245,
+            397
+          ],
+          "translation": [
+            -21,
+            19
+          ]
+        },
+        {
+          "index": 4,
+          "source_crop": [
+            418,
+            418,
+            418,
+            409
+          ],
+          "source_anchor": [
+            212,
+            393
+          ],
+          "translation": [
+            12,
+            23
+          ]
+        },
+        {
+          "index": 5,
+          "source_crop": [
+            836,
+            418,
+            418,
+            409
+          ],
+          "source_anchor": [
+            180,
+            396
+          ],
+          "translation": [
+            44,
+            20
+          ]
+        },
+        {
+          "index": 6,
+          "source_crop": [
+            0,
+            828,
+            418,
+            426
+          ],
+          "source_anchor": [
+            243,
+            393
+          ],
+          "translation": [
+            -19,
+            23
+          ]
+        },
+        {
+          "index": 7,
+          "source_crop": [
+            418,
+            827,
+            418,
+            427
+          ],
+          "source_anchor": [
+            210,
+            392
+          ],
+          "translation": [
+            14,
+            24
+          ]
+        },
+        {
+          "index": 8,
+          "source_crop": [
+            836,
+            827,
+            418,
+            427
+          ],
+          "source_anchor": [
+            183,
+            392
+          ],
+          "translation": [
+            41,
+            24
+          ]
+        }
+      ]
+    },
+    {
+      "direction": "left",
+      "source": "assets/characters/hero-v2/source/left.png",
+      "output": "assets/characters/protagonist-left-v2.webp",
+      "source_frame": [
+        418,
+        418
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "source_crop": [
+            0,
+            0,
+            418,
+            418
+          ],
+          "source_anchor": [
+            256,
+            413
+          ],
+          "translation": [
+            -32,
+            3
+          ]
+        },
+        {
+          "index": 1,
+          "source_crop": [
+            418,
+            0,
+            418,
+            418
+          ],
+          "source_anchor": [
+            226,
+            413
+          ],
+          "translation": [
+            -2,
+            3
+          ]
+        },
+        {
+          "index": 2,
+          "source_crop": [
+            836,
+            0,
+            418,
+            418
+          ],
+          "source_anchor": [
+            190,
+            410
+          ],
+          "translation": [
+            34,
+            6
+          ]
+        },
+        {
+          "index": 3,
+          "source_crop": [
+            0,
+            418,
+            418,
+            408
+          ],
+          "source_anchor": [
+            257,
+            394
+          ],
+          "translation": [
+            -33,
+            22
+          ]
+        },
+        {
+          "index": 4,
+          "source_crop": [
+            418,
+            418,
+            418,
+            409
+          ],
+          "source_anchor": [
+            216,
+            393
+          ],
+          "translation": [
+            8,
+            23
+          ]
+        },
+        {
+          "index": 5,
+          "source_crop": [
+            836,
+            418,
+            418,
+            409
+          ],
+          "source_anchor": [
+            200,
+            396
+          ],
+          "translation": [
+            24,
+            20
+          ]
+        },
+        {
+          "index": 6,
+          "source_crop": [
+            0,
+            826,
+            418,
+            428
+          ],
+          "source_anchor": [
+            267,
+            400
+          ],
+          "translation": [
+            -43,
+            16
+          ]
+        },
+        {
+          "index": 7,
+          "source_crop": [
+            418,
+            827,
+            418,
+            427
+          ],
+          "source_anchor": [
+            223,
+            397
+          ],
+          "translation": [
+            1,
+            19
+          ]
+        },
+        {
+          "index": 8,
+          "source_crop": [
+            836,
+            827,
+            418,
+            427
+          ],
+          "source_anchor": [
+            196,
+            391
+          ],
+          "translation": [
+            28,
+            25
+          ]
+        }
+      ]
+    },
+    {
+      "direction": "right",
+      "source": "assets/characters/hero-v2/source/right.png",
+      "output": "assets/characters/protagonist-right-v2.webp",
+      "source_frame": [
+        418,
+        418
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "source_crop": [
+            0,
+            0,
+            418,
+            418
+          ],
+          "source_anchor": [
+            242,
+            414
+          ],
+          "translation": [
+            -18,
+            2
+          ]
+        },
+        {
+          "index": 1,
+          "source_crop": [
+            418,
+            0,
+            418,
+            418
+          ],
+          "source_anchor": [
+            218,
+            412
+          ],
+          "translation": [
+            6,
+            4
+          ]
+        },
+        {
+          "index": 2,
+          "source_crop": [
+            836,
+            0,
+            418,
+            418
+          ],
+          "source_anchor": [
+            188,
+            411
+          ],
+          "translation": [
+            36,
+            5
+          ]
+        },
+        {
+          "index": 3,
+          "source_crop": [
+            0,
+            418,
+            418,
+            418
+          ],
+          "source_anchor": [
+            248,
+            404
+          ],
+          "translation": [
+            -24,
+            12
+          ]
+        },
+        {
+          "index": 4,
+          "source_crop": [
+            418,
+            418,
+            418,
+            414
+          ],
+          "source_anchor": [
+            223,
+            397
+          ],
+          "translation": [
+            1,
+            19
+          ]
+        },
+        {
+          "index": 5,
+          "source_crop": [
+            836,
+            418,
+            418,
+            413
+          ],
+          "source_anchor": [
+            209,
+            397
+          ],
+          "translation": [
+            15,
+            19
+          ]
+        },
+        {
+          "index": 6,
+          "source_crop": [
+            0,
+            836,
+            418,
+            418
+          ],
+          "source_anchor": [
+            253,
+            387
+          ],
+          "translation": [
+            -29,
+            29
+          ]
+        },
+        {
+          "index": 7,
+          "source_crop": [
+            418,
+            832,
+            418,
+            422
+          ],
+          "source_anchor": [
+            221,
+            391
+          ],
+          "translation": [
+            3,
+            25
+          ]
+        },
+        {
+          "index": 8,
+          "source_crop": [
+            836,
+            831,
+            418,
+            423
+          ],
+          "source_anchor": [
+            211,
+            391
+          ],
+          "translation": [
+            13,
+            25
+          ]
+        }
+      ]
+    },
+    {
+      "direction": "up",
+      "source": "assets/characters/hero-v2/source/up.png",
+      "output": "assets/characters/protagonist-up-v2.webp",
+      "source_frame": [
+        418,
+        418
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "source_crop": [
+            0,
+            0,
+            418,
+            418
+          ],
+          "source_anchor": [
+            240,
+            406
+          ],
+          "translation": [
+            -16,
+            10
+          ]
+        },
+        {
+          "index": 1,
+          "source_crop": [
+            418,
+            0,
+            418,
+            418
+          ],
+          "source_anchor": [
+            210,
+            412
+          ],
+          "translation": [
+            14,
+            4
+          ]
+        },
+        {
+          "index": 2,
+          "source_crop": [
+            836,
+            0,
+            418,
+            418
+          ],
+          "source_anchor": [
+            182,
+            412
+          ],
+          "translation": [
+            42,
+            4
+          ]
+        },
+        {
+          "index": 3,
+          "source_crop": [
+            0,
+            418,
+            418,
+            413
+          ],
+          "source_anchor": [
+            236,
+            394
+          ],
+          "translation": [
+            -12,
+            22
+          ]
+        },
+        {
+          "index": 4,
+          "source_crop": [
+            418,
+            418,
+            418,
+            412
+          ],
+          "source_anchor": [
+            209,
+            396
+          ],
+          "translation": [
+            15,
+            20
+          ]
+        },
+        {
+          "index": 5,
+          "source_crop": [
+            836,
+            418,
+            418,
+            413
+          ],
+          "source_anchor": [
+            186,
+            398
+          ],
+          "translation": [
+            38,
+            18
+          ]
+        },
+        {
+          "index": 6,
+          "source_crop": [
+            0,
+            831,
+            418,
+            423
+          ],
+          "source_anchor": [
+            239,
+            388
+          ],
+          "translation": [
+            -15,
+            28
+          ]
+        },
+        {
+          "index": 7,
+          "source_crop": [
+            418,
+            830,
+            418,
+            424
+          ],
+          "source_anchor": [
+            208,
+            390
+          ],
+          "translation": [
+            16,
+            26
+          ]
+        },
+        {
+          "index": 8,
+          "source_crop": [
+            836,
+            831,
+            418,
+            423
+          ],
+          "source_anchor": [
+            186,
+            389
+          ],
+          "translation": [
+            38,
+            27
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -71,7 +71,9 @@ console.log('PASS: '+art.length+' rooms with their own painting: images present,
 const gate=JSON.parse(run(`newGame();configureRegion('city');JSON.stringify([[415,60],[415,100],[415,140],[370,120],[460,120]].map(([x,y])=>walkable('4,7',x,y)))`));
 assert(gate.every(Boolean),'you can walk straight through the Dragon Gate');
 console.log('PASS: objects on the road (Dragon Gate arch) are walkable.');
-// Round 128: the hero is drawn at 80% size, scaled from the feet.
-assert(/#player \.hero-sprite\{[^}]*transform-origin:50% 90%;transform:scale\(\.8\)\}/.test(html),'the hero is 80% size');
-assert(/@keyframes hero-breathe\{0%,100%\{transform:scale\(\.8\)\}/.test(html),'breathing keeps the 80% size');
-console.log('PASS: the hero is drawn at 80% size.');
+// Round 250: the detailed frames are padded about the original y+22 collision foot.
+const atlas=JSON.parse(fs.readFileSync(path.join(__dirname,'../assets/characters/hero-v2/atlas.json'),'utf8'));
+const foot=-84/2-14+atlas.baseline/atlas.cell[1]*84;
+assert(Math.abs(foot-22)<1,'the rendered feet remain on the collision foot point');
+assert(/@keyframes hero-breathe\{0%,100%\{transform:scale\(1\)\}/.test(html),'breathing retains the new native rendering scale');
+console.log('PASS: detailed hero frames stay aligned with the collision ground point.');

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Adventurer · Animation review</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0b1420;color:#e5edf5;font:16px/1.5 system-ui}main{max-width:1100px;margin:auto;padding:32px 20px}h1{margin:0;font-size:28px}p{color:#a6b9ca}a{color:#80e4ed}.controls{display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin:24px 0}button{background:#18364b;border:1px solid #65bccd;color:#ecfbff;border-radius:8px;padding:10px 20px;font:inherit;cursor:pointer}label{display:flex;align-items:center;gap:10px}.views{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.view{border:1px solid #31465a;border-radius:12px;background:radial-gradient(ellipse at 50% 85%,#244353,#101c2a 65%);text-align:center;padding:12px 0}.sprite{width:224px;height:224px;max-width:100%;margin:0 auto;background-size:672px 672px;background-repeat:no-repeat;image-rendering:auto}.view h2{font-size:15px;margin:4px 0;color:#a6d4e0}.sheets{display:grid;grid-template-columns:1fr 1fr;gap:16px}.sheets img{width:100%;border:1px solid #31465a;border-radius:10px;background:#142536}summary{cursor:pointer;margin:30px 0 16px}small{color:#a6b9ca}@media(max-width:960px){.views{grid-template-columns:1fr 1fr}}@media(max-width:520px){.sprite{width:168px;height:168px;background-size:504px 504px}.sheets{grid-template-columns:1fr}}
+</style>
+<main>
+<a href="../index.html">← Return to game</a><h1>Adventurer · Animation review</h1>
+<p>The Aetherlink stays on the character’s left forearm. It appears on your right from the front and on your left from behind. The right-side view shows the far arm through its natural overlaps.</p>
+<div class="controls"><button id="play">Pause walk</button><button id="idle">Stand</button><label>Pose <input id="pose" type="range" min="0" max="8" value="1"><output id="number">1</output></label></div>
+<div class="views">
+<section class="view"><div class="sprite" data-direction="down" role="img" aria-label="Front-facing protagonist"></div><h2>Front</h2></section>
+<section class="view"><div class="sprite" data-direction="left" role="img" aria-label="Left-facing protagonist"></div><h2>Left side</h2></section>
+<section class="view"><div class="sprite" data-direction="right" role="img" aria-label="Right-facing protagonist"></div><h2>Right side</h2></section>
+<section class="view"><div class="sprite" data-direction="up" role="img" aria-label="Back-facing protagonist"></div><h2>Back</h2></section>
+</div>
+<details><summary>Review every frame</summary><div class="sheets">
+<img src="../assets/characters/protagonist-down-v2.webp" alt="Front-facing standing and eight walking poses">
+<img src="../assets/characters/protagonist-left-v2.webp" alt="Left-facing standing and eight walking poses">
+<img src="../assets/characters/protagonist-right-v2.webp" alt="Right-facing standing and eight walking poses">
+<img src="../assets/characters/protagonist-up-v2.webp" alt="Back-facing standing and eight walking poses">
+</div></details>
+<small>36 poses · Four directional sheets · Original character design retained.</small>
+</main>
+<script>
+const sprites=[...document.querySelectorAll('.sprite')],play=document.getElementById('play'),pose=document.getElementById('pose'),number=document.getElementById('number');
+let running=!matchMedia('(prefers-reduced-motion: reduce)').matches,phase=0,previous=0;
+for(const sprite of sprites)sprite.style.backgroundImage='url("../assets/characters/protagonist-'+sprite.dataset.direction+'-v2.webp")';
+function draw(frame){for(const sprite of sprites){const size=sprite.clientWidth;sprite.style.backgroundPosition=-(frame%3)*size+'px '+-Math.floor(frame/3)*size+'px'}pose.value=frame;number.value=frame;play.textContent=running?'Pause walk':'Play walk'}
+play.onclick=()=>{running=!running;draw(Number(pose.value))};
+document.getElementById('idle').onclick=()=>{running=false;draw(0)};
+pose.oninput=()=>{running=false;draw(Number(pose.value))};
+function loop(t){const dt=previous?Math.min(.1,(t-previous)/1000):0;previous=t;if(running){phase=(phase+dt/.48)%1;draw(1+Math.floor(phase*8))}requestAnimationFrame(loop)}
+addEventListener('resize',()=>draw(Number(pose.value)));draw(running?1:0);requestAnimationFrame(loop);
+</script>
+</html>

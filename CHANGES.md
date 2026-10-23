@@ -1,5 +1,23 @@
 # Balance pass — changes from upstream `achubu/Cardbound`
 
+## Round 250: detailed Adventurer sprites and smoother movement
+
+- Four native-resolution directional atlases, each with a standing pose and
+  eight walk phases. Keep the existing blond protagonist, outfit and cyan
+  Aetherlink on his anatomical left forearm in all views. Preserve original
+  character references, generated sources, prompts and the prior sprite sheet.
+- Align the torso and foot anchors, add transparent gutters and use lossless
+  WebP with smooth sampling. Keep the collision foot point at y+22.
+- Advance gait by actual distance and face actual movement, including wall
+  sliding. Maintain stable facing on diagonals and honor reduced motion for
+  decorative breathing.
+- Remove tap-route waypoint pauses and the touch arrows' initial 140ms jump.
+  Simulate small collision steps so low frame rates retain normal travel
+  speed; cap catch-up after a suspended tab at 100ms.
+- Add regression checks for gait phases, directional facing, variable frame
+  rates, route continuity, collision blocking and interruption by interactions.
+  Add `tools/hero-preview.html` for visual review of all 36 poses.
+
 ## Round 249: synchronize Cardbound with Claudebound through Round 248
 
 - Import source commit `6dce16c12176b3ae6bc98a03dd7eecccae9fd70b`, including
